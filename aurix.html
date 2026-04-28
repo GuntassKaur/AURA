@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>AURIX OS — Adaptive Urban Rescue Intelligence System</title>
-  <meta name="description" content="AURA - AI life-safety system for disaster rescue, crowd safety, and cardiac monitoring">
+  <meta name="description" content="AURIX - AI life-safety system for disaster rescue, crowd safety, and cardiac monitoring">
   <!-- Leaflet.js for real map rendering -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -168,7 +168,7 @@ html, body {
 <body>
 
 <div id="loader" class="loader-overlay">
-  <div style="font-size:12px; letter-spacing:0.4em; color:var(--c); font-weight:bold;">INITIALIZING AURA</div>
+  <div style="font-size:12px; letter-spacing:0.4em; color:var(--c); font-weight:bold;">INITIALIZING AURIX</div>
   <div class="loader-bar"><div id="loader-progress" class="loader-progress"></div></div>
   <div id="loader-status" style="font-size:9px; color:rgba(0,212,255,0.4); letter-spacing:0.1em;">CONNECTING TO MESH...</div>
 </div>
@@ -679,7 +679,7 @@ html, body {
         style="font-size:clamp(18px,3vw,28px);
         font-weight:bold;color:#fff;
         letter-spacing:0.10em;margin-bottom:12px;">
-        AURA — ADAPTIVE URBAN RESCUE & AID
+        AURIX — ADAPTIVE URBAN RESCUE & AID
       </div>
 
       <div id="demo-body"
@@ -738,7 +738,7 @@ html, body {
     padding:0 18px;gap:14px;">
     <span style="cursor:pointer;font-size:12px;
       color:rgba(0,212,255,0.65);letter-spacing:0.12em;"
-      onclick="goTo('screen-landing')">← AURA</span>
+      onclick="goTo('screen-landing')">← AURIX</span>
     <div style="width:1px;height:20px;
       background:rgba(255,255,255,0.08);"></div>
     <span class="lbl">CITIZEN NAVIGATOR</span>
@@ -941,7 +941,7 @@ html, body {
       <div style="padding:14px;flex:1;display:flex;
         flex-direction:column;">
         <div class="lbl" style="color:rgba(255,140,0,0.55);
-          margin-bottom:8px;">AURA MEDICAL AI</div>
+          margin-bottom:8px;">AURIX MEDICAL AI</div>
         <div style="display:flex;flex-wrap:wrap;
           gap:5px;margin-bottom:8px;">
           <span onclick="sendTriage(this.textContent)"
@@ -1019,7 +1019,7 @@ html, body {
     position:relative;">
     <span style="cursor:pointer;font-size:12px;
       color:rgba(0,212,255,0.65);letter-spacing:0.12em;"
-      onclick="goTo('screen-landing')">← AURA</span>
+      onclick="goTo('screen-landing')">← AURIX</span>
     <div style="width:1px;height:20px;
       background:rgba(255,255,255,0.08);"></div>
     <span class="lbl">COMMAND CENTER</span>
@@ -1224,7 +1224,7 @@ html, body {
           justify-content:space-between;
           margin-bottom:4px;font-size:9px;">
           <span style="color:var(--c);">
-            ● AURA CORE ACTIVE
+            ● AURIX CORE ACTIVE
           </span>
           <span id="clock-cmd"
             style="color:rgba(0,212,255,0.32);"></span>
@@ -1301,7 +1301,7 @@ html, body {
     padding:0 18px;gap:12px;">
     <span style="cursor:pointer;font-size:12px;
       color:rgba(255,140,0,0.65);letter-spacing:0.12em;"
-      onclick="goTo('screen-landing')">← AURA</span>
+      onclick="goTo('screen-landing')">← AURIX</span>
     <div style="width:1px;height:20px;
       background:rgba(255,255,255,0.08);"></div>
     <span style="font-size:9px;letter-spacing:0.18em;
@@ -1499,7 +1499,7 @@ html, body {
   <div class="panel" style="padding:28px;width:320px;">
     <div style="font-size:13px;color:var(--c);
       font-weight:500;letter-spacing:0.2em;
-      margin-bottom:4px;">RATE AURA</div>
+      margin-bottom:4px;">RATE AURIX</div>
     <div style="font-size:10px;
       color:rgba(255,255,255,0.30);margin-bottom:18px;">
       Help us save more lives
@@ -1523,7 +1523,7 @@ html, body {
         color:rgba(255,255,255,0.20);">★</span>
     </div>
     <textarea id="fb-txt"
-      placeholder="What would help AURA save more lives?"
+      placeholder="What would help AURIX save more lives?"
       style="width:100%;height:80px;
       background:rgba(0,212,255,0.03);
       border:1px solid rgba(0,212,255,0.18);
@@ -1568,7 +1568,7 @@ let victimQ=[];
 
 // ===== MOCK API / WEBHOOKS =====
 function mockAPI(endpoint, data) {
-  console.log(`[AURA-NETWORK] Sending to ${endpoint}:`, data);
+  console.log(`[AURIX-NETWORK] Sending to ${endpoint}:`, data);
   const t = new Date().toTimeString().slice(0,8);
   // Also log to command terminal if on that screen
   if (window._cmd) {
@@ -1627,7 +1627,7 @@ function goTo(id) {
       if (id === 'screen-citizen' && !window._cm) {
         buildCitizenMap();
         window._cm = true;
-        setTimeout(() => triageMsg('aura', '[AURA] Ready. Select your zone above to begin.'), 400);
+        setTimeout(() => triageMsg('AURIX', '[AURIX] Ready. Select your zone above to begin.'), 400);
         setTimeout(() => addAlert('⚠ Flash flood expanding NW', 'warn'), 2500);
         setTimeout(() => addAlert('✓ Gate 3 relief camp open', 'ok'), 7000);
       }
@@ -1661,7 +1661,7 @@ function goTo(id) {
         startDemo();
       }
     } catch (e) {
-      console.error("[AURA] Init error:", e);
+      console.error("[AURIX] Init error:", e);
     }
   }, 450);
 }
@@ -1994,7 +1994,7 @@ function setLoc(type){
   }
   const np=document.getElementById('nav-panel');
   if(np) np.style.opacity='1';
-  triageMsg('aura',`Located in ${z.nm}. Risk: ${z.risk}. `+
+  triageMsg('AURIX',`Located in ${z.nm}. Risk: ${z.risk}. `+
     (z.risk==='CRITICAL'?'URGENT — tap NEAREST SAFE EXIT now.':
     'Navigation ready.'));
 }
@@ -2012,7 +2012,7 @@ function locFromInput(){
 }
 function navTo(type){
   if(!uZone){
-    triageMsg('aura','Please select your location first.');return;
+    triageMsg('AURIX','Please select your location first.');return;
   }
   const M=window.CMAP; if(!M) return;
   let dX,dY,col,lbl,time;
@@ -2052,7 +2052,7 @@ function navTo(type){
         color:rgba(255,255,255,0.40);margin-top:2px;">
         ~${time} min · avoids high-density zones</div>`;
   }
-  triageMsg('aura',`Route to ${lbl}. ~${time} min.`);
+  triageMsg('AURIX',`Route to ${lbl}. ~${time} min.`);
 }
 function addAlert(msg,type){
   const c=document.getElementById('citizen-alerts');
@@ -2076,12 +2076,12 @@ function triageMsg(role,text){
   const chat=document.getElementById('triage-chat');
   if(!chat) return;
   const d=document.createElement('div');
-  d.style.cssText=`color:${role==='aura'?
+  d.style.cssText=`color:${role==='AURIX'?
     'rgba(0,212,255,0.82)':
     'rgba(255,255,255,0.52)'};
     padding:2px 0;font-size:10px;
     line-height:1.8;white-space:pre-wrap;`;
-  d.textContent=(role==='aura'?'[AURA] ':'[YOU] ')+text;
+  d.textContent=(role==='AURIX'?'[AURIX] ':'[YOU] ')+text;
   chat.appendChild(d);
   chat.scrollTop=chat.scrollHeight;
 }
@@ -2101,8 +2101,8 @@ function sendTriage(msg){
   else if(m.includes('safe')||m.includes('ok'))
     r='[STATUS] Marked safe on network.\n[NEXT] Proceed to Safe South when ready.';
   else
-    r='[AURA] Processing...\n[COT] Cross-referencing zone data.\n[OK] Stay put unless in immediate danger.';
-  setTimeout(()=>triageMsg('aura',r),500);
+    r='[AURIX] Processing...\n[COT] Cross-referencing zone data.\n[OK] Stay put unless in immediate danger.';
+  setTimeout(()=>triageMsg('AURIX',r),500);
 }
 function sendTriageBtn(){
   const i=document.getElementById('triage-inp');
@@ -2138,7 +2138,7 @@ function runReunion(){
           font-size:10px;">
           LOW MATCH — 28% · Fire East medical</div>
       </div>`;
-    triageMsg('aura',
+    triageMsg('AURIX',
       `[REUNION] 2 matches for ${nm}. Check panel above.`);
   },1800);
 }
@@ -2334,7 +2334,7 @@ function bootTerminal(){
   const t = document.getElementById('cmd-term');
   if(t) t.innerHTML = '';
   typeLines([
-    {t:'[BOOT] AURA Command v2.0 — online',c:'var(--c)'},
+    {t:'[BOOT] AURIX Command v2.0 — online',c:'var(--c)'},
     {t:'[BOOT] Sensor mesh: 8,420 nodes',c:'var(--c)'},
     {t:'[BOOT] AI engine: ONLINE',c:'var(--g)'},
     {t:'[OK]   Press F1 for STATUS',
@@ -2381,7 +2381,7 @@ function execCmd(raw){
     ]);
   else
     typeLines([
-      {t:'[AURA] Processing: "'+raw+'"',c:'var(--c)'},
+      {t:'[AURIX] Processing: "'+raw+'"',c:'var(--c)'},
       {t:'[COT]  Cross-referencing zone data...',
         c:'rgba(255,255,255,0.36)'},
       {t:'[OK]   No critical action required.',c:'var(--g)'}
@@ -2817,7 +2817,7 @@ function fieldAction(type){
 // ===== DEMO MODE =====
 const DEMO_STEPS=[
   {
-    title:'AURA — Adaptive Urban Rescue & Aid',
+    title:'AURIX — Adaptive Urban Rescue & Aid',
     body:'A real-time AI life-safety OS that coordinates disaster rescue, prevents crowd crushes, and monitors cardiac health — all offline-resilient via mesh networking.',
     cot:null,
     metric:[
@@ -2828,12 +2828,12 @@ const DEMO_STEPS=[
   },
   {
     title:'Problem: When Disasters Strike',
-    body:'Internet goes down. Rescuers can\'t find victims. Medical triage is slow. 50,000 died in Turkey earthquake. 159 in Seoul crowd crush. AURA solves all three failure points simultaneously.',
+    body:'Internet goes down. Rescuers can\'t find victims. Medical triage is slow. 50,000 died in Turkey earthquake. 159 in Seoul crowd crush. AURIX solves all three failure points simultaneously.',
     cot:null,metric:null
   },
   {
     title:'AI Chain-of-Thought — Visible Reasoning',
-    body:'Every AI decision is explainable. Judges can see exactly how AURA thinks. This is prompt engineering at its core.',
+    body:'Every AI decision is explainable. Judges can see exactly how AURIX thinks. This is prompt engineering at its core.',
     cot:'[OBSERVE] Flood NW expanding 0.3km/hr — 847 signals\n[REASON]  O2 dropping in Sector D — compression risk\n[DECIDE]  Rerouting teams A,B + pre-opening Gate 4\n[COT]     Confidence: 91.4% | AURIX_PRED_V2.1',
     metric:null
   },

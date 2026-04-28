@@ -1,5 +1,5 @@
 /* ============================================================
-   decisionEngine.js — AURA OS
+   decisionEngine.js — AURIX OS
    REAL: Decision-making logic based on live data.
          Evaluates zone risk, assigns rescue units, and monitors vitals.
    ============================================================ */

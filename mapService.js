@@ -1,5 +1,5 @@
 /* ============================================================
-   mapService.js — AURA OS
+   mapService.js — AURIX OS
    REAL: Leaflet.js map integration without disturbing UI.
          Plots incidents (circles) and rescue units (markers).
    ============================================================ */

@@ -1,5 +1,5 @@
 /* ============================================================
-   dataEngine.js — AURA OS
+   dataEngine.js — AURIX OS
    REAL: Deterministic data models — NO Math.random() for logic.
          Computes spread, impact, and evolution from physics model.
          Scenario engine with 3 pre-defined real scenarios.

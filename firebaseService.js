@@ -1,5 +1,5 @@
 /* ============================================================
-   firebaseService.js — AURA OS
+   firebaseService.js — AURIX OS
    REAL: Firebase Firestore init, CRUD, real-time listeners,
          presence system, offline queue, active-user tracking.
    ============================================================ */
@@ -7,9 +7,9 @@
 
 const FIREBASE_CFG = {
   apiKey:            "AIzaSyAvyWqiuYYrTMVyAuAQBQsiH6KZJz81V08",
-  authDomain:        "aura-tactical-v3.firebaseapp.com",
-  projectId:         "aura-tactical-v3",
-  storageBucket:     "aura-tactical-v3.appspot.com",
+  authDomain:        "AURIX-tactical-v3.firebaseapp.com",
+  projectId:         "AURIX-tactical-v3",
+  storageBucket:     "AURIX-tactical-v3.appspot.com",
   messagingSenderId: "000000000000",
   appId:             "1:000000000000:web:aabbccddeeff0011"
 };
@@ -42,9 +42,9 @@ async function fbInit() {
     _startPresence();
     _watchActiveUsers();
     _trackEventRate();
-    console.log('[AURA-FB] Firestore connected');
+    console.log('[AURIX-FB] Firestore connected');
   } catch (e) {
-    console.warn('[AURA-FB] Offline mode:', e.message);
+    console.warn('[AURIX-FB] Offline mode:', e.message);
     FB.connected = false;
   }
   return FB.connected;
@@ -108,7 +108,7 @@ async function fbWrite(collection, data, docId) {
   _bumpEvent();
   if (!FB.db) {
     FB.writeQueue.push({ collection, data, docId });
-    console.warn('[AURA-FB] Queued (offline):', collection);
+    console.warn('[AURIX-FB] Queued (offline):', collection);
     _showOfflineBanner();
     return null;
   }
@@ -123,7 +123,7 @@ async function fbWrite(collection, data, docId) {
       return ref.id;
     }
   } catch (e) {
-    console.error('[AURA-FB] Write failed:', e.message);
+    console.error('[AURIX-FB] Write failed:', e.message);
     FB.writeQueue.push({ collection, data, docId });
     return null;
   }
@@ -132,7 +132,7 @@ async function fbWrite(collection, data, docId) {
 // ── Flush offline queue when back online ─────────────────────
 async function _flushQueue() {
   if (!FB.db || FB.writeQueue.length === 0) return;
-  console.log(`[AURA-FB] Flushing ${FB.writeQueue.length} queued writes`);
+  console.log(`[AURIX-FB] Flushing ${FB.writeQueue.length} queued writes`);
   const q = [...FB.writeQueue];
   FB.writeQueue = [];
   for (const op of q) {
@@ -180,9 +180,9 @@ async function fbSeedIfEmpty(collection, records) {
       batch.set(ref, { ...r, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
     });
     await batch.commit();
-    console.log(`[AURA-FB] Seeded ${collection} with ${records.length} records`);
+    console.log(`[AURIX-FB] Seeded ${collection} with ${records.length} records`);
   } catch (e) {
-    console.warn('[AURA-FB] Seed error:', e.message);
+    console.warn('[AURIX-FB] Seed error:', e.message);
   }
 }
 
