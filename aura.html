@@ -1490,6 +1490,7 @@ function goTo(id) {
   const loader = document.getElementById('loader');
   const bar = document.getElementById('loader-progress');
   const status = document.getElementById('loader-status');
+  
   if (loader) {
     loader.style.display = 'flex';
     if (bar) bar.style.width = '0%';
@@ -1500,67 +1501,73 @@ function goTo(id) {
       if (status) status.textContent = steps[step];
       step++;
       if (step >= 3) clearInterval(interval);
-    }, 200);
+    }, 150);
   }
 
+  // Fade out current screens
+  const screens = document.querySelectorAll('.screen');
+  screens.forEach(s => { s.classList.remove('visible'); });
+
   setTimeout(() => {
-    const screens = document.querySelectorAll('.screen');
+    // Hide loader and switch screen
+    if (loader) loader.style.display = 'none';
+    
     screens.forEach(s => {
-      s.classList.remove('visible');
-      setTimeout(() => {
-        if (s.id !== id) s.classList.remove('active');
-      }, 320);
+      if (s.id !== id) s.classList.remove('active');
     });
 
-    setTimeout(() => {
-      if (loader) loader.style.display = 'none';
-      const t = document.getElementById(id);
-      if (!t) return;
-      t.classList.add('active');
+    const target = document.getElementById(id);
+    if (!target) return;
+    
+    target.classList.add('active');
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          t.classList.add('visible');
-        });
+        target.classList.add('visible');
       });
+    });
 
-    // Init screen content
-    if (id === 'screen-citizen' && !window._cm) {
-      buildCitizenMap();
-      window._cm = true;
-      setTimeout(() => triageMsg('aura', '[AURA] Ready. Select your zone above to begin.'), 400);
-      setTimeout(() => addAlert('⚠ Flash flood expanding NW', 'warn'), 2500);
-      setTimeout(() => addAlert('✓ Gate 3 relief camp open', 'ok'), 7000);
+    try {
+      // Lazy init screen content
+      if (id === 'screen-citizen' && !window._cm) {
+        buildCitizenMap();
+        window._cm = true;
+        setTimeout(() => triageMsg('aura', '[AURA] Ready. Select your zone above to begin.'), 400);
+        setTimeout(() => addAlert('⚠ Flash flood expanding NW', 'warn'), 2500);
+        setTimeout(() => addAlert('✓ Gate 3 relief camp open', 'ok'), 7000);
+      }
+      if (id === 'screen-command' && !window._cmd) {
+        buildCommandMap();
+        buildZoneRows();
+        buildResRows();
+        window._cmd = true;
+        setTimeout(bootTerminal, 400);
+      }
+      if (id === 'screen-vitals' && !window._vt) {
+        buildOrb();
+        buildWorkerRows();
+        window._vt = true;
+      }
+      if (id === 'screen-field' && !window._fd) {
+        buildFieldMap();
+        window._fd = true;
+        setTimeout(() => fieldLog('[SYS] Field mode active. GPS acquiring...', 'sys'), 400);
+        setTimeout(() => {
+          const fs = document.getElementById('field-status');
+          const fsub = document.getElementById('field-sub');
+          const floc = document.getElementById('field-loc');
+          if (fs) fs.textContent = 'ZONE ALPHA — FLOOD SECTOR';
+          if (fsub) fsub.textContent = '82 victims reported · 6 rescue units active';
+          if (floc) floc.textContent = '● GPS LOCKED — FLOOD NW';
+          fieldLog('[GPS] Lock acquired — Flood NW sector', 'ok');
+        }, 1800);
+      }
+      if (id === 'screen-demo') {
+        startDemo();
+      }
+    } catch (e) {
+      console.error("[AURA] Init error:", e);
     }
-    if (id === 'screen-command' && !window._cmd) {
-      buildCommandMap();
-      buildZoneRows();
-      buildResRows();
-      window._cmd = true;
-      setTimeout(bootTerminal, 400);
-    }
-    if (id === 'screen-vitals' && !window._vt) {
-      buildOrb();
-      buildWorkerRows();
-      window._vt = true;
-    }
-    if (id === 'screen-field' && !window._fd) {
-      buildFieldMap();
-      window._fd = true;
-      setTimeout(() => fieldLog('[SYS] Field mode active. GPS acquiring...', 'sys'), 400);
-      setTimeout(() => {
-        const fs = document.getElementById('field-status');
-        const fsub = document.getElementById('field-sub');
-        const floc = document.getElementById('field-loc');
-        if (fs) fs.textContent = 'ZONE ALPHA — FLOOD SECTOR';
-        if (fsub) fsub.textContent = '82 victims reported · 6 rescue units active';
-        if (floc) floc.textContent = '● GPS LOCKED — FLOOD NW';
-        fieldLog('[GPS] Lock acquired — Flood NW sector', 'ok');
-      }, 1800);
-    }
-    if (id === 'screen-demo') {
-      startDemo();
-    }
-  }, 320);
+  }, 450);
 }
 
 // ===== LANDING =====
