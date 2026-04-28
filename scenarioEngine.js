@@ -40,21 +40,26 @@ const SCENARIOS = {
   }
 };
 
-window.loadScenario = (id) => {
+window.loadScenario = async (id) => {
   const scenario = SCENARIOS[id];
   if (!scenario) return;
 
   if (window.AURIX_DATA) {
-    window.AURIX_DATA.incidents = scenario.dataset.map(inc => ({
+    const newIncidents = scenario.dataset.map(inc => ({
       ...inc,
       start_time: Date.now()
     }));
     
     // Log to UI
-    if (window.addLine) window.addLine(`[SCENARIO] Loaded: ${scenario.name}`, 'var(--a)');
+    if (window.addLine) window.addLine(`[SCENARIO] Activating: ${scenario.name}`, 'var(--a)');
     
-    // Log to Firebase
-    if (window.fbLog) window.fbLog('SCENARIO_LOADED', { scenario: id });
+    // Task 3: Write to Firebase to ensure persistence across syncs
+    if (window.fbWrite) {
+      for (const inc of newIncidents) {
+        await window.fbWrite('incidents', inc, inc.id);
+      }
+      window.fbLog('SCENARIO_ACTIVATED', { scenario: id });
+    }
 
     // Handle timeline
     scenario.timeline.forEach(step => {
@@ -63,7 +68,8 @@ window.loadScenario = (id) => {
       }, step.t);
     });
 
-    // Update Maps
+    // Local update (will be confirmed by sync)
+    window.AURIX_DATA.incidents = newIncidents;
     if (window.updateMaps) window.updateMaps(window.AURIX_DATA.incidents, window.AURIX_DATA.rescueUnits);
   }
 };
