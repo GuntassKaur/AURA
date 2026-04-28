@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>AURA — Adaptive Urban Rescue & Aid</title>
   <meta name="description" content="AURA - AI life-safety system for disaster rescue, crowd safety, and cardiac monitoring">
+  <!-- Leaflet.js for real map rendering -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
 /* ======================================================
    GLOBAL CSS
@@ -114,6 +117,52 @@ html, body {
   transition:width 0.4s ease;
   box-shadow:0 0 15px var(--c);
 }
+/* ======================================================
+   REAL-TIME STATUS PANEL
+   ====================================================== */
+#realtime-status {
+  position:fixed; bottom:38px; right:16px; z-index:500;
+  padding:10px 14px;
+  background:rgba(4,10,16,0.94);
+  border:1px solid rgba(0,212,255,0.15);
+  border-radius:3px;
+  font-family:monospace;
+  pointer-events:none;
+  min-width:200px;
+}
+.st-row {
+  display:flex; align-items:center;
+  gap:8px; margin-bottom:5px; font-size:9px;
+  letter-spacing:0.08em;
+}
+.st-row:last-child { margin-bottom:0; }
+.st-dot {
+  width:6px; height:6px; border-radius:50%;
+  flex-shrink:0;
+}
+.st-ok  { background:var(--g); box-shadow:0 0 5px var(--g); }
+.st-err { background:var(--r); box-shadow:0 0 5px var(--r); animation:pulse 1s infinite; }
+/* ======================================================
+   LEAFLET DARK THEME OVERRIDE
+   ====================================================== */
+.leaflet-container {
+  background:#04080c !important;
+  font-family:'Courier New',monospace;
+}
+.leaflet-tile {
+  filter:invert(1) hue-rotate(180deg) brightness(0.38) contrast(1.1) saturate(0.6);
+}
+.leaflet-control-attribution { display:none !important; }
+.leaflet-bar a {
+  background:rgba(4,10,16,0.88) !important;
+  color:var(--c) !important;
+  border-bottom:1px solid rgba(0,212,255,0.15) !important;
+}
+.leaflet-bar a:hover { background:rgba(0,212,255,0.12) !important; }
+/* Map wrap needs a real height when Leaflet is used */
+.leaflet-map-wrap {
+  position:absolute; inset:0;
+}
   </style>
 </head>
 <body>
@@ -122,6 +171,45 @@ html, body {
   <div style="font-size:12px; letter-spacing:0.4em; color:var(--c); font-weight:bold;">INITIALIZING AURA</div>
   <div class="loader-bar"><div id="loader-progress" class="loader-progress"></div></div>
   <div id="loader-status" style="font-size:9px; color:rgba(0,212,255,0.4); letter-spacing:0.1em;">CONNECTING TO MESH...</div>
+</div>
+
+<!-- =====================================================
+     LIVE SYSTEM STATUS PANEL (Task 7)
+     ====================================================== -->
+<div id="realtime-status">
+  <div style="font-size:8px;color:rgba(0,212,255,0.35);letter-spacing:0.18em;margin-bottom:7px;">
+    LIVE SYSTEM STATUS
+  </div>
+  <div class="st-row">
+    <div id="st-fb-dot" class="st-dot st-err"></div>
+    <span style="color:rgba(255,255,255,0.5);">Firebase: </span>
+    <span id="st-fb-txt" style="color:rgba(255,255,255,0.28);">Connecting...</span>
+  </div>
+  <div class="st-row">
+    <div id="st-sync-dot" class="st-dot st-err"></div>
+    <span style="color:rgba(255,255,255,0.5);">Data Sync: </span>
+    <span id="st-sync-txt" style="color:rgba(255,255,255,0.28);">Waiting...</span>
+  </div>
+  <div class="st-row">
+    <span style="color:rgba(255,255,255,0.5);">Active Users: </span>
+    <span id="st-active-users" style="color:var(--g);">0</span>
+  </div>
+  <div class="st-row">
+    <span style="color:rgba(255,255,255,0.5);">Events/sec: </span>
+    <span id="st-eps" style="color:var(--c);">0/s</span>
+  </div>
+  <div class="st-row" style="margin-top:2px;">
+    <span style="color:rgba(255,255,255,0.3);">Last Update: </span>
+    <span id="st-last-update" style="color:rgba(0,212,255,0.45);">--:--:--</span>
+  </div>
+</div>
+
+<!-- Offline Mode Banner (Task 8) -->
+<div id="offline-banner" style="position:fixed; top:40px; left:50%; transform:translateX(-50%); z-index:1000; 
+     background:rgba(255,58,58,0.9); color:#white; padding:6px 20px; border-radius:20px; font-size:10px; 
+     font-family:monospace; letter-spacing:0.1em; display:none; align-items:center; gap:10px; box-shadow:0 0 20px rgba(255,58,58,0.4);">
+  <div style="width:6px; height:6px; border-radius:50%; background:white; animation:pulse 1s infinite;"></div>
+  OFFLINE MODE ACTIVE — SYNC PENDING
 </div>
 
 <!-- =====================================================
@@ -347,13 +435,15 @@ html, body {
     grid-template-columns:1fr 220px 220px;
     overflow:hidden;">
 
-    <!-- MAP (left, large) -->
+    <!-- MAP (left, large) — Real Leaflet basemap -->
     <div id="field-map-wrap" style="position:relative;
       overflow:hidden;
       background:radial-gradient(ellipse 85% 75% at 50% 52%,
       #061520 0%,#040e18 42%,#020a10 100%);">
+      <!-- REAL MAP: Leaflet renders here -->
+      <div id="leaflet-field-map" style="position:absolute;inset:0;z-index:1;"></div>
       <svg id="field-map-svg" style="position:absolute;
-        inset:0;width:100%;height:100%;"></svg>
+        inset:0;width:100%;height:100%;z-index:2;pointer-events:none;"></svg>
       <!-- Field overlay info -->
       <div style="position:absolute;top:12px;left:12px;
         z-index:10;" class="panel">
@@ -668,20 +758,23 @@ html, body {
 
   <div style="flex:1;display:flex;overflow:hidden;">
 
-    <!-- MAP -->
+    <!-- MAP — Real Leaflet basemap + SVG overlay for zones/routes -->
     <div id="citizen-map-wrap"
       style="flex:1;position:relative;overflow:hidden;
       min-height:0;
       background:radial-gradient(ellipse 85% 75% at 50% 52%,
       #061520 0%,#040e18 42%,#020a10 100%);">
+      <!-- REAL MAP: Leaflet renders here -->
+      <div id="leaflet-citizen-map" style="position:absolute;inset:0;z-index:1;"></div>
+      <!-- SVG overlay for disaster zones, user marker, route path -->
       <svg id="citizen-map-svg"
         style="position:absolute;inset:0;
-        width:100%;height:100%;"></svg>
-      <div style="position:absolute;inset:0;pointer-events:none;
+        width:100%;height:100%;z-index:2;pointer-events:none;"></svg>
+      <div style="position:absolute;inset:0;pointer-events:none;z-index:3;
         background:radial-gradient(ellipse 96% 92% at 50% 50%,
         transparent 50%,rgba(4,8,12,0.48) 100%);"></div>
       <!-- Legend -->
-      <div style="position:absolute;bottom:10px;
+      <div style="position:absolute;bottom:10px;z-index:10;
         left:50%;transform:translateX(-50%);
         display:flex;gap:8px;
         background:rgba(0,0,0,0.75);
@@ -699,6 +792,7 @@ html, body {
         z-index:50;display:flex;flex-direction:column;
         gap:6px;width:250px;pointer-events:none;"></div>
     </div>
+
 
     <!-- RIGHT PANEL -->
     <div style="width:290px;display:flex;flex-direction:column;
@@ -992,10 +1086,12 @@ html, body {
       min-height:0;transition:transform 900ms ease;
       background:radial-gradient(ellipse 88% 78% at 50% 52%,
       #071220 0%,#040c18 42%,#020810 100%);">
+      <!-- REAL MAP: Leaflet renders here -->
+      <div id="leaflet-cmd-map" style="position:absolute;inset:0;z-index:1;"></div>
       <svg id="cmd-map-svg"
         style="position:absolute;inset:0;
-        width:100%;height:100%;"></svg>
-      <div style="position:absolute;inset:0;pointer-events:none;
+        width:100%;height:100%;z-index:2;pointer-events:none;"></svg>
+      <div style="position:absolute;inset:0;pointer-events:none;z-index:3;
         background:radial-gradient(ellipse 96% 92% at 50% 50%,
         transparent 48%,rgba(4,8,12,0.50) 100%);"></div>
       <!-- Threat panel -->
@@ -3141,6 +3237,72 @@ window.addEventListener('resize', () => {
   if (window._fd) buildFieldMap();
 });
 
+</script>
+
+<!-- =====================================================
+     AURA OS MODULAR CORE (Tasks 1, 9, 10)
+     ====================================================== -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="firebaseService.js"></script>
+<script src="dataEngine.js"></script>
+<script src="decisionEngine.js"></script>
+<script src="mapService.js"></script>
+
+<script>
+  // SYSTEM INITIALIZATION
+  window.addEventListener('DOMContentLoaded', async () => {
+    // 1. Data Layer
+    if (window.dataInit) window.dataInit();
+    
+    // 2. Network Layer
+    if (window.fbInit) {
+      const connected = await window.fbInit();
+      const stFb = document.getElementById('st-fb-txt');
+      const stFbDot = document.getElementById('st-fb-dot');
+      if (stFb) stFb.textContent = connected ? 'Connected ✅' : 'Offline Mode';
+      if (stFbDot) stFbDot.className = 'st-dot ' + (connected ? 'st-ok' : 'st-err');
+      
+      // Seed if empty (Task 1)
+      if (connected && window.AURA_DATA) {
+        window.fbSeedIfEmpty('incidents', window.AURA_DATA.incidents);
+        window.fbSeedIfEmpty('rescue_units', window.AURA_DATA.rescueUnits);
+      }
+    }
+
+    // 3. Map Layer
+    if (window.initAllMaps) window.initAllMaps();
+
+    // 4. Sync Listeners
+    if (window.fbListen) {
+      window.fbListen('incidents', (docs) => {
+        window.AURA_DATA.incidents = docs;
+        if (window.updateMaps) window.updateMaps(window.AURA_DATA.incidents, window.AURA_DATA.rescueUnits);
+        const stSync = document.getElementById('st-sync-txt');
+        const stSyncDot = document.getElementById('st-sync-dot');
+        if (stSync) stSync.textContent = 'Live ✅';
+        if (stSyncDot) stSyncDot.className = 'st-dot st-ok';
+        document.getElementById('st-last-update').textContent = new Date().toLocaleTimeString();
+      });
+    }
+
+    // 5. Periodic Decision Logic (Task 4)
+    setInterval(() => {
+      if (!window.AURA_DATA) return;
+      const assignments = window.assignRescue(window.AURA_DATA.rescueUnits, window.AURA_DATA.incidents);
+      // Logic for showing assignments in terminal
+      if (assignments.length > 0 && window.addLine) {
+        // Only log critical ones to avoid spam
+        assignments.forEach(a => {
+          const zone = window.AURA_DATA.incidents.find(z => z.id === a.zoneId);
+          if (zone && window.evaluateZone(zone) === 'CRITICAL') {
+            window.addLine(`[DECISION] Assigning ${a.unitId} to ${zone.name} (CRITICAL)`, 'var(--a)');
+          }
+        });
+      }
+    }, 10000);
+  });
 </script>
 </body>
 </html>

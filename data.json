@@ -1,0 +1,71 @@
+{
+  "incidents": [
+    {
+      "id": "zone_1",
+      "type": "flood",
+      "name": "Flood NW",
+      "severity": 0.85,
+      "growth_rate": 0.3,
+      "affected_population": 1247,
+      "coordinates": [12.9716, 77.5946],
+      "status": "critical",
+      "timestamp": "2026-04-28T17:56:00Z"
+    },
+    {
+      "id": "zone_2",
+      "type": "fire",
+      "name": "Fire East",
+      "severity": 0.65,
+      "growth_rate": 0.1,
+      "affected_population": 212,
+      "coordinates": [12.9816, 77.6146],
+      "status": "high",
+      "timestamp": "2026-04-28T17:56:00Z"
+    },
+    {
+      "id": "zone_3",
+      "type": "collapse",
+      "name": "Collapse SE",
+      "severity": 0.90,
+      "growth_rate": 0.05,
+      "affected_population": 312,
+      "coordinates": [12.9616, 77.6246],
+      "status": "critical",
+      "timestamp": "2026-04-28T17:56:00Z"
+    }
+  ],
+  "rescue_units": [
+    {
+      "id": "R-ALPHA",
+      "name": "Team Alpha",
+      "type": "rescue",
+      "coordinates": [12.9750, 77.6000],
+      "status": "active",
+      "vitals": { "hr": 88, "o2": 98 }
+    },
+    {
+      "id": "R-BETA",
+      "name": "Team Beta",
+      "type": "rescue",
+      "coordinates": [12.9800, 77.6100],
+      "status": "active",
+      "vitals": { "hr": 102, "o2": 96 }
+    },
+    {
+      "id": "M-UNIT-1",
+      "name": "Med Unit 1",
+      "type": "medical",
+      "coordinates": [12.9700, 77.6200],
+      "status": "standby",
+      "vitals": { "hr": 76, "o2": 99 }
+    }
+  ],
+  "users": [
+    {
+      "id": "U-1234",
+      "status": "safe",
+      "location": "Safe South",
+      "vitals": { "hr": 72, "o2": 99 }
+    }
+  ]
+}
