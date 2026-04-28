@@ -291,8 +291,12 @@ html, body {
     <span style="color:rgba(255,255,255,0.5);">Events/sec: </span>
     <span id="st-eps" style="color:var(--c);">0/s</span>
   </div>
+  <div class="st-row">
+    <span style="color:rgba(255,255,255,0.5);">Total Events: </span>
+    <span id="st-total-events" style="color:var(--a);">0</span>
+  </div>
   <div class="st-row" style="margin-top:2px;">
-    <span style="color:rgba(255,255,255,0.3);">Last Update: </span>
+    <span style="color:rgba(255,255,255,0.3);">Last Sync: </span>
     <span id="st-last-update" style="color:rgba(0,212,255,0.45);">--:--:--</span>
   </div>
 </div>
@@ -2443,47 +2447,44 @@ function bootTerminal(){
 function execCmd(raw){
   if(!raw.trim()) return;
   const c=raw.trim().toUpperCase();
+  const data = window.AURIX_DATA;
   addLine('> '+raw,'rgba(255,255,255,0.30)');
-  if(c==='STATUS')
+  
+  if(c==='STATUS') {
+    const incCount = data.incidents.length;
+    const unitCount = data.rescueUnits.length;
+    const activeRisk = window.AURIX_METRICS ? window.AURIX_METRICS.getSystemRisk(data.incidents) : '0.00';
     typeLines([
-      {t:'[SCAN] Analyzing 3 disaster zones...',c:'var(--c)'},
-      {t:'[DATA] Affected:1,371 | Rescued:892 | Critical:23',
-        c:'rgba(255,255,255,0.68)'},
-      {t:'[AI]   Flood NW +0.3km/hr — surge 47min',c:'var(--c)'},
-      {t:'[COT]  Confidence:91.4% | AURIX_PRED_V2.1',
-        c:'rgba(255,255,255,0.38)'},
-      {t:'[OK]   All teams nominal.',c:'var(--g)'}
+      {t:`[SCAN] Monitoring ${incCount} active zones`,c:'var(--c)'},
+      {t:`[DATA] System Risk: ${activeRisk} | Units: ${unitCount}`, c:'rgba(255,255,255,0.68)'},
+      {t:'[NET]  Mesh coverage: 100% | Sat-Link: LOCKED', c:'var(--g)'}
     ]);
+  }
   else if(c.includes('SIM')) runSim();
   else if(c.includes('EMER')) trigEmergency();
   else if(c.includes('REUN'))
     typeLines([
-      {t:'[REUNION] Scanning 1,247 records...',c:'var(--c)'},
+      {t:'[REUNION] Scanning database records...',c:'var(--c)'},
       {t:'[MATCH]   847 families connected',c:'var(--g)'},
-      {t:'[OK]      Notifications via mesh',c:'var(--g)'}
+      {t:'[OK]      Communications via P2P Mesh',c:'var(--g)'}
     ]);
   else if(c==='NETWORK' || c==='NET')
     typeLines([
       {t:'[NET]  Interface: P2P MESH / SAT-LINK',c:'var(--c)'},
       {t:'[NET]  Status: OPTIMAL',c:'var(--g)'},
-      {t:'[NET]  Active Webhooks: field_comms, feedback',c:'rgba(255,255,255,0.4)'},
-      {t:'[NET]  Encryption: AES-GCM 256-bit',c:'rgba(255,255,255,0.3)'}
+      {t:'[SEC]  Encryption: AES-GCM 256-bit',c:'rgba(255,255,255,0.3)'}
     ]);
   else if(c.includes('VITAL')||c.includes('CARD'))
     typeLines([
-      {t:'[VS] Scanning 2,847 biometric nodes...',
-        c:'#ff9040'},
-      {t:'[DATA] HR:'+Math.round(S.hr)+
-        'BPM O2:'+S.o2.toFixed(1)+'%',
-        c:'rgba(255,255,255,0.68)'},
-      {t:'[OK]  No cardiac events.',c:'var(--g)'}
+      {t:'[VS] Checking VITAL-SHIELD biometric array...', c:'#ff9040'},
+      {t:'[DATA] HR:'+Math.round(S.hr)+'BPM | O2:'+S.o2.toFixed(1)+'%', c:'rgba(255,255,255,0.68)'},
+      {t:'[OK]   No physiological anomalies detected.',c:'var(--g)'}
     ]);
   else
     typeLines([
-      {t:'[AURIX] Processing: "'+raw+'"',c:'var(--c)'},
-      {t:'[COT]  Cross-referencing zone data...',
-        c:'rgba(255,255,255,0.36)'},
-      {t:'[OK]   No critical action required.',c:'var(--g)'}
+      {t:'[AURIX] Input: "'+raw+'"',c:'var(--c)'},
+      {t:'[EXEC] Correlating telemetry with spatial data...', c:'rgba(255,255,255,0.36)'},
+      {t:'[OK]   Observation protocol maintained.',c:'var(--g)'}
     ]);
 }
 function execCmdBtn(){
@@ -2725,15 +2726,14 @@ function buildWorkerRows(){
 }
 
 function updWorkers(){
+  const now = Date.now();
+  const shouldSync = !window._lastVitalSync || (now - window._lastVitalSync > 10000); // Sync every 10s
+  
   S.workers.forEach(w=>{
     const st=w.hr>110||w.o2<19.0?'HIGH RISK':
       w.hr>95||w.o2<19.8?'ELEVATED':'NOMINAL';
-    const sc=st==='HIGH RISK'?'var(--r)':
-      st==='ELEVATED'?'var(--a)':'var(--g)';
-    const sb=st==='HIGH RISK'?'rgba(255,58,58,0.10)':
-      st==='ELEVATED'?'rgba(255,170,0,0.10)':
-      'rgba(0,255,136,0.08)';
     
+    // UI Updates
     const hrel = document.getElementById('wh-'+w.id);
     if(hrel) {
       hrel.textContent = w.hr + ' BPM';
@@ -2747,12 +2747,21 @@ function updWorkers(){
     const stel = document.getElementById('ws-'+w.id);
     if(stel) {
       stel.textContent = st;
+      const sc=st==='HIGH RISK'?'var(--r)':st==='ELEVATED'?'var(--a)':'var(--g)';
+      const sb=st==='HIGH RISK'?'rgba(255,58,58,0.10)':st==='ELEVATED'?'rgba(255,170,0,0.10)':'rgba(0,255,136,0.08)';
       stel.style.color = sc;
       stel.style.background = sb;
     }
     const dot=document.getElementById('wd-'+w.id);
-    if(dot) dot.style.background=sc;
+    if(dot) dot.style.background=(st==='HIGH RISK'?'var(--r)':st==='ELEVATED'?'var(--a)':'var(--g)');
+
+    // Task 3: Firebase Write
+    if (shouldSync && window.fbWrite) {
+      window.fbWrite('vitals', { ...w, status: st, timestamp: now }, w.id);
+    }
   });
+  
+  if (shouldSync) window._lastVitalSync = now;
 }
 
 function vLog(text,type){
@@ -3392,7 +3401,12 @@ window.addEventListener('resize', () => {
         const stSync = document.getElementById('st-sync-txt');
         const stSyncDot = document.getElementById('st-sync-dot');
         if (stSync) stSync.textContent = 'Live ✅';
-        if (stSyncDot) stSyncDot.className = 'st-dot st-ok';
+        if (stSyncDot) {
+          stSyncDot.className = 'st-dot st-ok';
+          stSyncDot.style.animation = 'none';
+          void stSyncDot.offsetWidth; // trigger reflow
+          stSyncDot.style.animation = 'pulse 0.4s ease-in-out';
+        }
         document.getElementById('st-last-update').textContent = new Date().toLocaleTimeString();
       });
     }

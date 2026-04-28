@@ -13,9 +13,9 @@ const SCENARIOS = {
       { id: 'zone_2', type: 'flood', name: 'Flood SE', severity: 0.40, growth_rate: 0.1, affected_population: 842, coordinates: [12.9516, 77.6246], status: 'warning' }
     ],
     timeline: [
-      { t: 0, msg: 'Initial breach detected in Sector NW' },
-      { t: 10000, msg: 'Water levels rising +0.5m in Sector SE' },
-      { t: 20000, msg: 'Grid failure in flooded zones — mesh active' }
+      { t: 0, msg: 'Initial breach: Flow rate 0.42m/s in Sector NW' },
+      { t: 10000, msg: 'Telemetry: Sector SE water level +0.52m | Surge probability 88%' },
+      { t: 20000, msg: 'Grid failure: Mesh redundancy activated in flooded sectors' }
     ]
   },
   crowd: {
@@ -24,8 +24,8 @@ const SCENARIOS = {
       { id: 'zone_crowd_1', type: 'crowd', name: 'Main Stadium Exit', severity: 0.92, growth_rate: 0.4, affected_population: 5000, coordinates: [12.9716, 77.5946], status: 'critical' }
     ],
     timeline: [
-      { t: 0, msg: 'Density threshold exceeded at Gate 4' },
-      { t: 5000, msg: 'AI predicting surge in 12 mins' }
+      { t: 0, msg: 'Density threshold: 4.8 persons/sqm at Gate 4' },
+      { t: 5000, msg: 'Predictive model: Localized surge expected in T-12:30' }
     ]
   },
   cardiac: {
@@ -34,8 +34,8 @@ const SCENARIOS = {
       { id: 'zone_worker_1', type: 'medical', name: 'Construction Site B', severity: 1.0, growth_rate: 0, affected_population: 1, coordinates: [12.9716, 77.5946], status: 'critical' }
     ],
     timeline: [
-      { t: 0, msg: 'VITAL-SHIELD Alert: HR 142 / O2 88%' },
-      { t: 2000, msg: 'Medical unit M2 dispatched — ETA 4 mins' }
+      { t: 0, msg: 'VITAL-SHIELD Alert: HR 142 BPM | O2 88.4%' },
+      { t: 2000, msg: 'Dispatch: Medical unit M2 deployed | ETA: 3.8 min' }
     ]
   }
 };

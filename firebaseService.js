@@ -93,6 +93,7 @@ function _watchActiveUsers() {
 
 // ── Event-rate tracker ───────────────────────────────────────
 let _evtCount = 0;
+let _totalEvt = 0;
 function _trackEventRate() {
   setInterval(() => {
     FB.eventsPerSec = _evtCount;
@@ -101,7 +102,12 @@ function _trackEventRate() {
     if (el) el.textContent = FB.eventsPerSec + '/s';
   }, 1000);
 }
-function _bumpEvent() { _evtCount++; }
+function _bumpEvent() { 
+  _evtCount++; 
+  _totalEvt++;
+  const el = document.getElementById('st-total-events');
+  if (el) el.textContent = _totalEvt.toLocaleString();
+}
 
 // ── Generic write with offline queue ────────────────────────
 async function fbWrite(collection, data, docId) {
