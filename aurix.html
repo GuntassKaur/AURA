@@ -163,6 +163,99 @@ html, body {
 .leaflet-map-wrap {
   position:absolute; inset:0;
 }
+/* ======================================================
+   RESPONSIVE OPTIMIZATIONS
+   ====================================================== */
+@media (max-width: 1024px) {
+  #screen-field > div:nth-child(2),
+  #screen-command > div:nth-child(2) {
+    grid-template-columns: 1fr 200px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Global font scaling */
+  :root { font-size: 14px; }
+  
+  /* Landing screen mobile */
+  #screen-landing .btn { padding: 10px 16px; font-size: 10px; }
+  #screen-landing h1 { font-size: 42px !important; }
+  
+  /* Field & Command stack layout */
+  #screen-field > div:nth-child(2),
+  #screen-command > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
+    overflow-y: auto !important;
+  }
+  
+  #field-map-wrap, #command-map-wrap {
+    height: 300px !important;
+    flex-shrink: 0;
+  }
+  
+  /* Hide side panels on very small screens or stack them */
+  #screen-field > div:nth-child(2) > div:not(:first-child),
+  #screen-command > div:nth-child(2) > div:not(:first-child) {
+    height: auto !important;
+    border-left: none !important;
+    border-top: 1px solid rgba(0,212,255,0.08);
+  }
+
+  /* Citizen screen stack */
+  #screen-citizen > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
+    flex-direction: column !important;
+  }
+  
+  #citizen-map-wrap {
+    height: 250px !important;
+    flex-shrink: 0;
+  }
+  
+  #screen-citizen > div:nth-child(2) > div:nth-child(2) {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 1px solid rgba(0,212,255,0.08);
+  }
+
+  /* Vitals screen grid */
+  #screen-vitals > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(4, auto) !important;
+    overflow-y: auto !important;
+  }
+  
+  #screen-vitals > div:nth-child(2) > div {
+    min-height: 250px;
+    border-bottom: 1px solid rgba(255,140,0,0.08);
+  }
+
+  #v-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    padding: 10px !important;
+  }
+  
+  .orb-wrap {
+    transform: scale(0.7);
+    margin-bottom: -40px;
+  }
+  
+  /* Navigation adjustments */
+  .screen header, #cmd-hdr {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    padding: 8px !important;
+  }
+  
+  #cmd-hdr div:nth-child(3) {
+    display: none !important; /* Hide stats on mobile header to save space */
+  }
+}
+
+@media (max-height: 600px) {
+  #screen-landing > div:nth-child(2) { padding: 20px !important; }
+  #screen-landing h1 { margin-bottom: 2px !important; }
+}
   </style>
 </head>
 <body>

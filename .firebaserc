@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "aura-tactical-v3"
-  }
+  },
+  "targets": {
+    "aura-tactical-v3": {
+      "hosting": {
+        "aurix": [
+          "aurix-tactical-v1"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

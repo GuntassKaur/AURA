@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "aurix",
     "public": ".",
     "ignore": [
       "firebase.json",

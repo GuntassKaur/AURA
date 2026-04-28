@@ -74,3 +74,10 @@ window.initAllMaps = () => {
   initMap('command', 'leaflet-cmd-map');
 };
 window.updateMaps = updateMaps;
+
+// Handle map resizing
+window.addEventListener('resize', () => {
+  ['citizen', 'field', 'command'].forEach(id => {
+    if (window.AURIX_MAPS[id]) window.AURIX_MAPS[id].invalidateSize();
+  });
+});
