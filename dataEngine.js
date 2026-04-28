@@ -6,13 +6,13 @@
    ============================================================ */
 'use strict';
 
-window.AURA_DATA = window.AURA_DATA || {
+window.AURIX_DATA = window.AURIX_DATA || {
   incidents:    [],
   rescueUnits:  [],
   activeScenario: null,
   scenarioTimer:  null
 };
-const DATA = window.AURA_DATA;
+const DATA = window.AURIX_DATA;
 
 const MASTER_INCIDENTS = [
   { id: 'zone_1', type: 'flood', name: 'Flood NW', severity: 0.85, growth_rate: 0.3, affected_population: 1247, coordinates: [12.9716, 77.5946], status: 'critical', start_time: Date.now() - 1800000 },

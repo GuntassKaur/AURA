@@ -15,7 +15,7 @@ const FIREBASE_CFG = {
 };
 
 // ── Singleton state ──────────────────────────────────────────
-window.AURA_FB = window.AURA_FB || {
+window.AURIX_FB = window.AURIX_FB || {
   db:           null,
   connected:    false,
   activeUsers:  0,
@@ -24,7 +24,7 @@ window.AURA_FB = window.AURA_FB || {
   sessionId:    _makeId(),
   listeners:    {}
 };
-const FB = window.AURA_FB;
+const FB = window.AURIX_FB;
 
 function _makeId() {
   return 'sess_' + Math.random().toString(36).slice(2,9) + '_' + Date.now();

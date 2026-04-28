@@ -8,7 +8,7 @@
 const MAP_CENTER = [12.9716, 77.5946];
 const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
-window.AURA_MAPS = {
+window.AURIX_MAPS = {
   citizen: null,
   field: null,
   command: null,
@@ -16,7 +16,7 @@ window.AURA_MAPS = {
 };
 
 function initMap(id, containerId) {
-  if (window.AURA_MAPS[id]) return;
+  if (window.AURIX_MAPS[id]) return;
   const el = document.getElementById(containerId);
   if (!el) return;
   
@@ -26,16 +26,16 @@ function initMap(id, containerId) {
     className: 'map-tiles' // For CSS filtering
   }).addTo(map);
   
-  window.AURA_MAPS[id] = map;
+  window.AURIX_MAPS[id] = map;
 }
 
 function plotData(id, incidents, units) {
-  const map = window.AURA_MAPS[id];
+  const map = window.AURIX_MAPS[id];
   if (!map) return;
 
   // Clear old markers
-  window.AURA_MAPS.markers[id].forEach(m => map.removeLayer(m));
-  window.AURA_MAPS.markers[id] = [];
+  window.AURIX_MAPS.markers[id].forEach(m => map.removeLayer(m));
+  window.AURIX_MAPS.markers[id] = [];
 
   // Plot Incidents
   incidents.forEach(inc => {
@@ -46,7 +46,7 @@ function plotData(id, incidents, units) {
       fillColor: col,
       fillOpacity: 0.2
     }).addTo(map);
-    window.AURA_MAPS.markers[id].push(circle);
+    window.AURIX_MAPS.markers[id].push(circle);
   });
 
   // Plot Units
@@ -60,7 +60,7 @@ function plotData(id, incidents, units) {
       fillOpacity: 1
     }).addTo(map);
     marker.bindPopup(`<b>${u.name}</b><br>Status: ${u.status}`);
-    window.AURA_MAPS.markers[id].push(marker);
+    window.AURIX_MAPS.markers[id].push(marker);
   });
 }
 

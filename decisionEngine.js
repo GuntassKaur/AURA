@@ -61,7 +61,7 @@ async function callGemini(message, context) {
   const GEMINI_KEY = "AIzaSyAvyWqiuYYrTMVyAuAQBQsiH6KZJz81V08";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
   
-  const systemPrompt = `You are AURA OS AI. Context: ${JSON.stringify(context)}. 
+  const systemPrompt = `You are AURIX OS AI. Context: ${JSON.stringify(context)}. 
 Respond concisely (2 lines). 
 Format: [ASSESS] ... | [ACTION] ... | [PRIORITY] ...`;
 
@@ -75,9 +75,9 @@ Format: [ASSESS] ... | [ACTION] ... | [PRIORITY] ...`;
       })
     });
     const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "[AURA] AI Processing... (Fallback)";
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "[AURIX] AI Processing... (Fallback)";
   } catch (e) {
-    return "[AURA] Offline Logic: " + (message.includes('help') ? 'Emergency units dispatched.' : 'Monitoring situation.');
+    return "[AURIX] Offline Logic: " + (message.includes('help') ? 'Emergency units dispatched.' : 'Monitoring situation.');
   }
 }
 
