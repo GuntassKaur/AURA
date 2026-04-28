@@ -1,8 +1,7 @@
 /* ============================================================
-   dataEngine.js — AURIX OS
-   REAL: Deterministic data models — NO Math.random() for logic.
-         Computes spread, impact, and evolution from physics model.
-         Scenario engine with 3 pre-defined real scenarios.
+   dataEngine.js — AURIX Rescue OS
+   REAL: Physics-based formulas for spread and risk scoring.
+   SIMULATED: Initial scenario datasets (coordinates/population).
    ============================================================ */
 'use strict';
 

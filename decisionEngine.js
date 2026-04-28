@@ -1,7 +1,8 @@
 /* ============================================================
-   decisionEngine.js — AURIX OS
-   REAL: Decision-making logic based on live data.
-         Evaluates zone risk, assigns rescue units, and monitors vitals.
+   decisionEngine.js — AURIX Rescue OS
+   REAL: Deterministic nearest-unit allocation and priority logic.
+   REAL: Medical alert thresholds (HR > 120, O2 < 90).
+   REAL: Gemini AI integration for live triage.
    ============================================================ */
 'use strict';
 
@@ -61,7 +62,7 @@ async function callGemini(message, context) {
   const GEMINI_KEY = "AIzaSyAvyWqiuYYrTMVyAuAQBQsiH6KZJz81V08";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
   
-  const systemPrompt = `You are AURIX OS AI. Context: ${JSON.stringify(context)}. 
+  const systemPrompt = `You are AURIX Rescue OS AI. Context: ${JSON.stringify(context)}. 
 Respond concisely (2 lines). 
 Format: [ASSESS] ... | [ACTION] ... | [PRIORITY] ...`;
 

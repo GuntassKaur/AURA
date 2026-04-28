@@ -1,7 +1,7 @@
 /* ============================================================
-   firebaseService.js — AURIX OS
-   REAL: Firebase Firestore init, CRUD, real-time listeners,
-         presence system, offline queue, active-user tracking.
+   firebaseService.js — AURIX Rescue OS
+   REAL: Bi-directional Firestore sync, presence tracking, 
+   REAL: Offline write-queuing, and performance telemetry.
    ============================================================ */
 'use strict';
 

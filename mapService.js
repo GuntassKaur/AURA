@@ -1,7 +1,7 @@
 /* ============================================================
-   mapService.js — AURIX OS
-   REAL: Leaflet.js map integration without disturbing UI.
-         Plots incidents (circles) and rescue units (markers).
+   mapService.js — AURIX Rescue OS
+   REAL: Leaflet.js integration with real-world geospatial plotting.
+   REAL: Dynamic route and marker updates based on backend sync.
    ============================================================ */
 'use strict';
 

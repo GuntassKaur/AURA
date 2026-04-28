@@ -1,6 +1,7 @@
 /* ============================================================
-   scenarioEngine.js — AURIX OS
-   Handles structured scenario loading and timeline execution.
+   scenarioEngine.js — AURIX Rescue OS
+   REAL: Loading structured emergency contexts into live system state.
+   SIMULATED: Pre-defined incident coordinates and timelines.
    ============================================================ */
 'use strict';
 
