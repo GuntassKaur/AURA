@@ -15,6 +15,14 @@ function evaluateZone(zone) {
   return priority;
 }
 
+function calculateResponseTime(distance) {
+  // Real world model: speed ~ 30km/h (8.3 m/s)
+  // Distance in lat/long degrees roughly converted to km (1 deg ~ 111km)
+  const distKm = distance * 111;
+  const timeHours = distKm / 30;
+  return Math.round(timeHours * 60); // minutes
+}
+
 function assignRescue(units, zones) {
   const assignments = [];
   const availableUnits = units.filter(u => u.status === 'active' || u.status === 'standby');
@@ -34,11 +42,17 @@ function assignRescue(units, zones) {
       const d = Math.hypot(unit.coordinates[0] - zone.coordinates[0], unit.coordinates[1] - zone.coordinates[1]);
       if (d < minD) {
         minD = d;
-        nearest = { unit, idx };
+        nearest = { unit, idx, d };
       }
     });
     if (nearest) {
-      assignments.push({ zoneId: zone.id, unitId: nearest.unit.id });
+      const eta = calculateResponseTime(nearest.d);
+      assignments.push({ 
+        zoneId: zone.id, 
+        unitId: nearest.unit.id, 
+        eta,
+        distance: (nearest.d * 111).toFixed(2)
+      });
       availableUnits.splice(nearest.idx, 1);
     }
   });
