@@ -1,11 +1,11 @@
-# AURA — Adaptive Urban Rescue & Aid
+# AURIX — Adaptive Urban Rescue & Aid
 
 > "Before the ambulance arrives. Before the rescue team 
-> reaches. AURA is already there."
+> reaches. AURIX is already there."
 
-## What is AURA?
+## What is AURIX?
 
-AURA is an AI-powered life-safety operating system that 
+AURIX is an AI-powered life-safety operating system that 
 works across three critical scenarios simultaneously:
 
 1. **Disaster Rescue** — Real-time coordination during 
@@ -26,12 +26,12 @@ Every year:
 
 When disasters strike, three things fail simultaneously:
 internet connectivity, coordination between rescuers, 
-and medical triage speed. AURA solves all three.
+and medical triage speed. AURIX solves all three.
 
 ## How It Works
 
 ### For Citizens (Victims)
-1. Open AURA on any device
+1. Open AURIX on any device
 2. Enter your location or tap your zone
 3. Get instant route to nearest exit, medical help, 
    or shelter
@@ -79,12 +79,12 @@ and medical triage speed. AURA solves all three.
 
 ## Impact
 
-AURA addresses **3 UN Sustainable Development Goals:**
+AURIX addresses **3 UN Sustainable Development Goals:**
 - **SDG 3** — Good Health (cardiac monitoring, medical triage)
 - **SDG 11** — Sustainable Cities (crowd safety, urban rescue)
 - **SDG 13** — Climate Action (disaster response infrastructure)
 
 
-AURA demonstrates prompt engineering through its 
+AURIX demonstrates prompt engineering through its 
 **Neural Command Terminal** where every AI decision 
 shows visible Chain-of-Thought reasoning:
