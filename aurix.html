@@ -3422,8 +3422,10 @@ window.addEventListener('resize', () => {
           const zone = window.AURIX_DATA.incidents.find(z => z.id === a.zoneId);
           if (zone && window.evaluateZone(zone) === 'CRITICAL') {
             window.addLine(`[DECISION] Assigning ${a.unitId} to ${zone.name} (CRITICAL)`, 'var(--a)');
-          }
         });
+      }
+    }, 10000);
+
     // 6. System Health Logs (Proof of Life)
     setInterval(() => {
       if (window.fbLog) {
@@ -3437,6 +3439,6 @@ window.addEventListener('resize', () => {
         window.fbLog('HEALTH_CHECK', { status: 'OPTIMAL', message: msg });
       }
     }, 45000); // Every 45s
-</script>
+  });
 </body>
 </html>

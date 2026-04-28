@@ -33,10 +33,17 @@ function _makeId() {
 // ── Init ─────────────────────────────────────────────────────
 async function fbInit() {
   try {
+    if (typeof firebase === 'undefined') {
+      console.error('[AURIX-FB] Firebase SDK not loaded');
+      FB.connected = false;
+      return false;
+    }
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CFG);
     FB.db = firebase.firestore();
     // Enable offline persistence (Firestore cache)
-    await FB.db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+    await FB.db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+      console.warn('[AURIX-FB] Persistence error:', err.code);
+    });
     FB.connected = true;
     _flushQueue();
     _startPresence();
@@ -44,7 +51,7 @@ async function fbInit() {
     _trackEventRate();
     console.log('[AURIX-FB] Firestore connected');
   } catch (e) {
-    console.warn('[AURIX-FB] Offline mode:', e.message);
+    console.error('[AURIX-FB] Initialization failed:', e);
     FB.connected = false;
   }
   return FB.connected;
