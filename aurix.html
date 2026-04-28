@@ -414,35 +414,40 @@ html, body {
       background:linear-gradient(90deg,transparent,
       rgba(0,212,255,0.45),transparent);"></div>
 
-    <!-- 5 buttons -->
     <div style="opacity:0;animation:fadeUp 0.6s ease 1.3s forwards;
-      display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-
-      <button class="btn btn-g" style="padding:13px 22px;font-size:11px;"
-        onclick="goTo('screen-field')">
-        ● FIELD MODE
-      </button>
-
-      <button class="btn btn-a" style="padding:13px 22px;font-size:11px;"
-        onclick="goTo('screen-demo')">
-        ▶ START DEMO
-      </button>
-
-      <button class="btn" style="padding:13px 22px;font-size:11px;"
-        onclick="goTo('screen-citizen')">
-        ◉ CITIZEN ACCESS
-      </button>
-
-      <button class="btn btn-r" style="padding:13px 22px;font-size:11px;"
-        onclick="goTo('screen-command')">
-        ⬡ COMMAND CENTER
-      </button>
-
-      <button class="btn" style="padding:13px 22px;font-size:11px;
-        border-color:rgba(255,140,0,0.42);color:#ff9040;"
-        onclick="goTo('screen-vitals')">
-        ♥ VITAL-SHIELD
-      </button>
+      display:flex;flex-direction:column;gap:10px;align-items:center;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+        <button class="btn btn-g" style="padding:13px 22px;font-size:11px;"
+          onclick="goTo('screen-field')">
+          ● FIELD MODE
+        </button>
+        <button class="btn btn-a" style="padding:13px 22px;font-size:11px;"
+          onclick="goTo('screen-demo')">
+          ▶ START DEMO
+        </button>
+        <button class="btn" style="padding:13px 22px;font-size:11px;"
+          onclick="goTo('screen-citizen')">
+          ◉ CITIZEN ACCESS
+        </button>
+        <button class="btn btn-r" style="padding:13px 22px;font-size:11px;"
+          onclick="goTo('screen-command')">
+          ⬡ COMMAND CENTER
+        </button>
+        <button class="btn" style="padding:13px 22px;font-size:11px;
+          border-color:rgba(255,140,0,0.42);color:#ff9040;"
+          onclick="goTo('screen-vitals')">
+          ♥ VITAL-SHIELD
+        </button>
+      </div>
+      <!-- Scenario Selector -->
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <select id="scenario-sel" class="inp" style="width:180px;height:34px;background:rgba(0,212,255,0.08);">
+          <option value="flood">Flood Crisis</option>
+          <option value="crowd">Mass Crowd Surge</option>
+          <option value="cardiac">Cardiac Emergency</option>
+        </select>
+        <button class="btn btn-a" style="padding:8px 14px;" onclick="loadScenario(document.getElementById('scenario-sel').value)">ACTIVATE SCENARIO</button>
+      </div>
     </div>
 
     <!-- stats -->
@@ -2495,11 +2500,15 @@ function incLog(msg){
     <span style="color:rgba(255,255,255,0.50);"> ${msg}</span>`;
   l.appendChild(d);
   l.scrollTop=l.scrollHeight;
+  if (window.fbWrite && !msg.startsWith('[SYSTEM]')) {
+    window.fbWrite('system_logs', { message: msg, type: 'INCIDENT' });
+  }
 }
 
 // ===== EMERGENCY =====
 function trigEmergency(){
   if(emgActive) return; emgActive=true;
+  if (window.fbLog) window.fbLog('EMERGENCY_TRIGGERED', { zone: 'SYSTEM_WIDE' });
   document.body.style.animation='critBlink 1.2s ease-in-out infinite';
   const ov=document.getElementById('emg-ov');
   if(ov) ov.style.display='flex';
@@ -2756,9 +2765,13 @@ function vLog(text,type){
   d.style.cssText=`color:${cols[type]||cols.ai};padding:1px 0;`;
   d.textContent=text;
   el.appendChild(d); el.scrollTop=el.scrollHeight;
+  if (window.fbWrite && type === 'alert') {
+    window.fbWrite('system_logs', { message: text, type: 'VITAL_ALERT' });
+  }
 }
 
 function cardiacEmg(){
+  if (window.fbLog) window.fbLog('CARDIAC_EMERGENCY', { status: 'triggered' });
   vLog('[ALERT]: CARDIAC EMERGENCY — units scrambled!','alert');
   vLog('[QUORUM]: Clearing path to medical facility','quorum');
   vLog('[VITAL-SHIELD]: AED broadcast to 2,847 nodes','shield');
@@ -3342,6 +3355,7 @@ window.addEventListener('resize', () => {
 <script src="dataEngine.js"></script>
 <script src="decisionEngine.js"></script>
 <script src="mapService.js"></script>
+<script src="scenarioEngine.js"></script>
 
 <script>
   // SYSTEM INITIALIZATION

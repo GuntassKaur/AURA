@@ -129,6 +129,12 @@ async function fbWrite(collection, data, docId) {
   }
 }
 
+// Global logger for Task 10
+window.fbLog = (action, details = {}) => {
+  fbWrite('system_logs', { action, ...details });
+  if (window.incLog) window.incLog(`[SYSTEM] ${action}`);
+};
+
 // ── Flush offline queue when back online ─────────────────────
 async function _flushQueue() {
   if (!FB.db || FB.writeQueue.length === 0) return;
@@ -190,5 +196,6 @@ async function fbSeedIfEmpty(collection, records) {
 window.fbInit       = fbInit;
 window.fbWrite      = fbWrite;
 window.fbListen     = fbListen;
+window.fbLog        = window.fbLog; // Export logger
 window.fbSeedIfEmpty= fbSeedIfEmpty;
 window.fbUpdateScreen = fbUpdateScreen;
