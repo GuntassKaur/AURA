@@ -175,48 +175,61 @@ html, body {
 
 @media (max-width: 768px) {
   /* Global font scaling */
-  :root { font-size: 14px; }
+  :root { font-size: 13px; }
   
   /* Landing screen mobile */
-  #screen-landing .btn { padding: 10px 16px; font-size: 10px; }
-  #screen-landing h1 { font-size: 42px !important; }
+  #screen-landing .btn { padding: 12px 20px; font-size: 11px; width: 100%; max-width: 280px; }
+  #screen-landing h1 { font-size: 38px !important; letter-spacing: 0.1em !important; }
   
-  /* Field & Command stack layout */
-  #screen-field > div:nth-child(2),
-  #screen-command > div:nth-child(2) {
+  /* Stacking Layouts */
+  .screen > div:nth-child(2) {
     grid-template-columns: 1fr !important;
     overflow-y: auto !important;
+    padding-bottom: 80px;
   }
   
-  #field-map-wrap, #command-map-wrap {
-    height: 300px !important;
+  .leaflet-map-wrap {
+    height: 350px !important;
+    position: relative !important;
     flex-shrink: 0;
   }
   
-  /* Hide side panels on very small screens or stack them */
-  #screen-field > div:nth-child(2) > div:not(:first-child),
-  #screen-command > div:nth-child(2) > div:not(:first-child) {
-    height: auto !important;
+  .panel {
     border-left: none !important;
-    border-top: 1px solid rgba(0,212,255,0.08);
+    border-top: 1px solid var(--bd) !important;
+    height: auto !important;
+    max-height: none !important;
   }
 
-  /* Citizen screen stack */
-  #screen-citizen > div:nth-child(2) {
-    grid-template-columns: 1fr !important;
-    flex-direction: column !important;
+  #realtime-status {
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+    min-width: 0;
+    font-size: 8px;
+    padding: 8px;
   }
-  
-  #citizen-map-wrap {
-    height: 250px !important;
-    flex-shrink: 0;
+}
+
+/* AI Assistant UI (Task 1) */
+#ai-assist-panel {
+  position: fixed;
+  bottom: 100px;
+  right: 16px;
+  width: 300px;
+  z-index: 600;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+@media (max-width: 768px) {
+  #ai-assist-panel {
+    bottom: 80px;
+    right: 10px;
+    left: 10px;
+    width: auto;
   }
-  
-  #screen-citizen > div:nth-child(2) > div:nth-child(2) {
-    width: 100% !important;
-    border-left: none !important;
-    border-top: 1px solid rgba(0,212,255,0.08);
-  }
+}
 
   /* Vitals screen grid */
   #screen-vitals > div:nth-child(2) {
@@ -298,6 +311,29 @@ html, body {
   <div class="st-row" style="margin-top:2px;">
     <span style="color:rgba(255,255,255,0.3);">Last Sync: </span>
     <span id="st-last-update" style="color:rgba(0,212,255,0.45);">--:--:--</span>
+  </div>
+  <!-- Task 1: Ask AI Button -->
+  <button class="btn btn-a" style="width:100%; margin-top:8px; padding:6px; font-size:9px;"
+    onclick="toggleAI()">✦ ASK AURIX AI</button>
+</div>
+
+<!-- AI Assistant Modal (Task 1) -->
+<div id="ai-assist-panel" class="panel" style="padding:0; overflow:hidden;">
+  <div style="background:rgba(0,212,255,0.1); padding:10px 14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--bd);">
+    <span class="lbl" style="color:var(--c);">✦ AURIX STRATEGIC AI</span>
+    <span style="cursor:pointer; color:rgba(255,255,255,0.4);" onclick="toggleAI()">✕</span>
+  </div>
+  <div id="ai-chat-body" style="padding:14px; max-height:200px; overflow-y:auto; font-size:10px; line-height:1.6; color:rgba(255,255,255,0.8);">
+    Initial system scan complete. Ask me about resource optimization, risk levels, or evacuation routes.
+  </div>
+  <div style="padding:10px; border-top:1px solid var(--bd); background:rgba(0,0,0,0.2);">
+    <div style="display:flex; gap:8px;">
+      <input id="ai-input" class="inp" placeholder="Ask Gemini..." style="height:32px;" onkeydown="if(event.key==='Enter') askAI()">
+      <button class="btn btn-c" style="padding:0 12px; height:32px;" onclick="askAI()">SEND</button>
+    </div>
+    <div style="font-size:7px; color:rgba(255,255,255,0.2); margin-top:6px; letter-spacing:0.1em; text-align:center;">
+      AI ASSIST POWERED BY GEMINI
+    </div>
   </div>
 </div>
 
@@ -3422,6 +3458,7 @@ window.addEventListener('resize', () => {
           const zone = window.AURIX_DATA.incidents.find(z => z.id === a.zoneId);
           if (zone && window.evaluateZone(zone) === 'CRITICAL') {
             window.addLine(`[DECISION] Assigning ${a.unitId} to ${zone.name} (CRITICAL)`, 'var(--a)');
+          }
         });
       }
     }, 10000);
@@ -3440,5 +3477,32 @@ window.addEventListener('resize', () => {
       }
     }, 45000); // Every 45s
   });
+
+  // AI Assistant Logic (Task 1)
+  function toggleAI() {
+    const el = document.getElementById('ai-assist-panel');
+    el.style.display = (el.style.display === 'flex') ? 'none' : 'flex';
+  }
+
+  async function askAI() {
+    const inp = document.getElementById('ai-input');
+    const body = document.getElementById('ai-chat-body');
+    const q = inp.value.trim();
+    if (!q) return;
+
+    inp.value = '';
+    body.innerHTML = `<div style="color:var(--c); margin-bottom:10px;">> ${q}</div><div style="color:rgba(255,255,255,0.4);">Analyzing data stream...</div>`;
+    
+    try {
+      if (window.generateAIResponse) {
+        const reply = await window.generateAIResponse(q);
+        body.innerHTML = `<div style="color:var(--c); margin-bottom:10px;">> ${q}</div><div>${reply}</div>`;
+      } else {
+        throw new Error('AI Module Offline');
+      }
+    } catch (e) {
+      body.innerHTML = `<div style="color:var(--c); margin-bottom:10px;">> ${q}</div><div style="color:var(--r);">AI module unavailable — using system logic fallback. Check connection.</div>`;
+    }
+  }
 </body>
 </html>

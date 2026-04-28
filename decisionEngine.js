@@ -96,7 +96,28 @@ Format: [ASSESS] ... | [ACTION] ... | [PRIORITY] ...`;
   }
 }
 
+async function generateAIResponse(inputText) {
+  const data = window.AURIX_DATA;
+  const metrics = window.AURIX_METRICS;
+  
+  const context = {
+    incidents: data?.incidents?.length || 0,
+    system_risk: metrics ? metrics.getSystemRisk(data?.incidents) : 'N/A',
+    units_active: data?.rescueUnits?.filter(u => u.status === 'active').length || 0
+  };
+
+  const systemPrompt = `You are the AURIX Rescue OS Strategic AI. 
+  Context: ${JSON.stringify(context)}.
+  User Question: ${inputText}
+  Respond with a single short paragraph. 
+  Focus on ACTION and RISK ASSESSMENT. 
+  Keep it engineering-focused.`;
+
+  return await callGemini(inputText, systemPrompt);
+}
+
 window.evaluateZone = evaluateZone;
 window.assignRescue = assignRescue;
 window.monitorVitals = monitorVitals;
 window.callGemini = callGemini;
+window.generateAIResponse = generateAIResponse;
