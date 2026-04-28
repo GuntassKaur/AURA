@@ -1,172 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="AURA — AI disaster rescue, crowd safety, and cardiac monitoring OS">
-<meta property="og:title" content="AURA | Adaptive Urban Rescue & Aid">
-<title>AURA | Adaptive Urban Rescue & Aid</title>
-<style>
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AURA — Adaptive Urban Rescue & Aid</title>
+  <meta name="description" content="AURA - AI life-safety system for disaster rescue, crowd safety, and cardiac monitoring">
+  <style>
+/* ======================================================
+   GLOBAL CSS
+   ====================================================== */
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
 html, body {
-  width: 100vw; height: 100vh; overflow: hidden;
-  background: #04080c;
-  font-family: 'Courier New', Courier, monospace;
-  color: #e0f0ff;
+  width:100vw; height:100vh; overflow:hidden;
+  background:#04080c;
+  font-family:'Courier New', monospace;
+  color:#e0f0ff;
 }
 :root {
-  --cyan: #00d4ff;
-  --red: #ff3a3a;
-  --green: #00ff88;
-  --amber: #ffaa00;
-  --orange: #ff8c00;
+  --c: #00d4ff;
+  --r: #ff3a3a;
+  --g: #00ff88;
+  --a: #ffaa00;
+  --o: #ff8c00;
   --bg: #04080c;
-  --panel-bg: rgba(6,14,24,0.95);
-  --border: rgba(0,212,255,0.12);
-  --panel-w: 320px;
+  --pb: rgba(6,14,24,0.96);
+  --bd: rgba(0,212,255,0.12);
+  --glass: blur(12px);
 }
-@media (max-width: 850px) {
-  :root { --panel-w: 100%; }
-  .screen-layout { flex-direction: column !important; }
-  .right-panel { width: 100% !important; border-left: none !important; border-top: 1px solid var(--border); height: auto !important; flex: 1 !important; }
-  .map-wrap { height: 50vh !important; flex: none !important; }
-  .hide-mobile { display: none !important; }
-}
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.20); }
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-thumb { background:rgba(0,212,255,0.22); }
 
 .screen {
-  position: fixed;
-  inset: 0;
-  display: none;
-  flex-direction: column;
-  opacity: 0;
-  transition: opacity 350ms ease;
-  background: #04080c;
+  position:fixed; inset:0;
+  display:none; flex-direction:column;
+  opacity:0; transition:opacity 320ms ease;
+  background:#04080c;
+  z-index: 5;
 }
-.screen.active { display: flex; }
-.screen.visible { opacity: 1; }
+.screen.active { display:flex; }
+.screen.visible { opacity:1; }
 
 .btn {
-  background: transparent;
-  border: 1px solid rgba(0,212,255,0.40);
-  color: var(--cyan); font-family: monospace;
-  font-size: 11px; letter-spacing: 0.14em;
-  padding: 8px 18px; border-radius: 2px;
-  cursor: pointer; transition: all 180ms;
-  white-space: nowrap;
+  background:transparent;
+  border:1px solid rgba(0,212,255,0.42);
+  color:var(--c); font-family:monospace;
+  font-size:11px; letter-spacing:0.14em;
+  padding:9px 20px; border-radius:2px;
+  cursor:pointer; transition:all 180ms;
+  white-space:nowrap;
+  outline: none;
 }
 .btn:hover {
-  background: rgba(0,212,255,0.08);
-  box-shadow: 0 0 14px rgba(0,212,255,0.15);
+  background:rgba(0,212,255,0.09);
+  box-shadow:0 0 16px rgba(0,212,255,0.18);
+  border-color: var(--c);
 }
-.btn-red {
-  border-color: rgba(255,58,58,0.45);
-  color: var(--red);
-}
-.btn-red:hover { background: rgba(255,58,58,0.08); }
-.btn-green { border-color: rgba(0,255,136,0.40); color: var(--green); }
-.btn-amber { border-color: rgba(255,170,0,0.40); color: var(--amber); }
+.btn:active { transform: scale(0.98); }
+
+.btn-r { border-color:rgba(255,58,58,0.45); color:var(--r); }
+.btn-r:hover { background:rgba(255,58,58,0.09); border-color: var(--r); }
+.btn-g { border-color:rgba(0,255,136,0.42); color:var(--g); }
+.btn-g:hover { border-color: var(--g); background: rgba(0,255,136,0.05); }
+.btn-a { border-color:rgba(255,170,0,0.42); color:var(--a); }
+.btn-a:hover { border-color: var(--a); background: rgba(255,170,0,0.05); }
 
 .panel {
-  background: var(--panel-bg);
-  border: 1px solid var(--border);
-  border-radius: 2px;
+  background:var(--pb);
+  border:1px solid var(--bd);
+  border-radius:2px;
+  backdrop-filter: var(--glass);
 }
 .lbl {
-  font-size: 9px; letter-spacing: 0.20em;
-  color: rgba(0,212,255,0.45);
-  text-transform: uppercase;
+  font-size:9px; letter-spacing:0.20em;
+  color:rgba(0,212,255,0.46);
+  text-transform:uppercase;
+  font-weight: bold;
 }
 .inp {
-  background: rgba(0,212,255,0.04);
-  border: 1px solid rgba(0,212,255,0.20);
-  color: var(--cyan); font-family: monospace;
-  font-size: 11px; padding: 8px 10px;
-  border-radius: 2px; outline: none; width: 100%;
+  background:rgba(0,212,255,0.04);
+  border:1px solid rgba(0,212,255,0.22);
+  color:var(--c); font-family:monospace;
+  font-size:11px; padding:8px 10px;
+  border-radius:2px; outline:none; width:100%;
+  transition:all 180ms;
 }
-.inp:focus { border-color: rgba(0,212,255,0.45); }
-.inp::placeholder { color: rgba(0,212,255,0.30); }
+.inp:focus { border-color:rgba(0,212,255,0.50); background:rgba(0,212,255,0.08); }
+.inp::placeholder { color:rgba(0,212,255,0.28); }
 
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.40} }
 @keyframes fadeUp {
-  from { opacity:0; transform:translateY(14px); }
-  to   { opacity:1; transform:translateY(0); }
+  from{opacity:0;transform:translateY(14px)}
+  to{opacity:1;transform:translateY(0)}
 }
-@keyframes pulse {
-  0%,100% { opacity:1; }
-  50%      { opacity:0.45; }
-}
-@keyframes dashScroll {
-  to { stroke-dashoffset: -20; }
-}
-@keyframes rippleOut {
-  0%   { r: 6; opacity: 0.6; }
-  100% { r: 18; opacity: 0; }
-}
-@keyframes cityDrift {
-  0%   { transform: scale(1.00) translate(0px,0px); }
-  50%  { transform: scale(1.05) translate(-5px,-4px); }
-  100% { transform: scale(1.02) translate(4px,-7px); }
-}
+@keyframes dashScroll { to { stroke-dashoffset:-20; } }
 @keyframes critBlink {
-  0%,100% { background: #04080c; }
-  50%      { background: #110305; }
+  0%,100%{background:#04080c} 50%{background:#110305}
 }
-
-</style>
+@keyframes neuralPulse { 0%,100%{opacity:0.3;r:2} 50%{opacity:0.8;r:4} }
+@keyframes scanline { 0%{transform:translateY(-100%)} 100%{transform:translateY(100%)} }
+.loader-overlay {
+  position:fixed; inset:0; z-index:9999;
+  background:#04080c; display:none;
+  align-items:center; justify-content:center;
+  flex-direction:column; gap:20px;
+}
+.loader-bar {
+  width:200px; height:2px; background:rgba(0,212,255,0.1);
+  position:relative; overflow:hidden;
+}
+.loader-progress {
+  position:absolute; inset:0;
+  background:var(--c); width:0%;
+  transition:width 0.4s ease;
+  box-shadow:0 0 15px var(--c);
+}
+  </style>
 </head>
 <body>
 
+<div id="loader" class="loader-overlay">
+  <div style="font-size:12px; letter-spacing:0.4em; color:var(--c); font-weight:bold;">INITIALIZING AURA</div>
+  <div class="loader-bar"><div id="loader-progress" class="loader-progress"></div></div>
+  <div id="loader-status" style="font-size:9px; color:rgba(0,212,255,0.4); letter-spacing:0.1em;">CONNECTING TO MESH...</div>
+</div>
+
 <!-- =====================================================
-SCREEN 1 — LANDING
-====================================================== -->
+     SCREEN 1 — LANDING
+     ====================================================== -->
+<div id="screen-landing" class="screen active visible">
 
-<div id="screen-landing" class="screen">
-
-  <!-- BG wrap — gets cityDrift animation -->
-  <div id="landing-bg" style="position:absolute;inset:0;
+  <!-- animated city background -->
+  <div id="lbg" style="position:absolute;inset:0;
     animation:cityDrift 26s ease-in-out infinite alternate;">
-
-    <!-- Base gradient -->
     <div style="position:absolute;inset:0;
       background:radial-gradient(ellipse 88% 72% at 50% 58%,
       #081828 0%,#050e18 38%,#030a12 70%,#020608 100%);">
     </div>
-
-    <!-- City grid SVG — generated by JS -->
-    <svg id="landing-grid" style="position:absolute;inset:0;
+    <svg id="lgrid" style="position:absolute;inset:0;
       width:100%;height:100%;pointer-events:none;"></svg>
-
-    <!-- Moving dots SVG — generated by JS -->
-    <svg id="landing-dots" style="position:absolute;inset:0;
+    <svg id="ldots" style="position:absolute;inset:0;
       width:100%;height:100%;pointer-events:none;"></svg>
-
-    <!-- Atmospheric overlays -->
-    <div style="position:absolute;top:0;left:0;right:0;height:32%;
+    <svg id="lneural" style="position:absolute;inset:0;
+      width:100%;height:100%;pointer-events:none;"></svg>
+    <!-- atmospheric layers -->
+    <div style="position:absolute;top:0;left:0;right:0;height:30%;
       background:linear-gradient(180deg,rgba(4,8,12,0.88) 0%,transparent);
       pointer-events:none;"></div>
-    <div style="position:absolute;bottom:0;left:0;right:0;height:24%;
+    <div style="position:absolute;bottom:0;left:0;right:0;height:22%;
       background:linear-gradient(0deg,rgba(4,8,12,0.82) 0%,transparent);
       pointer-events:none;"></div>
     <div style="position:absolute;inset:0;pointer-events:none;
       background:radial-gradient(ellipse 90% 86% at 50% 54%,
-      transparent 24%,rgba(4,8,12,0.58) 100%);"></div>
+      transparent 24%,rgba(4,8,12,0.56) 100%);"></div>
   </div>
 
-  <!-- Scanlines -->
-  <div style="position:absolute;inset:0;pointer-events:none;z-index:3;
+  <!-- scanlines -->
+  <div style="position:absolute;inset:0;pointer-events:none;z-index:2;
     background:repeating-linear-gradient(0deg,transparent,transparent 2px,
     rgba(0,212,255,0.007) 2px,rgba(0,212,255,0.007) 4px);"></div>
 
-  <!-- CONTENT -->
-  <div style="position:relative;z-index:10;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;height:100%;
+  <!-- top system bar -->
+  <div style="position:absolute;top:0;left:0;right:0;height:32px;
+    z-index:20;background:rgba(0,0,0,0.70);
+    border-bottom:1px solid rgba(0,212,255,0.08);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 18px;font-size:8px;letter-spacing:0.14em;">
+    <span style="color:rgba(255,140,0,0.65);">
+      VITAL-SHIELD v2.0 &nbsp;|&nbsp; GHOST PRIVACY [ON]
+      &nbsp;|&nbsp; P2P MESH [ACTIVE]
+    </span>
+    <span style="color:rgba(0,212,255,0.40);">
+      ◉ BIOMETRIC ANALYTICS — SECURE ENCRYPTED CHANNEL
+    </span>
+    <span style="color:rgba(255,100,100,0.70);">
+      PROTECTING 2,847 WORKERS
+    </span>
+  </div>
+
+  <!-- main content -->
+  <div style="position:relative;z-index:10;display:flex;
+    flex-direction:column;align-items:center;
+    justify-content:center;height:100%;
     text-align:center;padding:0 24px;">
 
-    <!-- Alert badge -->
-    <div id="l-badge" style="opacity:0;
-      animation:fadeUp 0.6s ease 0.3s forwards;
+    <!-- alert badge -->
+    <div style="opacity:0;animation:fadeUp 0.6s ease 0.3s forwards;
       display:inline-flex;align-items:center;gap:8px;
       background:rgba(255,58,58,0.10);
       border:1px solid rgba(255,58,58,0.28);
@@ -180,27 +198,25 @@ SCREEN 1 — LANDING
       </span>
     </div>
 
-    <!-- Logo -->
-    <div id="l-logo" style="opacity:0;
-      animation:fadeUp 0.7s ease 0.6s forwards;
-      font-size:clamp(48px,9vw,92px);font-weight:900;
+    <!-- logo -->
+    <div style="opacity:0;animation:fadeUp 0.7s ease 0.6s forwards;
+      font-size:clamp(52px,9vw,96px);font-weight:900;
       letter-spacing:0.2em;line-height:1;margin-bottom:6px;
-      background:linear-gradient(135deg,#ffffff 0%,#00d4ff 55%,#ffffff 100%);
+      background:linear-gradient(135deg,#fff 0%,#00d4ff 55%,#fff 100%);
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       background-clip:text;">AURA</div>
 
-    <!-- Full name -->
-    <div id="l-name" style="opacity:0;
-      animation:fadeUp 0.6s ease 0.85s forwards;
-      font-size:clamp(9px,1.3vw,12px);letter-spacing:0.32em;
+    <!-- subtitle -->
+    <div style="opacity:0;animation:fadeUp 0.6s ease 0.85s forwards;
+      font-size:clamp(9px,1.2vw,12px);letter-spacing:0.30em;
       color:rgba(0,212,255,0.50);margin-bottom:10px;">
-      ADAPTIVE URBAN RESCUE &amp; AID &nbsp;·&nbsp; VITAL-SHIELD ACTIVE
+      ADAPTIVE URBAN RESCUE &amp; AID &nbsp;·&nbsp;
+      VITAL-SHIELD ACTIVE
     </div>
 
-    <!-- Tagline -->
-    <div id="l-tag" style="opacity:0;
-      animation:fadeUp 0.6s ease 1.0s forwards;
-      margin-bottom:36px;line-height:1.8;">
+    <!-- tagline -->
+    <div style="opacity:0;animation:fadeUp 0.6s ease 1.0s forwards;
+      margin-bottom:38px;line-height:1.8;">
       <div style="font-size:clamp(11px,1.5vw,14px);
         color:rgba(255,255,255,0.36);letter-spacing:0.07em;">
         Before the ambulance arrives. Before the rescue team reaches.
@@ -211,341 +227,684 @@ SCREEN 1 — LANDING
       </div>
     </div>
 
-    <!-- Divider -->
-    <div id="l-div" style="opacity:0;
-      animation:fadeUp 0.5s ease 1.1s forwards;
+    <!-- divider -->
+    <div style="opacity:0;animation:fadeUp 0.5s ease 1.1s forwards;
       width:40px;height:1px;margin:0 auto 28px;
       background:linear-gradient(90deg,transparent,
       rgba(0,212,255,0.45),transparent);"></div>
 
-    <!-- Buttons -->
-    <div id="l-btns" style="opacity:0;
-      animation:fadeUp 0.6s ease 1.3s forwards;
-      display:flex;gap:12px;flex-wrap:wrap;
-      justify-content:center;">
+    <!-- 5 buttons -->
+    <div style="opacity:0;animation:fadeUp 0.6s ease 1.3s forwards;
+      display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
 
-      <button class="btn" style="padding:13px 28px;font-size:12px;"
-        onclick="showScreen('screen-citizen')">
+      <button class="btn btn-g" style="padding:13px 22px;font-size:11px;"
+        onclick="goTo('screen-field')">
+        ● FIELD MODE
+      </button>
+
+      <button class="btn btn-a" style="padding:13px 22px;font-size:11px;"
+        onclick="goTo('screen-demo')">
+        ▶ START DEMO
+      </button>
+
+      <button class="btn" style="padding:13px 22px;font-size:11px;"
+        onclick="goTo('screen-citizen')">
         ◉ CITIZEN ACCESS
       </button>
 
-      <button class="btn btn-red" style="padding:13px 28px;font-size:12px;"
-        onclick="showScreen('screen-command')">
+      <button class="btn btn-r" style="padding:13px 22px;font-size:11px;"
+        onclick="goTo('screen-command')">
         ⬡ COMMAND CENTER
       </button>
 
-      <button class="btn" style="padding:13px 28px;font-size:12px;
-        border-color:rgba(255,140,0,0.40);color:#ff9040;"
-        onclick="showScreen('screen-vitals')">
+      <button class="btn" style="padding:13px 22px;font-size:11px;
+        border-color:rgba(255,140,0,0.42);color:#ff9040;"
+        onclick="goTo('screen-vitals')">
         ♥ VITAL-SHIELD
       </button>
     </div>
 
-    <!-- Live stats -->
-    <div id="l-stats" style="opacity:0;
-      animation:fadeUp 0.6s ease 1.6s forwards;
-      display:flex;gap:0;margin-top:44px;
-      justify-content:center;align-items:center;">
-
+    <!-- stats -->
+    <div style="opacity:0;animation:fadeUp 0.6s ease 1.6s forwards;
+      display:flex;gap:0;margin-top:44px;justify-content:center;">
       <div style="padding:0 28px;text-align:center;">
-        <div id="stat-lives" style="font-size:22px;font-weight:500;
-          color:var(--cyan);">0</div>
+        <div id="s-lives" style="font-size:22px;font-weight:500;
+          color:var(--c);">0</div>
         <div style="font-size:8px;letter-spacing:0.16em;
-          color:rgba(255,255,255,0.28);margin-top:3px;">SURVEILLANCE NODES</div>
+          color:rgba(255,255,255,0.28);margin-top:3px;">
+          SURVEILLANCE NODES
+        </div>
       </div>
-
-      <div style="width:1px;height:32px;
+      <div style="width:1px;height:32px;margin:auto;
         background:rgba(255,255,255,0.07);"></div>
-
       <div style="padding:0 28px;text-align:center;">
-        <div id="stat-disasters" style="font-size:22px;font-weight:500;
+        <div id="s-zones" style="font-size:22px;font-weight:500;
           color:#ff6060;">0</div>
         <div style="font-size:8px;letter-spacing:0.16em;
-          color:rgba(255,255,255,0.28);margin-top:3px;">DEPLOYMENT ZONES</div>
+          color:rgba(255,255,255,0.28);margin-top:3px;">
+          DEPLOYMENT ZONES
+        </div>
       </div>
-
-      <div style="width:1px;height:32px;
+      <div style="width:1px;height:32px;margin:auto;
         background:rgba(255,255,255,0.07);"></div>
-
       <div style="padding:0 28px;text-align:center;">
-        <div id="stat-nodes" style="font-size:22px;font-weight:500;
-          color:var(--green);">0</div>
+        <div id="s-nodes" style="font-size:22px;font-weight:500;
+          color:var(--g);">0</div>
         <div style="font-size:8px;letter-spacing:0.16em;
-          color:rgba(255,255,255,0.28);margin-top:3px;">MESH NODES</div>
+          color:rgba(255,255,255,0.28);margin-top:3px;">
+          MESH NODES
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Bottom bar -->
-  <div style="position:absolute;bottom:0;left:0;right:0;height:34px;
+  <!-- bottom bar -->
+  <div style="position:absolute;bottom:0;left:0;right:0;height:32px;
     z-index:10;background:rgba(4,8,12,0.85);
     border-top:1px solid rgba(0,212,255,0.07);
     display:flex;align-items:center;
     justify-content:space-between;padding:0 18px;">
     <span style="font-size:8px;color:rgba(0,212,255,0.28);
       letter-spacing:0.12em;">AURA v1.0 — INITIAL DEPLOYMENT ACTIVE</span>
-    <span id="landing-ticker" style="font-size:9px;
-      color:rgba(0,212,255,0.42);letter-spacing:0.11em;
-      transition:opacity 300ms;"></span>
-    <span id="landing-clock" style="font-size:9px;
+    <span id="ticker" style="font-size:9px;color:rgba(0,212,255,0.42);
+      letter-spacing:0.11em;transition:opacity 300ms;"></span>
+    <span id="clock-l" style="font-size:9px;
       color:rgba(0,212,255,0.28);"></span>
   </div>
 </div>
 
 <!-- =====================================================
-SCREEN 2 — CITIZEN NAVIGATOR
-====================================================== -->
+     SCREEN 2 — FIELD MODE
+     ====================================================== -->
+<div id="screen-field" class="screen">
+  <!-- header -->
+  <div style="height:52px;flex-shrink:0;
+    background:rgba(0,0,0,0.92);
+    border-bottom:1px solid rgba(0,255,136,0.12);
+    display:flex;align-items:center;
+    padding:0 18px;gap:14px;">
+    <span style="cursor:pointer;font-size:12px;
+      color:rgba(0,255,136,0.65);letter-spacing:0.12em;"
+      onclick="goTo('screen-landing')">← AURA</span>
+    <div style="width:1px;height:20px;
+      background:rgba(255,255,255,0.08);"></div>
+    <span class="lbl" style="color:rgba(0,255,136,0.50);">
+      FIELD RESPONDER MODE
+    </span>
+    <div style="margin-left:auto;display:flex;
+      align-items:center;gap:14px;">
+      <span id="field-loc" style="font-size:10px;
+        color:rgba(0,255,136,0.55);">
+        ● GPS ACQUIRING...
+      </span>
+      <span id="clock-f" style="font-size:9px;
+        color:rgba(0,255,136,0.30);"></span>
+    </div>
+  </div>
 
+  <!-- 3-column layout -->
+  <div style="flex:1;display:grid;
+    grid-template-columns:1fr 220px 220px;
+    overflow:hidden;">
+
+    <!-- MAP (left, large) -->
+    <div id="field-map-wrap" style="position:relative;
+      overflow:hidden;
+      background:radial-gradient(ellipse 85% 75% at 50% 52%,
+      #061520 0%,#040e18 42%,#020a10 100%);">
+      <svg id="field-map-svg" style="position:absolute;
+        inset:0;width:100%;height:100%;"></svg>
+      <!-- Field overlay info -->
+      <div style="position:absolute;top:12px;left:12px;
+        z-index:10;" class="panel">
+        <div style="padding:10px 14px;">
+          <div class="lbl" style="color:rgba(0,255,136,0.50);
+            margin-bottom:6px;">FIELD STATUS</div>
+          <div id="field-status" style="font-size:12px;
+            color:var(--g);font-weight:500;">
+            SCANNING ZONE...
+          </div>
+          <div id="field-sub" style="font-size:10px;
+            color:rgba(255,255,255,0.42);margin-top:3px;">
+            Awaiting GPS lock
+          </div>
+        </div>
+      </div>
+      <!-- SOS button -->
+      <div style="position:absolute;bottom:16px;
+        left:50%;transform:translateX(-50%);z-index:10;">
+        <button onclick="fieldSOS()"
+          style="width:100px;height:100px;border-radius:50%;
+          border:3px solid var(--r);color:var(--r);
+          background:rgba(255,58,58,0.10);
+          font-family:monospace;font-size:13px;
+          font-weight:bold;letter-spacing:0.15em;
+          cursor:pointer;
+          box-shadow:0 0 30px rgba(255,58,58,0.25);
+          transition:all 200ms;"
+          onmouseover="this.style.background='rgba(255,58,58,0.20)'"
+          onmouseout="this.style.background='rgba(255,58,58,0.10)'">
+          SOS<br>
+          <span style="font-size:9px;letter-spacing:0.10em;">
+            EMERGENCY
+          </span>
+        </button>
+      </div>
+      <div style="position:absolute;inset:0;pointer-events:none;
+        background:linear-gradient(rgba(0,255,136,0) 0%, rgba(0,255,136,0.03) 50%, rgba(0,255,136,0) 100%);
+        background-size:100% 4px; animation:scanline 8s linear infinite;"></div>
+    </div>
+
+    <!-- VICTIM TRIAGE (center) -->
+    <div style="background:rgba(4,10,16,0.97);
+      border-left:1px solid rgba(0,255,136,0.08);
+      display:flex;flex-direction:column;overflow:hidden;">
+      <div style="padding:12px 14px;
+        border-bottom:1px solid rgba(0,255,136,0.07);">
+        <div class="lbl" style="color:rgba(0,255,136,0.50);
+          margin-bottom:10px;">VICTIM TRIAGE</div>
+        <!-- Add victim -->
+        <select id="victim-severity"
+          style="width:100%;background:rgba(0,255,136,0.04);
+          border:1px solid rgba(0,255,136,0.20);
+          color:var(--g);font-family:monospace;
+          font-size:11px;padding:7px 8px;
+          border-radius:2px;outline:none;
+          margin-bottom:6px;">
+          <option value="1">CRITICAL — Immediate</option>
+          <option value="2">HIGH — Urgent</option>
+          <option value="3">MODERATE — Delayed</option>
+          <option value="4">LOW — Minor</option>
+        </select>
+        <input class="inp" id="victim-symptom"
+          placeholder="Symptoms..."
+          style="margin-bottom:6px;font-size:10px;"
+          onkeydown="if(event.key==='Enter')addVictim()">
+        <button class="btn btn-g"
+          style="width:100%;padding:8px;font-size:10px;"
+          onclick="addVictim()">
+          + ADD VICTIM TO QUEUE
+        </button>
+      </div>
+      <!-- Victim list -->
+      <div class="lbl" style="padding:8px 14px 4px;
+        color:rgba(0,255,136,0.40);">ACTIVE QUEUE</div>
+      <div id="victim-list"
+        style="flex:1;overflow-y:auto;padding:0 14px 14px;">
+      </div>
+    </div>
+
+    <!-- COMMS PANEL (right) -->
+    <div style="background:rgba(4,8,14,0.98);
+      border-left:1px solid rgba(0,255,136,0.08);
+      display:flex;flex-direction:column;overflow:hidden;">
+      <!-- Vitals mini -->
+      <div style="padding:12px 14px;
+        border-bottom:1px solid rgba(0,255,136,0.07);">
+        <div class="lbl" style="color:rgba(0,255,136,0.50);
+          margin-bottom:8px;">MY VITALS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;
+          gap:6px;">
+          <div class="panel" style="padding:8px;
+            border-color:rgba(0,255,136,0.10);text-align:center;">
+            <div id="f-hr" style="font-size:18px;font-weight:500;
+              color:#ff9040;">94</div>
+            <div style="font-size:8px;color:rgba(255,255,255,0.30);
+              letter-spacing:0.12em;">BPM</div>
+          </div>
+          <div class="panel" style="padding:8px;
+            border-color:rgba(0,255,136,0.10);text-align:center;">
+            <div id="f-o2" style="font-size:18px;font-weight:500;
+              color:var(--c);">20.1</div>
+            <div style="font-size:8px;color:rgba(255,255,255,0.30);
+              letter-spacing:0.12em;">O2 %</div>
+          </div>
+        </div>
+      </div>
+      <!-- Field comms log -->
+      <div style="padding:12px 14px;
+        border-bottom:1px solid rgba(0,255,136,0.07);flex:1;
+        display:flex;flex-direction:column;">
+        <div class="lbl" style="color:rgba(0,255,136,0.50);
+          margin-bottom:6px;">FIELD COMMS</div>
+        <div id="field-log"
+          style="flex:1;overflow-y:auto;font-size:10px;
+          line-height:1.9;font-family:monospace;
+          min-height:80px;"></div>
+        <div style="display:flex;gap:6px;margin-top:6px;
+          flex-shrink:0;">
+          <input class="inp" id="field-msg"
+            placeholder="Send to command..."
+            style="flex:1;font-size:10px;
+            border-color:rgba(0,255,136,0.22);"
+            onkeydown="if(event.key==='Enter')
+              sendFieldMsg()">
+          <button class="btn btn-g"
+            style="padding:6px 10px;font-size:10px;"
+            onclick="sendFieldMsg()">SEND</button>
+        </div>
+      </div>
+      <!-- Quick actions -->
+      <div style="padding:12px 14px;">
+        <div class="lbl" style="color:rgba(0,255,136,0.50);
+          margin-bottom:8px;">QUICK ACTIONS</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <button class="btn btn-g"
+            style="width:100%;padding:8px;font-size:10px;"
+            onclick="fieldAction('ZONE_CLEAR')">
+            ✓ REPORT ZONE CLEAR
+          </button>
+          <button class="btn btn-a"
+            style="width:100%;padding:8px;font-size:10px;"
+            onclick="fieldAction('NEED_BACKUP')">
+            ⚡ REQUEST BACKUP
+          </button>
+          <button class="btn btn-r"
+            style="width:100%;padding:8px;font-size:10px;"
+            onclick="fieldAction('HAZARD')">
+            ⚠ REPORT HAZARD
+          </button>
+          <button class="btn"
+            style="width:100%;padding:8px;font-size:10px;"
+            onclick="goTo('screen-command')">
+            → SWITCH TO COMMAND
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- field bottom bar -->
+  <div style="height:28px;flex-shrink:0;
+    background:rgba(0,0,0,0.92);
+    border-top:1px solid rgba(0,255,136,0.07);
+    display:flex;align-items:center;
+    justify-content:space-between;padding:0 16px;
+    font-size:8px;letter-spacing:0.11em;">
+    <span style="color:rgba(0,255,136,0.28);">
+      FIELD MODE v2.0 | MESH CONNECTED
+    </span>
+    <span id="victim-count"
+      style="color:rgba(0,255,136,0.50);">
+      QUEUE: 0 VICTIMS
+    </span>
+    <span style="color:rgba(0,255,136,0.28);">
+      OFFLINE RESILIENT — NO INTERNET REQUIRED
+    </span>
+  </div>
+</div>
+
+<!-- =====================================================
+     SCREEN 3 — AUTO DEMO
+     ====================================================== -->
+<div id="screen-demo" class="screen">
+  <div style="height:52px;flex-shrink:0;
+    background:rgba(0,0,0,0.92);
+    border-bottom:1px solid rgba(255,170,0,0.12);
+    display:flex;align-items:center;
+    padding:0 18px;gap:14px;">
+    <span style="cursor:pointer;font-size:12px;
+      color:rgba(255,170,0,0.65);letter-spacing:0.12em;"
+      onclick="stopDemo();goTo('screen-landing')">
+      ← STOP DEMO
+    </span>
+    <div style="width:1px;height:20px;
+      background:rgba(255,255,255,0.08);"></div>
+    <span class="lbl" style="color:rgba(255,170,0,0.50);">
+      GUIDED DEMO — JUDGE MODE
+    </span>
+    <div style="margin-left:auto;">
+      <span id="demo-progress"
+        style="font-size:10px;color:rgba(255,170,0,0.55);">
+        Step 1 of 7
+      </span>
+    </div>
+  </div>
+
+  <!-- Demo content area -->
+  <div style="flex:1;display:flex;
+    align-items:center;justify-content:center;
+    flex-direction:column;padding:40px;
+    position:relative;overflow:hidden;">
+
+    <!-- Background same as landing -->
+    <div style="position:absolute;inset:0;
+      background:radial-gradient(ellipse 88% 72% at 50% 58%,
+      #081828 0%,#050e18 38%,#020608 100%);"></div>
+
+    <!-- Demo card -->
+    <div id="demo-card" class="panel"
+      style="position:relative;z-index:10;
+      max-width:680px;width:100%;padding:40px;
+      border-color:rgba(255,170,0,0.20);
+      text-align:center;">
+
+      <div id="demo-step-label"
+        style="font-size:9px;letter-spacing:0.22em;
+        color:rgba(255,170,0,0.55);margin-bottom:16px;">
+        STEP 1 OF 7
+      </div>
+
+      <div id="demo-title"
+        style="font-size:clamp(18px,3vw,28px);
+        font-weight:bold;color:#fff;
+        letter-spacing:0.10em;margin-bottom:12px;">
+        AURA — ADAPTIVE URBAN RESCUE & AID
+      </div>
+
+      <div id="demo-body"
+        style="font-size:13px;color:rgba(255,255,255,0.55);
+        line-height:1.8;margin-bottom:28px;
+        max-width:520px;margin-left:auto;margin-right:auto;">
+      </div>
+
+      <!-- Simulated CoT display -->
+      <div id="demo-cot"
+        style="display:none;background:rgba(0,0,0,0.50);
+        border:1px solid rgba(0,212,255,0.15);
+        border-radius:2px;padding:14px;
+        margin-bottom:24px;text-align:left;
+        font-family:monospace;font-size:11px;
+        line-height:1.9;"></div>
+
+      <!-- Mini metric display -->
+      <div id="demo-metrics"
+        style="display:none;gap:24px;
+        justify-content:center;margin-bottom:24px;">
+      </div>
+
+      <div style="display:flex;gap:12px;
+        justify-content:center;">
+        <button id="demo-prev" class="btn"
+          style="padding:10px 24px;"
+          onclick="demoStep(-1)">← PREV</button>
+        <button id="demo-next" class="btn btn-a"
+          style="padding:10px 32px;font-size:12px;"
+          onclick="demoStep(1)">NEXT →</button>
+        <button class="btn btn-g"
+          style="padding:10px 20px;font-size:10px;"
+          onclick="stopDemo();goTo('screen-command')">
+          OPEN LIVE APP →
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress dots -->
+    <div id="demo-dots"
+      style="position:relative;z-index:10;
+      display:flex;gap:8px;margin-top:20px;">
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================
+     SCREEN 4 — CITIZEN NAVIGATOR
+     ====================================================== -->
 <div id="screen-citizen" class="screen">
-
-  <!-- Header -->
-  <div style="height:52px;flex-shrink:0;background:rgba(0,0,0,0.90);
+  <div style="height:52px;flex-shrink:0;
+    background:rgba(0,0,0,0.90);
     border-bottom:1px solid rgba(0,212,255,0.10);
-    display:flex;align-items:center;padding:0 18px;gap:14px;">
-    <span style="font-size:12px;color:rgba(0,212,255,0.65);
-      cursor:pointer;letter-spacing:0.12em;"
-      onclick="showScreen('screen-landing')">← AURA</span>
+    display:flex;align-items:center;
+    padding:0 18px;gap:14px;">
+    <span style="cursor:pointer;font-size:12px;
+      color:rgba(0,212,255,0.65);letter-spacing:0.12em;"
+      onclick="goTo('screen-landing')">← AURA</span>
     <div style="width:1px;height:20px;
       background:rgba(255,255,255,0.08);"></div>
     <span class="lbl">CITIZEN NAVIGATOR</span>
     <div style="margin-left:auto;display:flex;
       align-items:center;gap:16px;">
-      <span id="citizen-weather" style="font-size:10px;
-        color:rgba(255,255,255,0.38);">☀ 28°C</span>
-      <span style="font-size:9px;color:var(--green);">
+      <span style="font-size:10px;color:rgba(255,255,255,0.38);">
+        ☀ 28°C
+      </span>
+      <span style="font-size:9px;color:var(--g);">
         <span style="animation:pulse 2s infinite;
           display:inline-block;">●</span> MESH ACTIVE
       </span>
-      <span id="citizen-clock" style="font-size:9px;
+      <span id="clock-c" style="font-size:9px;
         color:rgba(0,212,255,0.28);"></span>
     </div>
   </div>
 
-  <!-- Main layout -->
-  <div class="screen-layout" style="flex:1;display:flex;overflow:hidden;">
+  <div style="flex:1;display:flex;overflow:hidden;">
 
-    <!-- MAP AREA -->
-    <div id="citizen-map-wrap" class="map-wrap" style="flex:1; position:relative; overflow:hidden; min-height:0;
+    <!-- MAP -->
+    <div id="citizen-map-wrap"
+      style="flex:1;position:relative;overflow:hidden;
+      min-height:0;
       background:radial-gradient(ellipse 85% 75% at 50% 52%,
       #061520 0%,#040e18 42%,#020a10 100%);">
-
-      <!-- SVG map — drawn by JS -->
-      <svg id="citizen-map-svg" style="position:absolute; inset:0; width:100%; height:100%;"></svg>
-
-      <!-- Vignette -->
+      <svg id="citizen-map-svg"
+        style="position:absolute;inset:0;
+        width:100%;height:100%;"></svg>
       <div style="position:absolute;inset:0;pointer-events:none;
         background:radial-gradient(ellipse 96% 92% at 50% 50%,
-        transparent 50%,rgba(4,8,12,0.50) 100%);"></div>
-
+        transparent 50%,rgba(4,8,12,0.48) 100%);"></div>
       <!-- Legend -->
-      <div style="position:absolute;bottom:10px;left:50%;
-        transform:translateX(-50%);display:flex;gap:8px;
+      <div style="position:absolute;bottom:10px;
+        left:50%;transform:translateX(-50%);
+        display:flex;gap:8px;
         background:rgba(0,0,0,0.75);
         border:1px solid rgba(0,212,255,0.10);
         border-radius:12px;padding:5px 14px;
-        font-size:8px;letter-spacing:0.10em;
-        align-items:center;">
+        font-size:8px;letter-spacing:0.10em;">
         <span style="color:rgba(80,140,255,0.85);">● FLOOD</span>
         <span style="color:rgba(255,80,0,0.85);">● FIRE</span>
         <span style="color:rgba(0,255,136,0.85);">● SAFE</span>
         <span style="color:rgba(0,212,255,0.85);">▶ RESCUE</span>
       </div>
-
       <!-- Floating alerts -->
-      <div id="citizen-alerts" style="position:absolute;
-        top:12px;right:8px;z-index:50;
-        display:flex;flex-direction:column;gap:6px;
-        width:250px;pointer-events:none;"></div>
+      <div id="citizen-alerts"
+        style="position:absolute;top:12px;right:8px;
+        z-index:50;display:flex;flex-direction:column;
+        gap:6px;width:250px;pointer-events:none;"></div>
     </div>
 
     <!-- RIGHT PANEL -->
-    <div class="right-panel" style="width:var(--panel-w);display:flex;flex-direction:column;
+    <div style="width:290px;display:flex;flex-direction:column;
       overflow-y:auto;background:rgba(4,10,16,0.97);
       border-left:1px solid rgba(0,212,255,0.08);">
 
-      <!-- Location finder -->
+      <!-- Location -->
       <div style="padding:14px;
         border-bottom:1px solid rgba(0,212,255,0.07);">
         <div class="lbl" style="margin-bottom:10px;">
           WHERE ARE YOU?
         </div>
-
-        <!-- Quick zone buttons -->
         <div style="display:flex;flex-wrap:wrap;gap:5px;
           margin-bottom:8px;">
-          <button onclick="setLocation('flood')"
+          <button onclick="setLoc('flood')"
             style="border:1px solid rgba(80,140,255,0.30);
-            color:rgba(80,180,255,0.75);background:transparent;
-            padding:4px 9px;border-radius:2px;font-size:10px;
+            color:rgba(80,180,255,0.75);
+            background:transparent;padding:4px 9px;
+            border-radius:2px;font-size:10px;
             font-family:monospace;cursor:pointer;">
             Near Flood Zone
           </button>
-          <button onclick="setLocation('fire')"
+          <button onclick="setLoc('fire')"
             style="border:1px solid rgba(255,80,0,0.30);
-            color:rgba(255,120,60,0.75);background:transparent;
-            padding:4px 9px;border-radius:2px;font-size:10px;
+            color:rgba(255,120,60,0.75);
+            background:transparent;padding:4px 9px;
+            border-radius:2px;font-size:10px;
             font-family:monospace;cursor:pointer;">
             Near Fire Zone
           </button>
-          <button onclick="setLocation('safe')"
+          <button onclick="setLoc('safe')"
             style="border:1px solid rgba(0,255,136,0.30);
-            color:rgba(0,220,110,0.75);background:transparent;
-            padding:4px 9px;border-radius:2px;font-size:10px;
+            color:rgba(0,220,110,0.75);
+            background:transparent;padding:4px 9px;
+            border-radius:2px;font-size:10px;
             font-family:monospace;cursor:pointer;">
             Safe Area
           </button>
         </div>
-
-        <!-- Custom input -->
         <div style="display:flex;gap:6px;">
           <input class="inp" id="loc-input"
-            placeholder="Or type your location..."
-            onkeydown="if(event.key==='Enter')locateFromInput()"
-            style="flex:1;">
+            placeholder="Or type location..."
+            onkeydown="if(event.key==='Enter')
+              locFromInput()">
           <button class="btn" style="padding:7px 12px;"
-            onclick="locateFromInput()">LOCATE</button>
+            onclick="locFromInput()">LOCATE</button>
         </div>
-
-        <!-- Result -->
-        <div id="loc-result" style="display:none;
-          margin-top:10px;padding:10px;
+        <div id="loc-result"
+          style="display:none;margin-top:10px;
+          padding:10px;border-radius:2px;
           background:rgba(0,212,255,0.04);
-          border:1px solid rgba(0,212,255,0.15);
-          border-radius:2px;"></div>
+          border:1px solid rgba(0,212,255,0.15);">
+        </div>
       </div>
 
       <!-- Navigation -->
-      <div id="nav-panel" style="padding:14px;
-        border-bottom:1px solid rgba(0,212,255,0.07);
-        opacity:0.35;transition:opacity 300ms;">
+      <div id="nav-panel"
+        style="padding:14px;opacity:0.35;
+        transition:opacity 300ms;
+        border-bottom:1px solid rgba(0,212,255,0.07);">
         <div class="lbl" style="margin-bottom:10px;">
-          WHERE DO YOU NEED TO GO?
+          WHERE TO GO?
         </div>
-        <div style="display:flex;flex-direction:column;gap:7px;">
-          <button onclick="navigateTo('exit')"
-            style="width:100%;padding:11px;font-family:monospace;
-            font-size:11px;letter-spacing:0.13em;cursor:pointer;
+        <div style="display:flex;flex-direction:column;
+          gap:7px;">
+          <button onclick="navTo('exit')"
+            style="width:100%;padding:11px;
+            font-family:monospace;font-size:11px;
+            letter-spacing:0.13em;cursor:pointer;
             border:1px solid rgba(0,255,136,0.38);
-            color:var(--green);background:rgba(0,255,136,0.04);
+            color:var(--g);
+            background:rgba(0,255,136,0.04);
             border-radius:2px;">
             ⬡ NEAREST SAFE EXIT
           </button>
-          <button onclick="navigateTo('medical')"
-            style="width:100%;padding:11px;font-family:monospace;
-            font-size:11px;letter-spacing:0.13em;cursor:pointer;
+          <button onclick="navTo('medical')"
+            style="width:100%;padding:11px;
+            font-family:monospace;font-size:11px;
+            letter-spacing:0.13em;cursor:pointer;
             border:1px solid rgba(0,212,255,0.38);
-            color:var(--cyan);background:rgba(0,212,255,0.04);
+            color:var(--c);
+            background:rgba(0,212,255,0.04);
             border-radius:2px;">
             ⚕ MEDICAL HELP
           </button>
-          <button onclick="navigateTo('shelter')"
-            style="width:100%;padding:11px;font-family:monospace;
-            font-size:11px;letter-spacing:0.13em;cursor:pointer;
+          <button onclick="navTo('shelter')"
+            style="width:100%;padding:11px;
+            font-family:monospace;font-size:11px;
+            letter-spacing:0.13em;cursor:pointer;
             border:1px solid rgba(255,170,0,0.35);
-            color:var(--amber);background:rgba(255,170,0,0.04);
+            color:var(--a);
+            background:rgba(255,170,0,0.04);
             border-radius:2px;">
             ▣ SHELTER / SAFE ZONE
           </button>
-          <button onclick="showScreen('screen-vitals')"
-            style="width:100%;padding:11px;font-family:monospace;
-            font-size:11px;letter-spacing:0.13em;cursor:pointer;
-            border:1px solid rgba(255,140,0,0.32);
-            color:#ff9040;background:rgba(255,140,0,0.04);
-            border-radius:2px;">
-            ♥ CHECK MY VITALS
-          </button>
           <button onclick="showReunion()"
-            style="width:100%;padding:11px;font-family:monospace;
-            font-size:11px;letter-spacing:0.13em;cursor:pointer;
+            style="width:100%;padding:11px;
+            font-family:monospace;font-size:11px;
+            letter-spacing:0.13em;cursor:pointer;
             border:1px solid rgba(255,80,200,0.35);
-            color:#ff80cc;background:rgba(255,80,200,0.04);
+            color:#ff80cc;
+            background:rgba(255,80,200,0.04);
             border-radius:2px;">
             🔍 FIND MISSING PERSON
           </button>
         </div>
-        <div id="route-info" style="display:none;margin-top:10px;
-          padding:8px 10px;border-radius:2px;font-size:10px;
-          line-height:1.7;"></div>
+        <div id="route-info"
+          style="display:none;margin-top:10px;
+          padding:8px 10px;border-radius:2px;
+          font-size:10px;line-height:1.7;"></div>
       </div>
-      <div id="reunion-panel" style="display:none;padding:14px;
+
+      <!-- Reunion panel -->
+      <div id="reunion-panel"
+        style="display:none;padding:14px;
         border-bottom:1px solid rgba(0,212,255,0.07);">
-        <div style="font-size:9px;letter-spacing:0.20em;color:rgba(255,80,200,0.55);
-          margin-bottom:10px;">REUNION AI — FIND MISSING</div>
-        <input class="inp" id="r-name" placeholder="Name" style="margin-bottom:6px;">
-        <input class="inp" id="r-age" placeholder="Age" style="margin-bottom:6px;">
-        <input class="inp" id="r-loc" placeholder="Last seen location" style="margin-bottom:6px;">
-        <button class="btn" style="width:100%;border-color:rgba(255,80,200,0.40);
-          color:#ff80cc;" onclick="runReunion()">SEARCH WITH AI</button>
-        <div id="reunion-result" style="margin-top:8px;font-size:10px;
-          color:rgba(255,255,255,0.45);display:none;"></div>
+        <div class="lbl" style="color:rgba(255,80,200,0.55);
+          margin-bottom:8px;">REUNION AI</div>
+        <input class="inp" id="r-name"
+          placeholder="Missing person's name"
+          style="margin-bottom:6px;">
+        <input class="inp" id="r-age"
+          placeholder="Age"
+          style="margin-bottom:6px;">
+        <input class="inp" id="r-loc"
+          placeholder="Last seen location"
+          style="margin-bottom:6px;">
+        <button class="btn"
+          style="width:100%;
+          border-color:rgba(255,80,200,0.40);
+          color:#ff80cc;"
+          onclick="runReunion()">
+          SEARCH WITH AI
+        </button>
+        <div id="reunion-result"
+          style="display:none;margin-top:8px;
+          font-size:10px;"></div>
+        <button onclick="showReunion()"
+          style="background:none;border:none;
+          color:rgba(255,255,255,0.30);
+          font-size:10px;cursor:pointer;
+          margin-top:6px;">← back</button>
       </div>
 
       <!-- AI Triage -->
       <div style="padding:14px;flex:1;display:flex;
         flex-direction:column;">
         <div class="lbl" style="color:rgba(255,140,0,0.55);
-          margin-bottom:8px;">
-          AURA MEDICAL AI
-        </div>
-
-        <!-- Quick chips -->
-        <div style="display:flex;flex-wrap:wrap;gap:5px;
-          margin-bottom:8px;">
+          margin-bottom:8px;">AURA MEDICAL AI</div>
+        <div style="display:flex;flex-wrap:wrap;
+          gap:5px;margin-bottom:8px;">
           <span onclick="sendTriage(this.textContent)"
             style="border:1px solid rgba(0,212,255,0.18);
             color:rgba(0,212,255,0.65);padding:4px 9px;
-            border-radius:10px;font-size:10px;cursor:pointer;">
-            I'm injured
-          </span>
+            border-radius:10px;font-size:10px;
+            cursor:pointer;">I'm injured</span>
           <span onclick="sendTriage(this.textContent)"
             style="border:1px solid rgba(255,58,58,0.25);
             color:rgba(255,100,100,0.75);padding:4px 9px;
-            border-radius:10px;font-size:10px;cursor:pointer;">
-            Chest pain
-          </span>
+            border-radius:10px;font-size:10px;
+            cursor:pointer;">Chest pain</span>
           <span onclick="sendTriage(this.textContent)"
             style="border:1px solid rgba(0,212,255,0.18);
             color:rgba(0,212,255,0.65);padding:4px 9px;
-            border-radius:10px;font-size:10px;cursor:pointer;">
-            I'm trapped
-          </span>
+            border-radius:10px;font-size:10px;
+            cursor:pointer;">I'm trapped</span>
           <span onclick="sendTriage(this.textContent)"
             style="border:1px solid rgba(0,255,136,0.20);
             color:rgba(0,220,110,0.65);padding:4px 9px;
-            border-radius:10px;font-size:10px;cursor:pointer;">
-            I'm safe
-          </span>
+            border-radius:10px;font-size:10px;
+            cursor:pointer;">I'm safe</span>
         </div>
-
-        <!-- Chat -->
-        <div id="triage-chat" style="flex:1;overflow-y:auto;
+        <div id="triage-chat"
+          style="flex:1;overflow-y:auto;
           min-height:80px;max-height:160px;
           font-size:10px;line-height:1.9;
           margin-bottom:8px;"></div>
-
-        <!-- Input -->
         <div style="display:flex;gap:6px;flex-shrink:0;">
-          <input class="inp" id="triage-input"
+          <input class="inp" id="triage-inp"
             placeholder="Describe your situation..."
+            style="flex:1;font-size:10px;"
             onkeydown="if(event.key==='Enter'){
-              sendTriage(this.value);this.value='';}"
-            style="flex:1;font-size:10px;">
+              sendTriage(this.value);this.value='';}">
           <button class="btn" style="padding:7px 10px;"
             onclick="sendTriageBtn()">SEND</button>
         </div>
       </div>
-      <div class="panel" style="margin:0 0 0 0;padding:10px 14px;
-        border-top:1px solid rgba(0,212,255,0.07);flex-shrink:0;">
+
+      <!-- Mesh indicator -->
+      <div class="panel" style="margin:0;padding:10px 14px;
+        border-top:1px solid rgba(0,212,255,0.07);
+        flex-shrink:0;border-left:none;
+        border-right:none;border-bottom:none;
+        border-radius:0;">
         <div style="display:flex;align-items:center;gap:8px;">
           <div style="width:8px;height:8px;border-radius:50%;
-            background:#00ff88;flex-shrink:0;
+            background:var(--g);flex-shrink:0;
             box-shadow:0 0 8px rgba(0,255,136,0.6);
             animation:pulse 1.5s infinite;"></div>
           <div>
-            <div style="font-size:10px;color:#00ff88;
+            <div style="font-size:10px;color:var(--g);
               letter-spacing:0.10em;">MESH NETWORK ACTIVE</div>
-            <div style="font-size:9px;color:rgba(255,255,255,0.35);
-              margin-top:1px;">8,420 nodes · OFFLINE RESILIENT</div>
+            <div style="font-size:9px;
+              color:rgba(255,255,255,0.32);margin-top:1px;">
+              8,420 nodes · OFFLINE RESILIENT
+            </div>
           </div>
         </div>
       </div>
@@ -554,127 +913,145 @@ SCREEN 2 — CITIZEN NAVIGATOR
 </div>
 
 <!-- =====================================================
-SCREEN 3 — COMMAND CENTER
-====================================================== -->
-
+     SCREEN 5 — COMMAND CENTER
+     ====================================================== -->
 <div id="screen-command" class="screen">
-
-  <!-- Header -->
-  <div id="cmd-header" style="height:52px;flex-shrink:0;
+  <div id="cmd-hdr"
+    style="height:52px;flex-shrink:0;
     background:rgba(0,0,0,0.92);
     border-bottom:1px solid rgba(0,212,255,0.10);
     display:flex;align-items:center;
-    padding:0 16px;gap:12px;position:relative;z-index:20;">
-
-    <span style="font-size:12px;color:rgba(0,212,255,0.65);
-      cursor:pointer;letter-spacing:0.12em;"
-      onclick="showScreen('screen-landing')">← AURA</span>
+    padding:0 16px;gap:12px;z-index:20;
+    position:relative;">
+    <span style="cursor:pointer;font-size:12px;
+      color:rgba(0,212,255,0.65);letter-spacing:0.12em;"
+      onclick="goTo('screen-landing')">← AURA</span>
     <div style="width:1px;height:20px;
       background:rgba(255,255,255,0.08);"></div>
     <span class="lbl">COMMAND CENTER</span>
 
-    <!-- Center metrics -->
-    <div style="flex:1;display:flex;justify-content:center;
-      gap:32px;align-items:center;">
+    <div style="flex:1;display:flex;
+      justify-content:center;gap:28px;">
       <div style="text-align:center;">
-        <div id="m-response" style="font-size:18px;font-weight:500;
-          color:var(--cyan);">94.2%</div>
-        <div style="font-size:8px;letter-spacing:0.14em;
-          color:rgba(255,255,255,0.30);margin-top:1px;">
+        <div id="m-resp"
+          style="font-size:18px;font-weight:500;
+          color:var(--c);">94.2%</div>
+        <div style="font-size:8px;letter-spacing:0.13em;
+          color:rgba(255,255,255,0.28);margin-top:1px;">
           RESPONSE RATE
         </div>
       </div>
       <div style="text-align:center;">
-        <div id="m-lives" style="font-size:18px;font-weight:500;
-          color:var(--green);">1,247</div>
-        <div style="font-size:8px;letter-spacing:0.14em;
-          color:rgba(255,255,255,0.30);margin-top:1px;">
-          NODES MONITORED
+        <div id="m-lives"
+          style="font-size:18px;font-weight:500;
+          color:var(--g);">1,247</div>
+        <div style="font-size:8px;letter-spacing:0.13em;
+          color:rgba(255,255,255,0.28);margin-top:1px;">
+          LIVES ASSISTED
         </div>
       </div>
       <div style="text-align:center;">
-        <div id="m-rescues" style="font-size:18px;font-weight:500;
-          color:var(--amber);">23</div>
-        <div style="font-size:8px;letter-spacing:0.14em;
-          color:rgba(255,255,255,0.30);margin-top:1px;">
-          ACTIVE NODES
+        <div id="m-safety"
+          style="font-size:18px;font-weight:500;
+          color:var(--g);">94</div>
+        <div style="font-size:8px;letter-spacing:0.13em;
+          color:rgba(255,255,255,0.28);margin-top:1px;">
+          SAFETY SCORE
         </div>
       </div>
       <div style="text-align:center;">
-        <div id="m-safety" style="font-size:18px;font-weight:500;color:#00ff88;">94</div>
-        <div style="font-size:8px;letter-spacing:0.14em;color:rgba(255,255,255,0.30);margin-top:1px;">SAFETY SCORE</div>
+        <div id="m-res"
+          style="font-size:18px;font-weight:500;
+          color:var(--a);">23</div>
+        <div style="font-size:8px;letter-spacing:0.13em;
+          color:rgba(255,255,255,0.28);margin-top:1px;">
+          ACTIVE RESCUES
+        </div>
       </div>
     </div>
 
-    <!-- Right buttons -->
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button class="btn" id="drone-btn" style="font-size:10px;padding:6px 12px;"
+    <div style="display:flex;gap:8px;">
+      <button id="drone-btn" class="btn"
+        style="font-size:10px;padding:6px 12px;"
         onclick="toggleDrone()">DRONE VIEW</button>
-      <button class="btn btn-amber" style="font-size:10px;padding:6px 12px;"
-        onclick="runSimulation()">SIMULATE</button>
-      <button class="btn btn-red" style="font-size:10px;padding:6px 12px;"
-        onclick="triggerEmergency()">⚠ EMERGENCY</button>
-      <button class="btn" style="font-size:10px;padding:6px 12px;"
-        onclick="showScreen('screen-vitals')">♥ VITALS</button>
+      <button class="btn btn-a"
+        style="font-size:10px;padding:6px 12px;"
+        onclick="runSim()">SIMULATE</button>
+      <button class="btn btn-r"
+        style="font-size:10px;padding:6px 12px;"
+        onclick="trigEmergency()">⚠ EMERGENCY</button>
+      <button class="btn"
+        style="font-size:10px;padding:6px 12px;"
+        onclick="goTo('screen-vitals')">♥ VITALS</button>
     </div>
   </div>
 
-  <!-- Main -->
-  <div class="screen-layout" style="flex:1;display:flex;overflow:hidden;">
-
-    <!-- MAP -->
-    <div id="cmd-map-wrap" class="map-wrap" style="flex:1; position:relative; overflow:hidden; min-height:0;
+  <div style="flex:1;display:flex;overflow:hidden;">
+    <div id="cmd-map-wrap"
+      style="flex:1;position:relative;overflow:hidden;
+      min-height:0;transition:transform 900ms ease;
       background:radial-gradient(ellipse 88% 78% at 50% 52%,
       #071220 0%,#040c18 42%,#020810 100%);">
-
-      <svg id="cmd-map-svg" style="position:absolute;inset:0;
+      <svg id="cmd-map-svg"
+        style="position:absolute;inset:0;
         width:100%;height:100%;"></svg>
-
-      <!-- Vignette -->
       <div style="position:absolute;inset:0;pointer-events:none;
         background:radial-gradient(ellipse 96% 92% at 50% 50%,
-        transparent 48%,rgba(4,8,12,0.52) 100%);"></div>
-
-      <!-- Threat level -->
-      <div class="panel" style="position:absolute;top:12px;left:12px;
+        transparent 48%,rgba(4,8,12,0.50) 100%);"></div>
+      <!-- Threat panel -->
+      <div class="panel"
+        style="position:absolute;top:12px;left:12px;
         padding:10px 14px;z-index:10;min-width:170px;">
-        <div class="lbl" style="margin-bottom:6px;">THREAT LEVEL</div>
-        <div style="height:5px;border-radius:3px;position:relative;
+        <div class="lbl" style="margin-bottom:6px;">
+          THREAT LEVEL
+        </div>
+        <div style="height:5px;border-radius:3px;
+          position:relative;
           background:linear-gradient(90deg,
           #00ff88 0%,#ffaa00 50%,#ff3a3a 100%);">
-          <div id="threat-needle" style="position:absolute;
-            top:-4px;width:2px;height:13px;background:#fff;
+          <div id="threat-needle"
+            style="position:absolute;top:-4px;
+            width:2px;height:13px;background:#fff;
             border-radius:1px;left:65%;
             transition:left 1s ease;"></div>
         </div>
-        <div id="threat-label" style="font-size:9px;color:var(--amber);
-          margin-top:4px;letter-spacing:0.12em;">ELEVATED</div>
+        <div id="threat-label"
+          style="font-size:9px;color:var(--a);
+          margin-top:4px;letter-spacing:0.12em;">
+          ELEVATED
+        </div>
       </div>
-      <div class="panel" style="position:absolute;bottom:40px;left:12px;
-        padding:10px 14px;z-index:10;width:200px;">
-        <div style="font-size:9px;letter-spacing:0.16em;
-          color:rgba(0,212,255,0.45);margin-bottom:6px;">
+      <!-- Prediction slider -->
+      <div class="panel"
+        style="position:absolute;bottom:44px;
+        left:12px;padding:10px 14px;
+        z-index:10;width:200px;">
+        <div class="lbl" style="margin-bottom:6px;">
           CROWD PREDICTION
         </div>
-        <input type="range" id="pred-slider" min="0" max="30" value="0"
-          style="width:100%;accent-color:#00d4ff;"
-          oninput="updatePrediction(this.value)">
-        <div id="pred-label" style="font-size:9px;color:rgba(0,212,255,0.55);
-          margin-top:4px;text-align:center;">+0 MIN (LIVE)</div>
+        <input type="range" id="pred-slider"
+          min="0" max="30" value="0"
+          style="width:100%;accent-color:var(--c);"
+          oninput="updatePred(this.value)">
+        <div id="pred-lbl"
+          style="font-size:9px;color:rgba(0,212,255,0.55);
+          margin-top:4px;text-align:center;">
+          +0 MIN (LIVE)
+        </div>
       </div>
-
       <!-- Emergency overlay -->
-      <div id="emg-overlay" style="display:none;position:absolute;
-        inset:0;z-index:30;pointer-events:none;
+      <div id="emg-ov"
+        style="display:none;position:absolute;inset:0;
+        z-index:30;pointer-events:none;
+        flex-direction:column;
         align-items:center;justify-content:center;
-        flex-direction:column;text-align:center;
-        background:rgba(180,0,0,0.08);">
-        <div id="emg-line1"
-          style="font-size:clamp(14px,2.6vw,30px);
+        text-align:center;
+        background:rgba(180,0,0,0.09);">
+        <div style="font-size:clamp(14px,2.6vw,30px);
           font-weight:bold;letter-spacing:0.35em;
-          color:#ffffff;margin-bottom:10px;
+          color:#fff;margin-bottom:10px;
           text-shadow:0 0 24px rgba(255,58,58,0.6);
-          animation:pulse 1.1s ease-in-out infinite;">
+          animation:pulse 1.1s infinite;">
           FULL EMERGENCY PROTOCOL ACTIVE
         </div>
         <div style="font-size:clamp(9px,1.1vw,12px);
@@ -684,9 +1061,10 @@ SCREEN 3 — COMMAND CENTER
       </div>
     </div>
 
-    <!-- RIGHT PANEL -->
-    <div class="right-panel" style="width:var(--panel-w);display:flex;flex-direction:column;
-      overflow-y:auto;background:rgba(4,9,15,0.97);
+    <!-- Right panel -->
+    <div style="width:280px;display:flex;
+      flex-direction:column;overflow-y:auto;
+      background:rgba(4,9,15,0.97);
       border-left:1px solid rgba(0,212,255,0.08);">
 
       <!-- AI Directive -->
@@ -697,23 +1075,27 @@ SCREEN 3 — COMMAND CENTER
         </div>
         <div style="background:rgba(0,212,255,0.04);
           border:1px solid rgba(0,212,255,0.14);
-          border-left:3px solid var(--cyan);
+          border-left:3px solid var(--c);
           border-radius:2px;padding:10px 12px;">
-          <div id="ai-status" style="font-size:12px;
-            font-weight:500;color:var(--cyan);margin-bottom:6px;">
-            SYSTEM MONITORING ACTIVE
+          <div id="ai-st"
+            style="font-size:12px;font-weight:500;
+            color:var(--c);margin-bottom:6px;">
+            COORDINATING RESCUE OPS
           </div>
-          <div id="cot-obs" style="font-size:10px;
+          <div id="cot-o"
+            style="font-size:10px;
             color:rgba(255,255,255,0.48);line-height:1.9;">
-            [OBSERVE] 3 deployment zones — 1,247 signals active
+            [OBSERVE] 3 zones — 1,247 signals active
           </div>
-          <div id="cot-rea" style="font-size:10px;
+          <div id="cot-r"
+            style="font-size:10px;
             color:rgba(255,255,255,0.48);line-height:1.9;">
-            [REASON]  NW flood expanding 0.3km/hr
+            [REASON]  NW flood +0.3km/hr
           </div>
-          <div id="cot-dec" style="font-size:10px;
+          <div id="cot-d"
+            style="font-size:10px;
             color:rgba(255,255,255,0.48);line-height:1.9;">
-            [DECIDE]  Rerouting teams A,B + opening Gate 4
+            [DECIDE]  Rerouting teams A,B → Gate 4
           </div>
         </div>
       </div>
@@ -721,15 +1103,19 @@ SCREEN 3 — COMMAND CENTER
       <!-- Zone status -->
       <div style="padding:14px;
         border-bottom:1px solid rgba(0,212,255,0.07);">
-        <div class="lbl" style="margin-bottom:8px;">ZONE STATUS</div>
+        <div class="lbl" style="margin-bottom:8px;">
+          ZONE STATUS
+        </div>
         <div id="zone-rows"></div>
       </div>
 
       <!-- Resources -->
       <div style="padding:14px;
         border-bottom:1px solid rgba(0,212,255,0.07);">
-        <div class="lbl" style="margin-bottom:8px;">RESOURCES</div>
-        <div id="resource-rows"></div>
+        <div class="lbl" style="margin-bottom:8px;">
+          RESOURCES
+        </div>
+        <div id="res-rows"></div>
       </div>
 
       <!-- Terminal -->
@@ -738,228 +1124,262 @@ SCREEN 3 — COMMAND CENTER
         <div class="lbl" style="margin-bottom:6px;">
           NEURAL TERMINAL
         </div>
-        <div style="display:flex;justify-content:space-between;
+        <div style="display:flex;
+          justify-content:space-between;
           margin-bottom:4px;font-size:9px;">
-          <span style="color:var(--cyan);">● AURA CORE ACTIVE</span>
-          <span id="cmd-clock"
+          <span style="color:var(--c);">
+            ● AURA CORE ACTIVE
+          </span>
+          <span id="clock-cmd"
             style="color:rgba(0,212,255,0.32);"></span>
         </div>
-        <div id="cmd-terminal" style="height:150px;overflow-y:auto;
-          font-size:10px;line-height:1.9;font-family:monospace;
+        <div id="cmd-term"
+          style="height:140px;overflow-y:auto;
+          font-size:10px;line-height:1.9;
+          font-family:monospace;
           background:rgba(0,0,0,0.40);
           border:1px solid rgba(0,212,255,0.08);
-          border-radius:2px;padding:8px;margin-bottom:6px;"></div>
-        <div style="display:flex;gap:6px;align-items:center;">
+          border-radius:2px;padding:8px;
+          margin-bottom:6px;"></div>
+        <div style="display:flex;gap:6px;
+          align-items:center;">
           <span style="font-size:10px;
             color:rgba(0,212,255,0.45);
-            white-space:nowrap;">DIRECTOR &gt;</span>
-          <input class="inp" id="cmd-input"
+            white-space:nowrap;">DIR &gt;</span>
+          <input class="inp" id="cmd-inp"
             style="flex:1;font-size:10px;"
             onkeydown="if(event.key==='Enter'){
-              execCmd(this.value);this.value='';}">
+              execCmd(this.value);
+              this.value='';}">
           <button class="btn" style="padding:5px 10px;"
-            onclick="execCmdBtn()">EXEC</button>
+            onclick="execCmdBtn()">RUN</button>
         </div>
-        <div style="font-size:8px;color:rgba(0,212,255,0.18);
-          text-align:center;padding:5px 0;letter-spacing:0.10em;">
+        <div style="font-size:8px;
+          color:rgba(0,212,255,0.18);
+          text-align:center;padding:4px 0;
+          letter-spacing:0.10em;">
           F1 STATUS · F2 SIMULATE · F3 EMERGENCY · ESC RESET
         </div>
       </div>
 
       <!-- Incident log -->
       <div style="padding:14px;">
-        <div class="lbl" style="margin-bottom:6px;">INCIDENT LOG</div>
-        <div id="incident-log" style="height:130px;overflow-y:auto;
+        <div class="lbl" style="margin-bottom:6px;">
+          INCIDENT LOG
+        </div>
+        <div id="inc-log"
+          style="height:120px;overflow-y:auto;
           font-size:10px;line-height:1.9;"></div>
       </div>
     </div>
   </div>
 
-  <!-- Bottom bar -->
   <div style="height:28px;flex-shrink:0;
     background:rgba(0,0,0,0.92);
     border-top:1px solid rgba(0,212,255,0.07);
     display:flex;align-items:center;
-    justify-content:space-between;padding:0 16px;
-    font-size:8px;letter-spacing:0.11em;">
-    <span id="cmd-status-l"
+    justify-content:space-between;
+    padding:0 16px;font-size:8px;
+    letter-spacing:0.11em;">
+    <span id="cmd-st-l"
       style="color:rgba(0,212,255,0.26);">
       NEURAL_LOAD: 34% | ENCRYPTION: AES-256
     </span>
     <span style="color:rgba(0,212,255,0.34);">
-      ⬡ SIMULATED IoT PIPELINE — PRODUCTION: SATELLITE + SENSOR MESH
+      ⬡ SIMULATED IoT — PRODUCTION: SATELLITE + SENSORS
     </span>
-    <span style="color:var(--cyan);">
-      AURA INITIAL DEPLOYMENT — MESH ACTIVE
+    <span style="color:var(--c);">
+      PROTECTING 1,247 LIVES
     </span>
   </div>
 </div>
 
 <!-- =====================================================
-SCREEN 4 — VITAL-SHIELD
-====================================================== -->
-
+     SCREEN 6 — VITAL-SHIELD
+     ====================================================== -->
 <div id="screen-vitals" class="screen">
-
-  <!-- Header -->
   <div style="height:52px;flex-shrink:0;
     background:rgba(0,0,0,0.92);
     border-bottom:1px solid rgba(255,140,0,0.12);
     display:flex;align-items:center;
     padding:0 18px;gap:12px;">
-
-    <span style="font-size:12px;color:rgba(255,140,0,0.65);
-      cursor:pointer;letter-spacing:0.12em;"
-      onclick="showScreen('screen-landing')">← AURA</span>
+    <span style="cursor:pointer;font-size:12px;
+      color:rgba(255,140,0,0.65);letter-spacing:0.12em;"
+      onclick="goTo('screen-landing')">← AURA</span>
     <div style="width:1px;height:20px;
       background:rgba(255,255,255,0.08);"></div>
-    <span style="font-size:9px;letter-spacing:0.20em;
+    <span style="font-size:9px;letter-spacing:0.18em;
       color:rgba(255,140,0,0.50);">
-      VITAL-SHIELD Ω &nbsp;·&nbsp; MODE: CARDIAC-SENTINEL [ACTIVE]
+      VITAL-SHIELD Ω · CARDIAC-SENTINEL [ACTIVE]
     </span>
-
     <div style="margin-left:auto;display:flex;
       align-items:center;gap:16px;">
       <span style="font-size:9px;
-        color:rgba(255,255,255,0.26);letter-spacing:0.13em;">
+        color:rgba(255,255,255,0.25);
+        letter-spacing:0.13em;">
         GHOST PRIVACY [ON]
       </span>
-      <span style="font-size:9px;color:var(--green);
+      <span style="font-size:9px;color:var(--g);
         letter-spacing:0.13em;">
         P2P MESH [ACTIVE]
       </span>
-      <button class="btn" style="font-size:10px;padding:5px 12px;"
-        onclick="showScreen('screen-command')">
+      <button class="btn"
+        style="font-size:10px;padding:5px 12px;"
+        onclick="goTo('screen-command')">
         ← COMMAND
       </button>
-      <span id="vitals-clock"
-        style="font-size:9px;color:rgba(255,140,0,0.28);"></span>
+      <span id="clock-v"
+        style="font-size:9px;
+        color:rgba(255,140,0,0.28);"></span>
     </div>
   </div>
 
-  <!-- 2x2 grid -->
-  <div style="flex:1; display:grid; grid-template-columns:1fr 1fr;
-    grid-template-rows:1fr 1fr; gap:1px; overflow:hidden;
-    background:rgba(255,140,0,0.05); min-height:0;">
+  <div style="flex:1;display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:1px;overflow:hidden;min-height:0;
+    background:rgba(255,140,0,0.04);">
 
-    <!-- Q1: Survival Orb -->
+    <!-- Q1: Orb -->
     <div style="background:rgba(4,8,12,0.98);
       display:flex;flex-direction:column;
       align-items:center;justify-content:center;
       position:relative;overflow:hidden;">
-      <div class="lbl" style="color:rgba(255,140,0,0.40);
-        position:absolute;top:14px;left:14px;">
+      <div class="lbl"
+        style="position:absolute;top:14px;left:14px;
+        color:rgba(255,140,0,0.40);">
         VITAL-SHIELD Ω
       </div>
-      <svg id="survival-orb" width="220" height="220"></svg>
-      <div id="heart-rate-big" style="position:absolute;
-        bottom:14px;right:14px;font-size:11px;
-        color:#ff9040;letter-spacing:0.12em;">94 BPM</div>
+      <svg id="survival-orb"
+        width="220" height="220"></svg>
+      <div id="hrb"
+        style="position:absolute;bottom:14px;right:14px;
+        font-size:11px;color:#ff9040;
+        letter-spacing:0.12em;">94 BPM</div>
     </div>
 
-    <!-- Q2: Telemetry Grid -->
+    <!-- Q2: Telemetry -->
     <div style="background:rgba(4,8,12,0.98);
-      padding:16px;display:flex;flex-direction:column;gap:10px;
+      padding:16px;display:flex;
+      flex-direction:column;gap:10px;
       overflow:hidden;">
       <div class="lbl" style="color:rgba(255,140,0,0.50);">
         LIVE TELEMETRY
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;
+      <div style="display:grid;
+        grid-template-columns:1fr 1fr;
         gap:8px;flex:1;">
-
         <div class="panel" style="padding:10px 12px;
           border-color:rgba(255,140,0,0.10);">
-          <div class="lbl">OXYGEN LEVEL</div>
-          <div id="tel-o2" style="font-size:22px;font-weight:500;
-            color:var(--cyan);margin:4px 0;">20.1%</div>
-          <div id="tel-o2-s" style="font-size:9px;color:var(--green);
+          <div class="lbl">OXYGEN</div>
+          <div id="tel-o2"
+            style="font-size:22px;font-weight:500;
+            color:var(--c);margin:4px 0;">20.1%</div>
+          <div id="tel-o2s"
+            style="font-size:9px;color:var(--g);
             letter-spacing:0.12em;">[STABLE]</div>
-          <svg id="spark-o2" width="60" height="18"
-            style="margin-top:6px;"></svg>
+          <svg id="sp-o2" width="60" height="16"
+            style="margin-top:5px;"></svg>
         </div>
-
         <div class="panel" style="padding:10px 12px;
           border-color:rgba(255,140,0,0.10);">
           <div class="lbl">HEART RATE</div>
-          <div id="tel-hr" style="font-size:22px;font-weight:500;
+          <div id="tel-hr"
+            style="font-size:22px;font-weight:500;
             color:#ff9040;margin:4px 0;">94 BPM</div>
-          <div id="tel-hr-s" style="font-size:9px;color:var(--green);
+          <div id="tel-hrs"
+            style="font-size:9px;color:var(--g);
             letter-spacing:0.12em;">[NOMINAL]</div>
-          <svg id="spark-hr" width="60" height="18"
-            style="margin-top:6px;"></svg>
+          <svg id="sp-hr" width="60" height="16"
+            style="margin-top:5px;"></svg>
         </div>
-
         <div class="panel" style="padding:10px 12px;
           border-color:rgba(255,140,0,0.10);">
           <div class="lbl">CO TOXICITY</div>
-          <div id="tel-co" style="font-size:22px;font-weight:500;
-            color:var(--green);margin:4px 0;">5 PPM</div>
-          <div id="tel-co-s" style="font-size:9px;color:var(--green);
+          <div id="tel-co"
+            style="font-size:22px;font-weight:500;
+            color:var(--g);margin:4px 0;">5 PPM</div>
+          <div id="tel-cos"
+            style="font-size:9px;color:var(--g);
             letter-spacing:0.12em;">[LOW]</div>
         </div>
-
         <div class="panel" style="padding:10px 12px;
           border-color:rgba(255,140,0,0.10);">
           <div class="lbl">CROWD DENSITY</div>
-          <div id="tel-den" style="font-size:22px;font-weight:500;
-            color:var(--amber);margin:4px 0;">88%</div>
-          <div id="tel-den-s" style="font-size:9px;color:var(--amber);
+          <div id="tel-den"
+            style="font-size:22px;font-weight:500;
+            color:var(--a);margin:4px 0;">88%</div>
+          <div id="tel-dens"
+            style="font-size:9px;color:var(--a);
             letter-spacing:0.12em;">[HIGH]</div>
         </div>
       </div>
-
-      <div style="display:flex;gap:0;justify-content:center;
-        border-top:1px solid rgba(255,140,0,0.06);padding-top:8px;">
-        <div style="flex:1;text-align:center;font-size:10px;
-          color:rgba(255,255,255,0.38);">AVG AGE: 28 YRS</div>
-        <div style="width:1px;background:rgba(255,255,255,0.06);"></div>
-        <div style="flex:1;text-align:center;font-size:10px;
-          color:rgba(255,255,255,0.38);">NODES: 2,847</div>
+      <div style="display:flex;gap:0;
+        justify-content:center;
+        border-top:1px solid rgba(255,140,0,0.06);
+        padding-top:8px;">
+        <div style="flex:1;text-align:center;
+          font-size:10px;
+          color:rgba(255,255,255,0.36);">
+          AVG AGE: 28 YRS
+        </div>
+        <div style="width:1px;
+          background:rgba(255,255,255,0.06);"></div>
+        <div style="flex:1;text-align:center;
+          font-size:10px;
+          color:rgba(255,255,255,0.36);">
+          NODES: 2,847
+        </div>
       </div>
     </div>
 
-    <!-- Q3: AI Alert Feed -->
+    <!-- Q3: AI Log -->
     <div style="background:rgba(4,8,12,0.98);
-      padding:14px;display:flex;flex-direction:column;
-      overflow:hidden;">
+      padding:14px;display:flex;
+      flex-direction:column;overflow:hidden;">
       <div class="lbl" style="color:rgba(255,140,0,0.50);
-        margin-bottom:8px;flex-shrink:0;">AI ALERT FEED</div>
-      <div id="vital-log" style="flex:1;overflow-y:auto;
+        margin-bottom:8px;flex-shrink:0;">
+        AI ALERT FEED
+      </div>
+      <div id="vital-log"
+        style="flex:1;overflow-y:auto;
         font-size:10px;line-height:1.9;
         font-family:monospace;"></div>
     </div>
 
-    <!-- Q4: Worker Safety -->
+    <!-- Q4: Workers -->
     <div style="background:rgba(4,8,12,0.98);
-      padding:14px;display:flex;flex-direction:column;
-      overflow:hidden;">
+      padding:14px;display:flex;
+      flex-direction:column;overflow:hidden;">
       <div class="lbl" style="color:rgba(255,140,0,0.50);
         margin-bottom:8px;flex-shrink:0;">
-        WORKER SAFETY MONITOR
+        WORKER SAFETY
       </div>
-      <div id="worker-rows" style="flex:1;overflow-y:auto;
-        display:flex;flex-direction:column;gap:5px;"></div>
-      <button class="btn btn-red"
-        style="width:100%;padding:10px;margin-top:8px;
-        font-size:10px;flex-shrink:0;"
-        onclick="cardiacEmergency()">
+      <div id="worker-rows"
+        style="flex:1;overflow-y:auto;
+        display:flex;flex-direction:column;
+        gap:5px;"></div>
+      <button class="btn btn-r"
+        style="width:100%;padding:10px;
+        margin-top:8px;font-size:10px;flex-shrink:0;"
+        onclick="cardiacEmg()">
         ⚠ TRIGGER CARDIAC EMERGENCY
       </button>
     </div>
   </div>
 
-  <!-- Bottom bar -->
   <div style="height:28px;flex-shrink:0;
     background:rgba(0,0,0,0.92);
     border-top:1px solid rgba(255,140,0,0.07);
     display:flex;align-items:center;
-    justify-content:space-between;padding:0 16px;
-    font-size:8px;letter-spacing:0.11em;">
+    justify-content:space-between;
+    padding:0 16px;font-size:8px;
+    letter-spacing:0.11em;">
     <span style="color:rgba(255,140,0,0.28);">
-      VITAL-SHIELD v2.0 | GHOST PRIVACY [ON] | P2P MESH [ACTIVE]
+      VITAL-SHIELD v2.0 | GHOST PRIVACY [ON] | P2P MESH
     </span>
     <span style="color:rgba(255,140,0,0.35);">
-      ⬡ SIMULATED BIOMETRIC — PRODUCTION: BLE WEARABLES + IoT
+      ⬡ SIMULATED BIOMETRIC — PRODUCTION: BLE WEARABLES
     </span>
     <span style="color:#ff9040;">
       PROTECTING 2,847 WORKERS
@@ -967,963 +1387,1057 @@ SCREEN 4 — VITAL-SHIELD
   </div>
 </div>
 
-<!-- FEEDBACK BUTTON -->
-<button id="feedback-btn"
-  style="position:fixed;bottom:18px;right:18px;z-index:900;
-  background:rgba(4,8,12,0.88);
+<!-- FEEDBACK -->
+<button style="position:fixed;bottom:18px;right:18px;
+  z-index:900;background:rgba(4,8,12,0.88);
   border:1px solid rgba(0,212,255,0.18);
   color:rgba(0,212,255,0.45);font-family:monospace;
   font-size:9px;letter-spacing:0.14em;
   padding:7px 14px;border-radius:2px;cursor:pointer;"
-  onclick="openFeedback()">◈ FEEDBACK</button>
+  onclick="openFB()">◈ FEEDBACK</button>
 
-<!-- FEEDBACK MODAL -->
-<div id="feedback-modal"
-  style="display:none;position:fixed;inset:0;z-index:950;
-  background:rgba(0,0,0,0.85);
+<div id="fb-modal"
+  style="display:none;position:fixed;inset:0;
+  z-index:950;background:rgba(0,0,0,0.85);
   align-items:center;justify-content:center;">
   <div class="panel" style="padding:28px;width:320px;">
-    <div style="font-size:13px;color:var(--cyan);
+    <div style="font-size:13px;color:var(--c);
       font-weight:500;letter-spacing:0.2em;
       margin-bottom:4px;">RATE AURA</div>
-    <div style="font-size:10px;color:rgba(255,255,255,0.32);
-      margin-bottom:18px;">
+    <div style="font-size:10px;
+      color:rgba(255,255,255,0.30);margin-bottom:18px;">
       Help us save more lives
     </div>
-    <div id="stars-row"
-      style="display:flex;gap:8px;
+    <div style="display:flex;gap:8px;
       justify-content:center;margin-bottom:16px;">
-      <span onclick="selectStar(1)" id="star-1"
+      <span onclick="setStar(1)" id="st1"
         style="font-size:24px;cursor:pointer;
         color:rgba(255,255,255,0.20);">★</span>
-      <span onclick="selectStar(2)" id="star-2"
+      <span onclick="setStar(2)" id="st2"
         style="font-size:24px;cursor:pointer;
         color:rgba(255,255,255,0.20);">★</span>
-      <span onclick="selectStar(3)" id="star-3"
+      <span onclick="setStar(3)" id="st3"
         style="font-size:24px;cursor:pointer;
         color:rgba(255,255,255,0.20);">★</span>
-      <span onclick="selectStar(4)" id="star-4"
+      <span onclick="setStar(4)" id="st4"
         style="font-size:24px;cursor:pointer;
         color:rgba(255,255,255,0.20);">★</span>
-      <span onclick="selectStar(5)" id="star-5"
+      <span onclick="setStar(5)" id="st5"
         style="font-size:24px;cursor:pointer;
         color:rgba(255,255,255,0.20);">★</span>
     </div>
-    <textarea id="fb-text"
+    <textarea id="fb-txt"
       placeholder="What would help AURA save more lives?"
       style="width:100%;height:80px;
       background:rgba(0,212,255,0.03);
       border:1px solid rgba(0,212,255,0.18);
       color:rgba(255,255,255,0.75);
       font-family:monospace;font-size:11px;
-      padding:8px;resize:none;border-radius:2px;
-      outline:none;"></textarea>
+      padding:8px;resize:none;
+      border-radius:2px;outline:none;"></textarea>
     <div style="display:flex;gap:8px;margin-top:12px;">
       <button class="btn" style="flex:1;"
-        onclick="submitFeedback()">SUBMIT</button>
-      <button class="btn btn-red" style="padding:8px 16px;"
-        onclick="closeFeedback()">CANCEL</button>
+        onclick="submitFB()">SUBMIT</button>
+      <button class="btn btn-r"
+        style="padding:8px 16px;"
+        onclick="closeFB()">CANCEL</button>
     </div>
   </div>
 </div>
 
 <!-- =====================================================
-ALL JAVASCRIPT
-====================================================== -->
+     COMPLETE JAVASCRIPT
+     ====================================================== -->
 <script>
 
-// ==================== DATA ====================
-
-const SENSOR = {
-  o2: 20.1, hr: 94, co: 5, density: 88,
-  lives: 1247, rescues: 23, safetyScore: 94,
-  threatLevel: 65,
-  workers: [
-    {id:'W-001',name:'Team Alpha', loc:'Zone A',    hr:88,  o2:20.4},
-    {id:'W-002',name:'Team Beta',  loc:'Flood NW',  hr:102, o2:19.8},
-    {id:'W-003',name:'Team Gamma', loc:'Fire East', hr:115, o2:19.2},
-    {id:'W-004',name:'Med Unit 1', loc:'Safe South',hr:76,  o2:21.0},
-    {id:'W-005',name:'Rescue R-7', loc:'Collapse',  hr:98,  o2:19.5},
-    {id:'W-006',name:'Coord Unit', loc:'Command',   hr:72,  o2:20.8}
+// ===== DATA =====
+const S = {
+  o2:20.1, hr:94, co:5, den:88,
+  lives:1247, rescues:23, safety:94,
+  threat:65,
+  workers:[
+    {id:'W-001',nm:'Team Alpha', hr:88, o2:20.4},
+    {id:'W-002',nm:'Team Beta',  hr:102,o2:19.8},
+    {id:'W-003',nm:'Team Gamma', hr:115,o2:19.2},
+    {id:'W-004',nm:'Med Unit 1', hr:76, o2:21.0},
+    {id:'W-005',nm:'Rescue R-7', hr:98, o2:19.5},
+    {id:'W-006',nm:'Coord Unit', hr:72, o2:20.8}
   ]
 };
+const spH = {o2:[],hr:[]};
+let uZone=null, uX=0, uY=0;
+let emgActive=false, simT=null;
+let fbStars=0, demoIdx=0, demoTimer=null;
+let victimQ=[];
 
-const ZONE_DB = {
-  flood:  {name:'Flood NW',   x:0.24, y:0.38, risk:'CRITICAL', color:'80,140,255'},
-  fire:   {name:'Fire East',  x:0.68, y:0.30, risk:'HIGH',     color:'255,80,0'},
-  safe:   {name:'Safe South', x:0.50, y:0.82, risk:'LOW',      color:'0,255,136'},
-  north:  {name:'Safe North', x:0.12, y:0.18, risk:'LOW',      color:'0,255,136'}
-};
+// ===== MOCK API / WEBHOOKS =====
+function mockAPI(endpoint, data) {
+  console.log(`[AURA-NETWORK] Sending to ${endpoint}:`, data);
+  const t = new Date().toTimeString().slice(0,8);
+  // Also log to command terminal if on that screen
+  if (window._cmd) {
+    addLine(`[NET] POST /${endpoint} - 200 OK`, 'rgba(0,255,136,0.6)');
+    addLine(`[NET] Payload: ${JSON.stringify(data).slice(0, 30)}...`, 'rgba(255,255,255,0.2)');
+  }
+  // Simulate beacon
+  if (navigator.sendBeacon) {
+    // In a real app: navigator.sendBeacon('/api/' + endpoint, JSON.stringify(data));
+  }
+}
 
-const sparkH = {o2:[], hr:[]};
-let userZone = null;
-let userX = 0, userY = 0;
-let emergencyActive = false;
-let simTimer = null;
-let selectedStars = 0;
-let citizenMapReady = false;
-let commandMapReady = false;
+// ===== SCREEN NAV =====
+function goTo(id) {
+  const loader = document.getElementById('loader');
+  const bar = document.getElementById('loader-progress');
+  const status = document.getElementById('loader-status');
+  if (loader) {
+    loader.style.display = 'flex';
+    if (bar) bar.style.width = '0%';
+    const steps = ['DECRYPTING MESH...', 'SYNCHRONIZING NODES...', 'AUTHORIZING ACCESS...'];
+    let step = 0;
+    const interval = setInterval(() => {
+      if (bar) bar.style.width = ((step + 1) * 33) + '%';
+      if (status) status.textContent = steps[step];
+      step++;
+      if (step >= 3) clearInterval(interval);
+    }, 200);
+  }
 
-// ==================== SCREEN SWITCHER ====================
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => {
-    s.classList.remove('visible');
-    setTimeout(() => {
-      if (s.id !== id) s.classList.remove('active');
-    }, 320);
-  });
   setTimeout(() => {
-    const t = document.getElementById(id);
-    if (!t) return;
-    t.classList.add('active');
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      t.classList.add('visible');
-    }));
-    if (id === 'screen-citizen') {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(s => {
+      s.classList.remove('visible');
       setTimeout(() => {
-        if (!window.citizenMapReady) {
-          buildCitizenMap();
-          window.citizenMapReady = true;
-        }
-        if (!document.getElementById('triage-chat').hasChildNodes()) {
-          triageMsg('aura', '[AURA] Ready. Enter your location above to begin navigation.');
-        }
-      }, 100);
-      setTimeout(() => addAlert('⚠ Flash flood expanding NW — avoid low ground', 'warn'), 2000);
-      setTimeout(() => addAlert('✓ Gate 3 relief camp open — 340/500 capacity', 'ok'), 6000);
+        if (s.id !== id) s.classList.remove('active');
+      }, 320);
+    });
+
+    setTimeout(() => {
+      if (loader) loader.style.display = 'none';
+      const t = document.getElementById(id);
+      if (!t) return;
+      t.classList.add('active');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          t.classList.add('visible');
+        });
+      });
+
+    // Init screen content
+    if (id === 'screen-citizen' && !window._cm) {
+      buildCitizenMap();
+      window._cm = true;
+      setTimeout(() => triageMsg('aura', '[AURA] Ready. Select your zone above to begin.'), 400);
+      setTimeout(() => addAlert('⚠ Flash flood expanding NW', 'warn'), 2500);
+      setTimeout(() => addAlert('✓ Gate 3 relief camp open', 'ok'), 7000);
     }
-    if (id === 'screen-command') {
+    if (id === 'screen-command' && !window._cmd) {
+      buildCommandMap();
+      buildZoneRows();
+      buildResRows();
+      window._cmd = true;
+      setTimeout(bootTerminal, 400);
+    }
+    if (id === 'screen-vitals' && !window._vt) {
+      buildOrb();
+      buildWorkerRows();
+      window._vt = true;
+    }
+    if (id === 'screen-field' && !window._fd) {
+      buildFieldMap();
+      window._fd = true;
+      setTimeout(() => fieldLog('[SYS] Field mode active. GPS acquiring...', 'sys'), 400);
       setTimeout(() => {
-        if (!window.commandMapReady) {
-          buildCommandMap();
-          window.commandMapReady = true;
-        }
-        typeLines([
-          {t:'[BOOT]  AURA Command v2.0 — online', c:'#00d4ff'},
-          {t:'[BOOT]  Sensor mesh: 8,420 nodes connected', c:'#00d4ff'},
-          {t:'[BOOT]  AI prediction engine: ONLINE', c:'#00ff88'},
-          {t:'[OK]    Type STATUS or press F1 for full report', c:'rgba(255,255,255,0.40)'}
-        ]);
-      }, 150);
-      setTimeout(() => execCmd('STATUS'), 3000);
+        const fs = document.getElementById('field-status');
+        const fsub = document.getElementById('field-sub');
+        const floc = document.getElementById('field-loc');
+        if (fs) fs.textContent = 'ZONE ALPHA — FLOOD SECTOR';
+        if (fsub) fsub.textContent = '82 victims reported · 6 rescue units active';
+        if (floc) floc.textContent = '● GPS LOCKED — FLOOD NW';
+        fieldLog('[GPS] Lock acquired — Flood NW sector', 'ok');
+      }, 1800);
     }
-    if (id === 'screen-vitals') {
-      setTimeout(() => {
-        const orb = document.getElementById('survival-orb');
-        if (orb && !orb.hasChildNodes()) buildOrb();
-        const wr = document.getElementById('worker-rows');
-        if (wr && !wr.hasChildNodes()) buildWorkerRows();
-      }, 100);
+    if (id === 'screen-demo') {
+      startDemo();
     }
-  }, 250);
+  }, 320);
 }
 
-// ==================== LANDING ====================
-
-function buildLandingGrid() {
-  const W = window.innerWidth, H = window.innerHeight;
-  const svgG = document.getElementById('landing-grid');
-  const svgD = document.getElementById('landing-dots');
-  let g = '', d = '';
-
+// ===== LANDING =====
+function buildLanding(){
+  const W=window.innerWidth, H=window.innerHeight;
+  let g='',d='';
   // Perspective grid
-  for (let i = 0; i < 18; i++) {
-    const t = i / 17;
-    const y = H * 0.42 + (H * 0.55) * Math.pow(t, 1.4);
-    g += `<line x1="0" y1="${y}" x2="${W}" y2="${y}"
-      stroke="rgba(0,212,255,${0.02 + t * 0.06})" stroke-width="0.6"/>`;
+  for(let i=0;i<18;i++){
+    const t=i/17;
+    const y=H*0.42+(H*0.55)*Math.pow(t,1.4);
+    g+=`<line x1="0" y1="${y}" x2="${W}" y2="${y}"
+      stroke="rgba(0,212,255,${0.02+t*0.06})"
+      stroke-width="0.6"/>`;
   }
-  const vx = W * 0.5;
-  for (let i = 0; i < 24; i++) {
-    const t = i / 23;
-    const bx = t * W;
-    const tx2 = vx + (bx - vx) * 0.12;
-    g += `<line x1="${tx2}" y1="${H*0.25}" x2="${bx}" y2="${H*0.95}"
-      stroke="rgba(0,212,255,${0.02 + Math.sin(t*Math.PI)*0.04})" stroke-width="0.5"/>`;
+  const vx=W*0.5;
+  for(let i=0;i<24;i++){
+    const t=i/23, bx=t*W;
+    const tx2=vx+(bx-vx)*0.12;
+    g+=`<line x1="${tx2}" y1="${H*0.25}"
+      x2="${bx}" y2="${H*0.95}"
+      stroke="rgba(0,212,255,${0.02+Math.sin(t*Math.PI)*0.04})"
+      stroke-width="0.5"/>`;
   }
-  for (let i = 0; i < 65; i++) {
-    const x = W*0.05 + Math.random()*W*0.90;
-    const y = H*0.35 + Math.random()*H*0.50;
-    g += `<rect x="${x}" y="${y}" width="${20+Math.random()*55}"
+  for(let i=0;i<65;i++){
+    const x=W*0.05+Math.random()*W*0.90;
+    const y=H*0.35+Math.random()*H*0.50;
+    g+=`<rect x="${x}" y="${y}"
+      width="${20+Math.random()*55}"
       height="${10+Math.random()*32}" rx="1"
-      fill="rgba(0,212,255,${0.010+Math.random()*0.030})"/>`;
+      fill="rgba(0,212,255,${0.01+Math.random()*0.03})"/>`;
   }
-
-  // Disaster zone glows
-  [[W*0.26,H*0.46,'0,100,255',W*0.12,H*0.10],
-   [W*0.67,H*0.32,'255,60,0',W*0.10,H*0.09],
-   [W*0.71,H*0.64,'255,140,0',W*0.09,H*0.08]
-  ].forEach(([cx,cy,col,rx,ry]) => {
-    g += `<defs><filter id="gf${col.slice(0,3)}">
-      <feGaussianBlur stdDeviation="18"/></filter></defs>`;
-    g += `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"
-      fill="rgba(${col},0.16)" filter="url(#gf${col.slice(0,3)})">
+  // Disaster glows
+  const dzs=[[W*0.26,H*0.46,'0,100,255'],[W*0.67,H*0.32,'255,60,0'],[W*0.71,H*0.64,'255,140,0']];
+  g+=`<defs>
+    <filter id="f1"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="f2"><feGaussianBlur stdDeviation="12"/></filter>
+  </defs>`;
+  dzs.forEach(([cx,cy,col])=>{
+    g+=`<ellipse cx="${cx}" cy="${cy}"
+      rx="${W*0.11}" ry="${H*0.09}"
+      fill="rgba(${col},0.16)" filter="url(#f1)">
       <animate attributeName="opacity"
-        values="0.8;0.35;0.8" dur="2.8s" repeatCount="indefinite"/>
-    </ellipse>`;
+        values="0.8;0.35;0.8" dur="2.8s"
+        repeatCount="indefinite"/></ellipse>`;
   });
-
-  svgG.innerHTML = `<svg width="100%" height="100%"
-    xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
-
+  const lgrid = document.getElementById('lgrid');
+  if(lgrid) lgrid.innerHTML=
+    `<svg width="100%" height="100%"
+      xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
   // Dots
-  for (let i = 0; i < 45; i++) {
-    const x = Math.random()*W, y = H*0.2+Math.random()*H*0.65;
-    const dur = 3+Math.random()*5;
-    const dx = (Math.random()-0.5)*28, dy = (Math.random()-0.5)*18;
-    d += `<circle cx="${x}" cy="${y}" r="2" fill="#00d4ff" opacity="0.50">
-      <animate attributeName="cx" values="${x};${x+dx};${x}"
+  for(let i=0;i<45;i++){
+    const x=Math.random()*W, y=H*0.2+Math.random()*H*0.65;
+    const dur=3+Math.random()*5;
+    const dx=(Math.random()-0.5)*28, dy=(Math.random()-0.5)*18;
+    d+=`<circle cx="${x}" cy="${y}" r="2"
+      fill="#00d4ff" opacity="0.50">
+      <animate attributeName="cx"
+        values="${x};${x+dx};${x}"
         dur="${dur}s" repeatCount="indefinite"/>
-      <animate attributeName="cy" values="${y};${y+dy};${y}"
-        dur="${dur}s" repeatCount="indefinite"/>
-    </circle>`;
-  }
-  for (let i = 0; i < 55; i++) {
-    const zones = [[W*0.26,H*0.46],[W*0.67,H*0.32],[W*0.71,H*0.64]];
-    const z = zones[i%3];
-    const x = z[0]+(Math.random()-0.5)*W*0.16;
-    const y = z[1]+(Math.random()-0.5)*H*0.12;
-    const dur = 1.2+Math.random()*0.9;
-    d += `<circle cx="${x}" cy="${y}" r="1.6" fill="#ff3a3a" opacity="0.45">
-      <animate attributeName="r" values="1.6;3.0;1.6"
-        dur="${dur}s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.45;0.15;0.45"
+      <animate attributeName="cy"
+        values="${y};${dy};${y}"
         dur="${dur}s" repeatCount="indefinite"/>
     </circle>`;
   }
-  for (let i = 0; i < 30; i++) {
-    const x = Math.random()<0.5 ? Math.random()*W*0.12 : W*0.88+Math.random()*W*0.12;
-    const y = Math.random()*H;
-    d += `<circle cx="${x}" cy="${y}" r="1.4"
-      fill="#00ff88" opacity="0.30"/>`;
-  }
-  svgD.innerHTML = `<svg width="100%" height="100%"
-    xmlns="http://www.w3.org/2000/svg">${d}</svg>`;
-}
-
-function countUp(id, target, ms) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.dataset.cu = 'y';
-  let v = 0;
-  const step = target / (ms/16);
-  const iv = setInterval(() => {
-    v = Math.min(v+step, target);
-    el.textContent = Math.floor(v).toLocaleString();
-    if (v >= target) { clearInterval(iv); delete el.dataset.cu; }
-  }, 16);
-}
-
-// ==================== CITIZEN MAP ====================
-
-function buildCitizenMap() {
-  const wrap = document.getElementById('citizen-map-wrap');
-  const svg = document.getElementById('citizen-map-svg');
-  const W = wrap.offsetWidth || window.innerWidth * 0.75;
-  const H = wrap.offsetHeight || window.innerHeight - 80;
-  window.MAP = { W, H };
-
-  let s = `<svg width="100%" height="100%"
-    viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <filter id="glow-lg">
-        <feGaussianBlur stdDeviation="20" result="b"/>
-        <feMerge><feMergeNode in="b"/>
-        <feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-      <filter id="glow-md">
-        <feGaussianBlur stdDeviation="12" result="b"/>
-        <feMerge><feMergeNode in="b"/>
-        <feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-    </defs>`;
-
-  // Streets
-  [0.08,0.16,0.26,0.38,0.50,0.62,0.72,0.80,0.88,0.94].forEach(t => {
-    s += `<line x1="0" y1="${H*t}" x2="${W}" y2="${H*t}"
-      stroke="rgba(255,255,255,0.052)" stroke-width="1"/>`;
-  });
-  [0.06,0.14,0.22,0.32,0.42,0.52,0.62,0.70,0.78,0.86,0.92,0.96].forEach(t => {
-    s += `<line x1="${W*t}" y1="0" x2="${W*t}" y2="${H}"
-      stroke="rgba(255,255,255,0.052)" stroke-width="1"/>`;
-  });
-
-  // City blocks
-  for (let i = 0; i < 55; i++) {
-    const x = W*(0.04+Math.random()*0.92);
-    const y = H*(0.04+Math.random()*0.90);
-    s += `<rect x="${x}" y="${y}"
-      width="${W*(0.02+Math.random()*0.05)}"
-      height="${H*(0.015+Math.random()*0.04)}"
-      fill="rgba(255,255,255,0.020)" rx="1"/>`;
-  }
-
-  // Disaster zones
-  const DZ = [
-    {x:W*0.24,y:H*0.38,rx:W*0.13,ry:H*0.11,col:'0,100,255',lbl:'FLOOD NW'},
-    {x:W*0.68,y:H*0.30,rx:W*0.11,ry:H*0.09,col:'255,60,0', lbl:'FIRE EAST'},
-    {x:W*0.70,y:H*0.66,rx:W*0.09,ry:H*0.08,col:'255,140,0',lbl:'COLLAPSE SE'}
-  ];
-  window.MAP.DZ = DZ;
-
-  DZ.forEach(z => {
-    s += `<ellipse cx="${z.x}" cy="${z.y}"
-      rx="${z.rx}" ry="${z.ry}"
-      fill="rgba(${z.col},0.18)" filter="url(#glow-lg)">
+  for(let i=0;i<55;i++){
+    const z=dzs[i%3];
+    const x=z[0]+(Math.random()-0.5)*W*0.16;
+    const y=z[1]+(Math.random()-0.5)*H*0.12;
+    const dur=1.2+Math.random()*0.9;
+    d+=`<circle cx="${x}" cy="${y}" r="1.6"
+      fill="#ff3a3a" opacity="0.45">
+      <animate attributeName="r"
+        values="1.6;3.0;1.6"
+        dur="${dur}s" repeatCount="indefinite"/>
       <animate attributeName="opacity"
-        values="0.7;0.30;0.7" dur="3s" repeatCount="indefinite"/>
-    </ellipse>`;
-    s += `<ellipse cx="${z.x}" cy="${z.y}"
-      rx="${z.rx*0.5}" ry="${z.ry*0.5}"
-      fill="rgba(${z.col},0.26)" filter="url(#glow-md)"/>`;
-    s += `<rect x="${z.x-52}" y="${z.y-z.ry-26}" width="104" height="20" rx="2"
-      fill="rgba(0,0,0,0.78)"/>`;
-    s += `<text x="${z.x}" y="${z.y-z.ry-12}"
-      text-anchor="middle" fill="rgba(${z.col},0.90)"
-      font-size="10" font-family="monospace"
-      letter-spacing="2">${z.lbl}</text>`;
-  });
-
-  // Safe zones
-  [[W*0.10,H*0.18],[W*0.50,H*0.86],[W*0.90,H*0.50]].forEach(([x,y],i) => {
-    s += `<ellipse cx="${x}" cy="${y}"
-      rx="${W*0.07}" ry="${H*0.055}"
-      fill="rgba(0,255,100,0.10)" filter="url(#glow-md)"/>`;
-    const lbms = ['SAFE NORTH','SAFE SOUTH','SAFE EAST'];
-    s += `<text x="${x}" y="${y+5}" text-anchor="middle"
-      fill="rgba(0,255,136,0.62)" font-size="9"
-      font-family="monospace" letter-spacing="1">${lbms[i]}</text>`;
-  });
-
-  // Exits
-  const EX = [
-    [W*0.10,H*0.08,'G1'],[W*0.50,H*0.04,'G2'],[W*0.90,H*0.08,'G3'],
-    [W*0.96,H*0.50,'G4'],[W*0.90,H*0.90,'G5'],[W*0.50,H*0.96,'G6'],
-    [W*0.10,H*0.90,'G7'],[W*0.04,H*0.50,'G8']
-  ];
-  window.MAP.EX = EX;
-  EX.forEach(([x,y,n]) => {
-    s += `<rect x="${x-13}" y="${y-8}" width="26" height="16" rx="2"
-      fill="rgba(0,255,136,0.14)"
-      stroke="rgba(0,255,136,0.44)" stroke-width="1"/>`;
-    s += `<text x="${x}" y="${y+4}" text-anchor="middle"
-      fill="rgba(0,255,136,0.78)"
-      font-size="8" font-family="monospace">${n}</text>`;
-  });
-
-  // Rescue dots (22)
-  for (let i = 0; i < 22; i++) {
-    const x = W*(0.1+Math.random()*0.8);
-    const y = H*(0.1+Math.random()*0.8);
-    const dur = 4+Math.random()*6;
-    const tx = x+(Math.random()-0.5)*W*0.08;
-    const ty = y+(Math.random()-0.5)*H*0.06;
-    s += `<circle cx="${x}" cy="${y}" r="3.2" fill="#00d4ff" opacity="0.60">
-      <animate attributeName="cx" values="${x};${tx};${x}"
-        dur="${dur}s" repeatCount="indefinite"/>
-      <animate attributeName="cy" values="${y};${ty};${y}"
-        dur="${dur}s" repeatCount="indefinite"/>
-    </circle>`;
-    s += `<circle cx="${x}" cy="${y}" r="3" fill="none"
-      stroke="#00d4ff" stroke-width="1" opacity="0">
-      <animate attributeName="cx" values="${x};${tx};${x}"
-        dur="${dur}s" repeatCount="indefinite"/>
-      <animate attributeName="cy" values="${y};${ty};${y}"
-        dur="${dur}s" repeatCount="indefinite"/>
-      <animate attributeName="r" values="3;10;3"
-        dur="${dur}s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.3;0;0.3"
+        values="0.45;0.15;0.45"
         dur="${dur}s" repeatCount="indefinite"/>
     </circle>`;
   }
+  const ldots = document.getElementById('ldots');
+  if(ldots) ldots.innerHTML=
+    `<svg width="100%" height="100%"
+      xmlns="http://www.w3.org/2000/svg">${d}</svg>`;
+  buildNeuralNetwork();
+}
 
-  // User marker (hidden)
-  s += `<g id="umark" opacity="0">
-    <circle id="umark-ring" cx="${W/2}" cy="${H/2}" r="12"
-      fill="none" stroke="#00d4ff" stroke-width="1.5" opacity="0.4">
-      <animate attributeName="r" values="8;18;8"
-        dur="1.8s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.4;0;0.4"
-        dur="1.8s" repeatCount="indefinite"/>
-    </circle>
-    <circle id="umark-dot" cx="${W/2}" cy="${H/2}"
-      r="5" fill="#00d4ff"/>
-    <text id="umark-lbl" x="${W/2}" y="${H/2-18}"
-      text-anchor="middle" fill="#00d4ff"
-      font-size="9" font-family="monospace">YOU</text>
-  </g>`;
+function buildNeuralNetwork() {
+  const svg = document.getElementById('lneural');
+  if (!svg) return;
+  const W = window.innerWidth, H = window.innerHeight;
+  const nodes = [];
+  for (let i = 0; i < 40; i++) {
+    nodes.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5 });
+  }
 
-  // Route path
-  s += `<path id="route-path" d="" fill="none"
-    stroke="#00ff88" stroke-width="3.5"
-    stroke-dasharray="12 6" stroke-linecap="round"
-    stroke-dashoffset="0" opacity="0">
-    <animate attributeName="stroke-dashoffset"
-      from="0" to="-18" dur="0.8s" repeatCount="indefinite"/>
-  </path>`;
+  let h = '';
+  // Lines
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const d = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+      if (d < 180) {
+        h += `<line x1="${nodes[i].x}" y1="${nodes[i].y}" x2="${nodes[j].x}" y2="${nodes[j].y}" 
+          stroke="rgba(0,212,255,${0.1 - d / 1800})" stroke-width="0.5" />`;
+      }
+    }
+  }
+  // Points
+  nodes.forEach(n => {
+    h += `<circle cx="${n.x}" cy="${n.y}" r="2" fill="rgba(0,212,255,0.4)">
+      <animate attributeName="opacity" values="0.2;0.6;0.2" dur="${2 + Math.random() * 2}s" repeatCount="indefinite" />
+    </circle>`;
+  });
+  svg.innerHTML = h;
+}
 
+function countUp(id,target,ms){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.dataset.cu='y';
+  let v=0;
+  const step=target/(ms/16);
+  const iv=setInterval(()=>{
+    v=Math.min(v+step,target);
+    el.textContent=Math.floor(v).toLocaleString();
+    if(v>=target){clearInterval(iv);delete el.dataset.cu;}
+  },16);
+}
+
+// ===== MAP BUILDER HELPER =====
+function makeMapSVG(containerId, svgId, onDone) {
+  const wrap = document.getElementById(containerId);
+  const svg = document.getElementById(svgId);
+  if (!wrap || !svg) return;
+  const W = wrap.offsetWidth || window.innerWidth * 0.65;
+  const H = wrap.offsetHeight || (window.innerHeight - 80);
+  window['_M_' + svgId] = { W, H };
+
+  let s = `<svg width="100%" height="100%" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="gb${svgId}"><feGaussianBlur stdDeviation="20" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="gm${svgId}"><feGaussianBlur stdDeviation="12" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <pattern id="grid${svgId}" width="40" height="40" patternUnits="userSpaceOnUse">
+        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,212,255,0.03)" stroke-width="0.5"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#grid${svgId})" />`;
+
+  // Major roads
+  [0.2, 0.4, 0.6, 0.8].forEach(t => {
+    s += `<line x1="0" y1="${H * t}" x2="${W}" y2="${H * t}" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>`;
+    s += `<line x1="${W * t}" y1="0" x2="${W * t}" y2="${H}" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>`;
+  });
+
+  // Minor streets
+  for (let i = 0; i < 15; i++) {
+    const ty = Math.random() * H;
+    const tx = Math.random() * W;
+    s += `<line x1="0" y1="${ty}" x2="${W}" y2="${ty}" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>`;
+    s += `<line x1="${tx}" y1="0" x2="${tx}" y2="${H}" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>`;
+  }
+
+  // Building blocks
+  for (let i = 0; i < 80; i++) {
+    const x = Math.random() * W;
+    const y = Math.random() * H;
+    const bw = 15 + Math.random() * 40;
+    const bh = 15 + Math.random() * 40;
+    // Don't overlap major roads too much? Nah, looks like density
+    s += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="1" fill="rgba(0,212,255,${0.01 + Math.random() * 0.02})" stroke="rgba(0,212,255,0.05)" stroke-width="0.5"/>`;
+    if (Math.random() > 0.8) {
+      s += `<rect x="${x + 2}" y="${y + 2}" width="${bw - 4}" height="${bh - 4}" fill="rgba(0,212,255,0.02)"/>`;
+    }
+  }
+
+  s = onDone(s, W, H);
   s += '</svg>';
   svg.innerHTML = s;
+  return { W, H };
 }
 
-// ==================== CITIZEN LOGIC ====================
-
-function setLocation(type) {
-  const z = ZONE_DB[type] || ZONE_DB.safe;
-  const M = window.MAP;
-  if (!M) return;
-  userZone = type;
-  userX = M.W * z.x;
-  userY = M.H * z.y;
-
-  const um = document.getElementById('umark');
-  const ud = document.getElementById('umark-dot');
-  const ur = document.getElementById('umark-ring');
-  const ul = document.getElementById('umark-lbl');
-  if (um) {
-    um.setAttribute('opacity','1');
-    [ud,ur].forEach(el => {
-      if(el) {
-        el.setAttribute('cx', userX);
-        el.setAttribute('cy', userY);
-      }
+// ===== CITIZEN MAP =====
+function buildCitizenMap(){
+  makeMapSVG('citizen-map-wrap','citizen-map-svg',(s,W,H)=>{
+    window.CMAP={W,H};
+    // Disaster zones
+    const DZ=[
+      {x:W*0.24,y:H*0.38,rx:W*0.13,ry:H*0.11,
+        col:'0,100,255',lbl:'FLOOD NW'},
+      {x:W*0.68,y:H*0.30,rx:W*0.11,ry:H*0.09,
+        col:'255,60,0',lbl:'FIRE EAST'},
+      {x:W*0.70,y:H*0.66,rx:W*0.09,ry:H*0.08,
+        col:'255,140,0',lbl:'COLLAPSE SE'}
+    ];
+    window.CMAP.DZ=DZ;
+    DZ.forEach(z=>{
+      s+=`<ellipse cx="${z.x}" cy="${z.y}"
+        rx="${z.rx}" ry="${z.ry}"
+        fill="rgba(${z.col},0.18)"
+        filter="url(#gbcitizen-map-svg)">
+        <animate attributeName="opacity"
+          values="0.7;0.30;0.7" dur="3s"
+          repeatCount="indefinite"/></ellipse>`;
+      s+=`<rect x="${z.x-52}" y="${z.y-z.ry-26}"
+        width="104" height="20" rx="2"
+        fill="rgba(0,0,0,0.78)"/>`;
+      s+=`<text x="${z.x}" y="${z.y-z.ry-12}"
+        text-anchor="middle"
+        fill="rgba(${z.col},0.90)"
+        font-size="10" font-family="monospace"
+        letter-spacing="2">${z.lbl}</text>`;
     });
-    if (ul) {
-      ul.setAttribute('x', userX);
-      ul.setAttribute('y', userY-18);
+    // Safe zones
+    [[W*0.10,H*0.18,'SAFE NORTH'],
+     [W*0.50,H*0.86,'SAFE SOUTH'],
+     [W*0.90,H*0.50,'SAFE EAST']].forEach(([x,y,n])=>{
+      s+=`<ellipse cx="${x}" cy="${y}"
+        rx="${W*0.07}" ry="${H*0.055}"
+        fill="rgba(0,255,100,0.10)"
+        filter="url(#gmcitizen-map-svg)"/>`;
+      s+=`<text x="${x}" y="${y+5}"
+        text-anchor="middle"
+        fill="rgba(0,255,136,0.62)"
+        font-size="9" font-family="monospace">${n}</text>`;
+    });
+    // Exits
+    const EX=[
+      [W*0.10,H*0.08,'G1'],[W*0.50,H*0.04,'G2'],
+      [W*0.90,H*0.08,'G3'],[W*0.96,H*0.50,'G4'],
+      [W*0.90,H*0.90,'G5'],[W*0.50,H*0.96,'G6'],
+      [W*0.10,H*0.90,'G7'],[W*0.04,H*0.50,'G8']
+    ];
+    window.CMAP.EX=EX;
+    EX.forEach(([x,y,n])=>{
+      s+=`<rect x="${x-13}" y="${y-8}"
+        width="26" height="16" rx="2"
+        fill="rgba(0,255,136,0.14)"
+        stroke="rgba(0,255,136,0.44)"
+        stroke-width="1"/>`;
+      s+=`<text x="${x}" y="${y+4}"
+        text-anchor="middle"
+        fill="rgba(0,255,136,0.78)"
+        font-size="8" font-family="monospace">${n}</text>`;
+    });
+    // Rescue dots
+    for(let i=0;i<22;i++){
+      const x=W*(0.1+Math.random()*0.8);
+      const y=H*(0.1+Math.random()*0.8);
+      const dur=4+Math.random()*6;
+      const tx=x+(Math.random()-0.5)*W*0.08;
+      const ty=y+(Math.random()-0.5)*H*0.06;
+      s+=`<circle cx="${x}" cy="${y}" r="3.2"
+        fill="#00d4ff" opacity="0.60">
+        <animate attributeName="cx"
+          values="${x};${tx};${x}"
+          dur="${dur}s" repeatCount="indefinite"/>
+        <animate attributeName="cy"
+          values="${y};${ty};${y}"
+          dur="${dur}s" repeatCount="indefinite"/>
+      </circle>`;
     }
-  }
+    // User marker
+    s+=`<g id="umark" opacity="0">
+      <circle id="ur" cx="${W/2}" cy="${H/2}" r="12"
+        fill="none" stroke="#00d4ff"
+        stroke-width="1.5" opacity="0.4">
+        <animate attributeName="r"
+          values="8;18;8" dur="1.8s"
+          repeatCount="indefinite"/>
+        <animate attributeName="opacity"
+          values="0.4;0;0.4" dur="1.8s"
+          repeatCount="indefinite"/>
+      </circle>
+      <circle id="ud" cx="${W/2}" cy="${H/2}"
+        r="5" fill="#00d4ff"/>
+      <text id="ul" x="${W/2}" y="${H/2-18}"
+        text-anchor="middle" fill="#00d4ff"
+        font-size="9" font-family="monospace">YOU</text>
+    </g>`;
+    // Route
+    s+=`<path id="rpath" d="" fill="none"
+      stroke="#00ff88" stroke-width="3.5"
+      stroke-dasharray="12 6"
+      stroke-linecap="round" opacity="0">
+      <animate attributeName="stroke-dashoffset"
+        from="0" to="-18" dur="0.8s"
+        repeatCount="indefinite"/>
+    </path>`;
+    return s;
+  });
+}
 
-  const riskColor = z.risk==='CRITICAL'?'#ff3a3a':
+// ===== CITIZEN LOGIC =====
+const ZDATA={
+  flood:{nm:'Flood NW',x:0.24,y:0.38,risk:'CRITICAL',crowd:94,o2:19.2},
+  fire: {nm:'Fire East',x:0.68,y:0.30,risk:'HIGH',crowd:81,o2:19.8},
+  safe: {nm:'Safe South',x:0.50,y:0.86,risk:'LOW',crowd:28,o2:21.0}
+};
+function setLoc(type){
+  const z=ZDATA[type]||ZDATA.safe;
+  const M=window.CMAP; if(!M) return;
+  uZone=type; uX=M.W*z.x; uY=M.H*z.y;
+  const um=document.getElementById('umark');
+  const ud=document.getElementById('ud');
+  const ur=document.getElementById('ur');
+  const ul=document.getElementById('ul');
+  if(um){ um.setAttribute('opacity','1'); }
+  if(ud){ ud.setAttribute('cx',uX); ud.setAttribute('cy',uY); }
+  if(ur){ ur.setAttribute('cx',uX); ur.setAttribute('cy',uY); }
+  if(ul){ ul.setAttribute('x',uX); ul.setAttribute('y',uY-18); }
+  const rc=z.risk==='CRITICAL'?'#ff3a3a':
     z.risk==='HIGH'?'#ffaa00':'#00ff88';
-  const lr = document.getElementById('loc-result');
-  if (lr) {
-    lr.style.display = 'block';
-    lr.innerHTML = `
+  const lr=document.getElementById('loc-result');
+  if(lr){
+    lr.style.display='block';
+    lr.innerHTML=`
       <div style="font-size:13px;font-weight:500;
-        color:var(--cyan);margin-bottom:4px;">
-        YOU ARE IN: ${z.name.toUpperCase()}
-      </div>
-      <div style="font-size:10px;color:${riskColor};
+        color:var(--c);margin-bottom:4px;">
+        YOU ARE IN: ${z.nm.toUpperCase()}</div>
+      <div style="font-size:10px;color:${rc};
         margin-bottom:3px;letter-spacing:0.10em;">
-        RISK: ${z.risk}
-      </div>
-      <div style="font-size:10px;color:rgba(255,255,255,0.42);">
+        RISK: ${z.risk} · CROWD: ${z.crowd}%</div>
+      <div style="font-size:10px;
+        color:rgba(255,255,255,0.40);">
         ${z.risk==='CRITICAL'?
-          '⚠ HIGH DANGER — navigate to exit immediately':
-          z.risk==='HIGH'?
-          'ELEVATED — stay alert':
-          'Area is safe — proceed normally'}
-      </div>`;
+          '⚠ DANGER — tap NEAREST EXIT immediately':
+          z.risk==='HIGH'?'ELEVATED — stay alert':
+          'Area is safe'}</div>`;
   }
-
-  const np = document.getElementById('nav-panel');
-  if (np) np.style.opacity = '1';
-
-  triageMsg('aura',
-    `Located in ${z.name}. Risk: ${z.risk}. ` +
-    (z.risk==='CRITICAL'?
-      'URGENT: Tap NEAREST SAFE EXIT now.':
-      'Navigation options unlocked above.'));
+  const np=document.getElementById('nav-panel');
+  if(np) np.style.opacity='1';
+  triageMsg('aura',`Located in ${z.nm}. Risk: ${z.risk}. `+
+    (z.risk==='CRITICAL'?'URGENT — tap NEAREST SAFE EXIT now.':
+    'Navigation ready.'));
 }
-
-function locateFromInput() {
-  const v = (document.getElementById('loc-input').value||'').toLowerCase().trim();
-  if (!v) return;
-  const map = {flood:['flood','nw','north'],fire:['fire','east'],safe:['safe','south']};
-  let found = 'safe';
-  for (const [k,kws] of Object.entries(map)) {
-    if (kws.some(w => v.includes(w))) { found=k; break; }
+function locFromInput(){
+  const v=(document.getElementById('loc-input').value||'')
+    .toLowerCase().trim();
+  if(!v) return;
+  const m={flood:['flood','nw'],fire:['fire','east'],safe:['safe','south']};
+  let f='safe';
+  for(const [k,ws] of Object.entries(m)){
+    if(ws.some(w=>v.includes(w))){f=k;break;}
   }
-  setLocation(found);
-  document.getElementById('loc-input').value = '';
+  setLoc(f);
+  document.getElementById('loc-input').value='';
 }
-
-function navigateTo(type) {
-  if (!userZone) {
-    triageMsg('aura','Please select your location first.');
-    return;
+function navTo(type){
+  if(!uZone){
+    triageMsg('aura','Please select your location first.');return;
   }
-  const M = window.MAP;
-  if (!M) return;
-
-  let destX, destY, color, label, time;
-
-  if (type==='exit') {
-    let minD = Infinity;
-    M.EX.forEach(([x,y,n]) => {
-      const d = Math.hypot(x-userX, y-userY);
-      if (d<minD) { minD=d; destX=x; destY=y; label=n+' (NEAREST EXIT)'; }
+  const M=window.CMAP; if(!M) return;
+  let dX,dY,col,lbl,time;
+  if(type==='exit'){
+    let md=Infinity;
+    M.EX.forEach(([x,y,n])=>{
+      const d=Math.hypot(x-uX,y-uY);
+      if(d<md){md=d;dX=x;dY=y;lbl=n+' (NEAREST EXIT)';}
     });
-    color='#00ff88'; time=Math.max(1,Math.round(Math.hypot(destX-userX,destY-userY)/85));
-  } else if (type==='medical') {
-    destX=M.W*0.50; destY=M.H*0.86;
-    label='Safe South — Medical Point';
-    color='var(--cyan)'; time=3;
+    col='#00ff88';time=Math.max(1,Math.round(
+      Math.hypot(dX-uX,dY-uY)/85));
+  } else if(type==='medical'){
+    dX=M.W*0.50;dY=M.H*0.86;
+    lbl='Safe South — Medical';col='var(--c)';time=3;
   } else {
-    destX=M.W*0.10; destY=M.H*0.18;
-    label='Safe North — Shelter';
-    color='var(--amber)'; time=4;
+    dX=M.W*0.10;dY=M.H*0.18;
+    lbl='Safe North — Shelter';col='var(--a)';time=4;
   }
-
-  if (!destX) return;
-
-  const rp = document.getElementById('route-path');
-  if (rp) {
-    const mx=(userX+destX)/2+(Math.random()-0.5)*55;
-    const my=(userY+destY)/2+(Math.random()-0.5)*35;
+  if(!dX) return;
+  const rp=document.getElementById('rpath');
+  if(rp){
+    const mx=(uX+dX)/2+(Math.random()-0.5)*55;
+    const my=(uY+dY)/2+(Math.random()-0.5)*35;
     rp.setAttribute('d',
-      `M${userX},${userY} Q${mx},${my} ${destX},${destY}`);
-    rp.setAttribute('stroke', color);
-    rp.style.opacity = '0.85';
+      `M${uX},${uY} Q${mx},${my} ${dX},${dY}`);
+    rp.setAttribute('stroke',col);
+    rp.style.opacity='0.85';
   }
-
-  const ri = document.getElementById('route-info');
-  if (ri) {
+  const ri=document.getElementById('route-info');
+  if(ri){
     ri.style.display='block';
-    ri.style.cssText += `;border-left:3px solid ${color};
+    ri.style.cssText+=`;border-left:3px solid ${col};
       background:rgba(0,0,0,0.45);padding:8px 10px;`;
-    ri.innerHTML=`<div style="font-size:11px;color:${color};">
-      ROUTE ACTIVE → ${label}</div>
-      <div style="font-size:10px;color:rgba(255,255,255,0.42);
-      margin-top:2px;">Walk ~${time} min · Avoids high-density zones</div>`;
+    ri.innerHTML=`<div style="font-size:11px;color:${col};">
+      ROUTE → ${lbl}</div>
+      <div style="font-size:10px;
+        color:rgba(255,255,255,0.40);margin-top:2px;">
+        ~${time} min · avoids high-density zones</div>`;
   }
-
-  triageMsg('aura',
-    `Route to ${label} activated. ~${time} min walk. Follow the path on the map.`);
+  triageMsg('aura',`Route to ${lbl}. ~${time} min.`);
 }
-
-function addAlert(msg, type) {
-  const c = document.getElementById('citizen-alerts');
-  if (!c) return;
-  const d = document.createElement('div');
-  const col = type==='warn'?'#ffaa00':type==='ok'?'#00ff88':'var(--cyan)';
-  d.style.cssText = `background:rgba(0,0,0,0.88);
+function addAlert(msg,type){
+  const c=document.getElementById('citizen-alerts');
+  if(!c) return;
+  const d=document.createElement('div');
+  const col=type==='warn'?'#ffaa00':type==='ok'?'#00ff88':'var(--c)';
+  d.style.cssText=`background:rgba(0,0,0,0.88);
     border-left:3px solid ${col};border-radius:2px;
     padding:8px 12px;font-size:10px;color:${col};
     letter-spacing:0.08em;line-height:1.5;
-    animation:fadeUp 0.3s ease forwards;pointer-events:none;`;
-  d.textContent = msg;
+    animation:fadeUp 0.3s ease forwards;`;
+  d.textContent=msg;
   c.appendChild(d);
-  setTimeout(() => {
+  setTimeout(()=>{
     d.style.transition='opacity 300ms';
     d.style.opacity='0';
     setTimeout(()=>d.remove(),300);
   },5000);
 }
-
-function triageMsg(role, text) {
-  const chat = document.getElementById('triage-chat');
-  if (!chat) return;
-  const d = document.createElement('div');
-  d.style.cssText = `color:${role==='aura'?
-    'rgba(0,212,255,0.82)':'rgba(255,255,255,0.52)'};
-    padding:2px 0;font-size:10px;line-height:1.8;white-space:pre-wrap;`;
-  d.textContent = (role==='aura'?'[AURA] ':'[YOU] ') + text;
+function triageMsg(role,text){
+  const chat=document.getElementById('triage-chat');
+  if(!chat) return;
+  const d=document.createElement('div');
+  d.style.cssText=`color:${role==='aura'?
+    'rgba(0,212,255,0.82)':
+    'rgba(255,255,255,0.52)'};
+    padding:2px 0;font-size:10px;
+    line-height:1.8;white-space:pre-wrap;`;
+  d.textContent=(role==='aura'?'[AURA] ':'[YOU] ')+text;
   chat.appendChild(d);
-  chat.scrollTop = chat.scrollHeight;
+  chat.scrollTop=chat.scrollHeight;
 }
-
-function sendTriage(msg) {
-  if (!msg.trim()) return;
-  triageMsg('user', msg);
-  const m = msg.toLowerCase();
-  let r = '';
-  if (m.includes('chest')||m.includes('heart')||m.includes('cardiac'))
-    r='[ASSESS] Possible cardiac event.\n[ACTION] Sit still. Loosen clothing. Do not exert.\n[PRIORITY] CRITICAL — medical unit dispatched.\n[ETA] 6 min';
-  else if (m.includes('breath')||m.includes('oxygen'))
-    r='[ASSESS] Respiratory distress.\n[ACTION] Move to open area. Breathe slowly.\n[COT] O2 in your zone: '+SENSOR.o2.toFixed(1)+'%';
-  else if (m.includes('bleed')||m.includes('injur')||m.includes('wound'))
-    r='[ASSESS] Physical injury.\n[ACTION] Apply firm pressure. Do not remove cloth.\n[PRIORITY] HIGH — first responder alerted.';
-  else if (m.includes('trap')||m.includes('stuck'))
-    r='[ASSESS] Entrapment.\n[ACTION] STAY STILL. Make noise every 3 min.\n[PRIORITY] CRITICAL — rescue rerouted to you.';
-  else if (m.includes('safe')||m.includes('ok')||m.includes('fine'))
-    r='[STATUS] Marked as safe on network.\n[NEXT] Proceed to Safe South collection point.\n[INFO] Capacity: 340/500.';
+function sendTriage(msg){
+  if(!msg.trim()) return;
+  triageMsg('user',msg);
+  const m=msg.toLowerCase();
+  let r='';
+  if(m.includes('chest')||m.includes('heart'))
+    r='[ASSESS] Cardiac event possible.\n[ACTION] Sit still. Loosen clothing.\n[PRIORITY] CRITICAL — unit dispatched. ETA: 6 min';
+  else if(m.includes('breath')||m.includes('oxygen'))
+    r='[ASSESS] Respiratory distress.\n[ACTION] Move to open area. Breathe slowly.\n[O2 READING] '+S.o2.toFixed(1)+'% in your zone';
+  else if(m.includes('bleed')||m.includes('injur'))
+    r='[ASSESS] Physical injury.\n[ACTION] Apply firm pressure. Do not remove.\n[PRIORITY] HIGH — responder alerted';
+  else if(m.includes('trap')||m.includes('stuck'))
+    r='[ASSESS] Entrapment.\n[ACTION] STAY STILL. Noise every 3 min.\n[PRIORITY] CRITICAL — rescue rerouted';
+  else if(m.includes('safe')||m.includes('ok'))
+    r='[STATUS] Marked safe on network.\n[NEXT] Proceed to Safe South when ready.';
   else
-    r='[AURA] Processing...\n[COT] Cross-referencing zone data.\n[OK] Stay where you are unless in immediate danger.';
-  setTimeout(()=>triageMsg('aura',r), 480);
+    r='[AURA] Processing...\n[COT] Cross-referencing zone data.\n[OK] Stay put unless in immediate danger.';
+  setTimeout(()=>triageMsg('aura',r),500);
+}
+function sendTriageBtn(){
+  const i=document.getElementById('triage-inp');
+  if(i&&i.value.trim()){sendTriage(i.value);i.value='';}
+}
+function showReunion(){
+  const rp=document.getElementById('reunion-panel');
+  if(rp) rp.style.display=rp.style.display==='none'?'block':'none';
+}
+function runReunion(){
+  const nm=document.getElementById('r-name').value.trim()||'Unknown';
+  const rr=document.getElementById('reunion-result');
+  if(!rr) return;
+  rr.style.display='block';
+  rr.innerHTML=`<span style="color:var(--c);">
+    [REUNION AI] Scanning 1,247 records...</span>`;
+  setTimeout(()=>{
+    rr.innerHTML=`
+      <div style="border-left:3px solid #ffaa00;
+        padding:6px 8px;
+        background:rgba(255,170,0,0.05);
+        margin-bottom:6px;">
+        <div style="color:#ffaa00;font-size:11px;
+          font-weight:500;">
+          POSSIBLE MATCH — 78% confidence</div>
+        <div style="color:rgba(255,255,255,0.48);
+          margin-top:3px;font-size:10px;">
+          ${nm} · Safe South collection point</div>
+      </div>
+      <div style="border-left:3px solid
+        rgba(255,255,255,0.14);padding:6px 8px;">
+        <div style="color:rgba(255,255,255,0.38);
+          font-size:10px;">
+          LOW MATCH — 28% · Fire East medical</div>
+      </div>`;
+    triageMsg('aura',
+      `[REUNION] 2 matches for ${nm}. Check panel above.`);
+  },1800);
 }
 
-function sendTriageBtn() {
-  const i = document.getElementById('triage-input');
-  if (i&&i.value.trim()) { sendTriage(i.value); i.value=''; }
-}
-
-// ==================== COMMAND MAP ====================
-
-function buildCommandMap() {
-  const wrap = document.getElementById('cmd-map-wrap');
-  const svg = document.getElementById('cmd-map-svg');
-  const W = wrap.offsetWidth || window.innerWidth * 0.75;
-  const H = wrap.offsetHeight || window.innerHeight - 80;
-
-  let s = `<svg width="100%" height="100%"
-    viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <filter id="cg-lg"><feGaussianBlur stdDeviation="22"/></filter>
-      <filter id="cg-md"><feGaussianBlur stdDeviation="13"/></filter>
-    </defs>`;
-
-  // Grid
-  [0.08,0.16,0.26,0.38,0.50,0.62,0.72,0.80,0.88].forEach(t=>{
-    s+=`<line x1="0" y1="${H*t}" x2="${W}" y2="${H*t}"
-      stroke="rgba(0,212,255,0.065)" stroke-width="1"/>`;
-  });
-  [0.06,0.14,0.22,0.32,0.44,0.56,0.66,0.76,0.86,0.94].forEach(t=>{
-    s+=`<line x1="${W*t}" y1="0" x2="${W*t}" y2="${H}"
-      stroke="rgba(0,212,255,0.065)" stroke-width="1"/>`;
-  });
-
-  // Blocks
-  for (let i=0;i<55;i++) {
-    const x=W*(0.04+Math.random()*0.92), y=H*(0.04+Math.random()*0.90);
-    s+=`<rect x="${x}" y="${y}"
-      width="${W*(0.02+Math.random()*0.05)}"
-      height="${H*(0.015+Math.random()*0.04)}"
-      fill="rgba(0,212,255,0.018)" rx="1"/>`;
-  }
-
-  // Disaster zones with danger rings
-  const DZ=[
-    {x:W*0.24,y:H*0.38,rx:W*0.14,ry:H*0.12,col:'0,100,255',
-      lbl:'FLOOD NW',aff:'847 AFFECTED',sev:'CRITICAL'},
-    {x:W*0.68,y:H*0.30,rx:W*0.11,ry:H*0.10,col:'255,60,0',
-      lbl:'FIRE EAST',aff:'212 AFFECTED',sev:'HIGH'},
-    {x:W*0.70,y:H*0.65,rx:W*0.10,ry:H*0.09,col:'255,140,0',
-      lbl:'COLLAPSE SE',aff:'312 AFFECTED',sev:'CRITICAL'}
-  ];
-  DZ.forEach(z=>{
-    s+=`<ellipse cx="${z.x}" cy="${z.y}"
-      rx="${z.rx}" ry="${z.ry}"
-      fill="rgba(${z.col},0.20)" filter="url(#cg-lg)">
-      <animate attributeName="opacity"
-        values="0.7;0.28;0.7" dur="2.8s" repeatCount="indefinite"/>
-    </ellipse>`;
-    // Danger ring (dashed)
-    s+=`<ellipse cx="${z.x}" cy="${z.y}"
-      rx="${z.rx*1.3}" ry="${z.ry*1.3}"
-      fill="none" stroke="rgba(${z.col},0.32)"
-      stroke-width="1" stroke-dasharray="8 4">
-      <animate attributeName="stroke-dashoffset"
-        from="0" to="-12" dur="1.4s" repeatCount="indefinite"/>
-    </ellipse>`;
-    // Label
-    s+=`<rect x="${z.x-70}" y="${z.y-z.ry-32}"
-      width="140" height="28" rx="2" fill="rgba(0,0,0,0.80)"/>`;
-    s+=`<text x="${z.x}" y="${z.y-z.ry-18}"
-      text-anchor="middle" fill="rgba(${z.col},0.90)"
-      font-size="9" font-family="monospace"
-      font-weight="bold" letter-spacing="2">${z.lbl}</text>`;
-    s+=`<text x="${z.x}" y="${z.y-z.ry-7}"
-      text-anchor="middle" fill="rgba(${z.col},0.65)"
-      font-size="8" font-family="monospace"
-      letter-spacing="1">${z.aff} · ${z.sev}</text>`;
-  });
-
-  // Safe zones
-  [[W*0.10,H*0.18,'SAFE NORTH'],[W*0.50,H*0.86,'SAFE SOUTH'],
-   [W*0.90,H*0.50,'SAFE EAST']].forEach(([x,y,n])=>{
-    s+=`<ellipse cx="${x}" cy="${y}"
-      rx="${W*0.07}" ry="${H*0.055}"
-      fill="rgba(0,255,100,0.10)" filter="url(#cg-md)"/>`;
-    s+=`<text x="${x}" y="${y+4}" text-anchor="middle"
-      fill="rgba(0,255,136,0.58)"
-      font-size="9" font-family="monospace">${n}</text>`;
-  });
-
-  // Active rescue routes (5)
-  const RT=[
-    [W*0.35,H*0.60,W*0.24,H*0.38,'rgba(0,255,136,0.52)'],
-    [W*0.55,H*0.45,W*0.68,H*0.30,'rgba(0,212,255,0.45)'],
-    [W*0.45,H*0.68,W*0.70,H*0.65,'rgba(255,170,0,0.42)'],
-    [W*0.30,H*0.42,W*0.10,H*0.18,'rgba(0,255,136,0.36)'],
-    [W*0.60,H*0.55,W*0.50,H*0.86,'rgba(0,212,255,0.36)']
-  ];
-  RT.forEach(([x1,y1,x2,y2,col],i)=>{
-    const mx=(x1+x2)/2+(Math.random()-0.5)*55;
-    const my=(y1+y2)/2+(Math.random()-0.5)*35;
-    s+=`<path d="M${x1},${y1} Q${mx},${my} ${x2},${y2}"
-      fill="none" stroke="${col}" stroke-width="2"
-      stroke-dasharray="10 5" stroke-linecap="round">
-      <animate attributeName="stroke-dashoffset"
-        from="0" to="-15" dur="${0.8+i*0.15}s"
-        repeatCount="indefinite"/>
-    </path>`;
-  });
-
-  // Rescue dots (40)
-  for (let i=0;i<40;i++){
-    const x=W*(0.08+Math.random()*0.84);
-    const y=H*(0.08+Math.random()*0.84);
-    const dur=3.5+Math.random()*5;
-    const tx=x+(Math.random()-0.5)*W*0.07;
-    const ty=y+(Math.random()-0.5)*H*0.06;
-    s+=`<circle cx="${x}" cy="${y}" r="3" fill="#00d4ff" opacity="0.60">
-      <animate attributeName="cx" values="${x};${tx};${x}"
-        dur="${dur}s" repeatCount="indefinite"/>
-      <animate attributeName="cy" values="${y};${ty};${y}"
-        dur="${dur}s" repeatCount="indefinite"/>
-    </circle>`;
-  }
-
-  // Victim pulses near disaster zones
-  DZ.forEach(z=>{
-    for(let i=0;i<8;i++){
-      const vx=z.x+(Math.random()-0.5)*z.rx*1.2;
-      const vy=z.y+(Math.random()-0.5)*z.ry*1.2;
-      const dur=1.2+Math.random()*0.8;
-      s+=`<circle cx="${vx}" cy="${vy}" r="2" fill="#ff3a3a" opacity="0.50">
-        <animate attributeName="r" values="2;4;2"
+// ===== COMMAND MAP =====
+function buildCommandMap(){
+  makeMapSVG('cmd-map-wrap','cmd-map-svg',(s,W,H)=>{
+    window.KMAP={W,H};
+    const DZ=[
+      {x:W*0.24,y:H*0.38,rx:W*0.14,ry:H*0.12,
+        col:'0,100,255',lbl:'FLOOD NW',
+        aff:'847',sev:'CRITICAL'},
+      {x:W*0.68,y:H*0.30,rx:W*0.11,ry:H*0.10,
+        col:'255,60,0',lbl:'FIRE EAST',
+        aff:'212',sev:'HIGH'},
+      {x:W*0.70,y:H*0.65,rx:W*0.10,ry:H*0.09,
+        col:'255,140,0',lbl:'COLLAPSE SE',
+        aff:'312',sev:'CRITICAL'}
+    ];
+    DZ.forEach(z=>{
+      s+=`<ellipse cx="${z.x}" cy="${z.y}"
+        rx="${z.rx}" ry="${z.ry}"
+        fill="rgba(${z.col},0.20)"
+        filter="url(#gbcmd-map-svg)">
+        <animate attributeName="opacity"
+          values="0.7;0.28;0.7" dur="2.8s"
+          repeatCount="indefinite"/></ellipse>`;
+      s+=`<ellipse cx="${z.x}" cy="${z.y}"
+        rx="${z.rx*1.3}" ry="${z.ry*1.3}"
+        fill="none"
+        stroke="rgba(${z.col},0.30)"
+        stroke-width="1" stroke-dasharray="8 4">
+        <animate attributeName="stroke-dashoffset"
+          from="0" to="-12" dur="1.4s"
+          repeatCount="indefinite"/></ellipse>`;
+      s+=`<rect x="${z.x-70}" y="${z.y-z.ry-34}"
+        width="140" height="30" rx="2"
+        fill="rgba(0,0,0,0.80)"/>`;
+      s+=`<text x="${z.x}" y="${z.y-z.ry-20}"
+        text-anchor="middle"
+        fill="rgba(${z.col},0.90)"
+        font-size="9" font-family="monospace"
+        font-weight="bold"
+        letter-spacing="2">${z.lbl}</text>`;
+      s+=`<text x="${z.x}" y="${z.y-z.ry-8}"
+        text-anchor="middle"
+        fill="rgba(${z.col},0.60)"
+        font-size="8"
+        font-family="monospace">${z.aff} AFFECTED · ${z.sev}</text>`;
+    });
+    [[W*0.10,H*0.18,'SAFE N'],[W*0.50,H*0.86,'SAFE S'],
+     [W*0.90,H*0.50,'SAFE E']].forEach(([x,y,n])=>{
+      s+=`<ellipse cx="${x}" cy="${y}"
+        rx="${W*0.07}" ry="${H*0.055}"
+        fill="rgba(0,255,100,0.10)"
+        filter="url(#gmcmd-map-svg)"/>`;
+      s+=`<text x="${x}" y="${y+4}"
+        text-anchor="middle"
+        fill="rgba(0,255,136,0.58)"
+        font-size="9"
+        font-family="monospace">${n}</text>`;
+    });
+    // Active routes
+    [[W*0.35,H*0.60,W*0.24,H*0.38,'rgba(0,255,136,0.52)'],
+     [W*0.55,H*0.45,W*0.68,H*0.30,'rgba(0,212,255,0.45)'],
+     [W*0.45,H*0.68,W*0.70,H*0.65,'rgba(255,170,0,0.42)'],
+     [W*0.30,H*0.42,W*0.10,H*0.18,'rgba(0,255,136,0.36)'],
+     [W*0.60,H*0.55,W*0.50,H*0.86,'rgba(0,212,255,0.36)']
+    ].forEach(([x1,y1,x2,y2,col],i)=>{
+      const mx=(x1+x2)/2+(Math.random()-0.5)*55;
+      const my=(y1+y2)/2+(Math.random()-0.5)*35;
+      s+=`<path d="M${x1},${y1} Q${mx},${my} ${x2},${y2}"
+        fill="none" stroke="${col}" stroke-width="2"
+        stroke-dasharray="10 5"
+        stroke-linecap="round">
+        <animate attributeName="stroke-dashoffset"
+          from="0" to="-15"
+          dur="${0.8+i*0.15}s"
+          repeatCount="indefinite"/></path>`;
+    });
+    // 40 rescue dots
+    for(let i=0;i<40;i++){
+      const x=W*(0.08+Math.random()*0.84);
+      const y=H*(0.08+Math.random()*0.84);
+      const dur=3.5+Math.random()*5;
+      const tx=x+(Math.random()-0.5)*W*0.07;
+      const ty=y+(Math.random()-0.5)*H*0.06;
+      s+=`<circle cx="${x}" cy="${y}" r="3"
+        fill="#00d4ff" opacity="0.60">
+        <animate attributeName="cx"
+          values="${x};${tx};${x}"
           dur="${dur}s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="0.5;0.15;0.5"
+        <animate attributeName="cy"
+          values="${y};${ty};${y}"
           dur="${dur}s" repeatCount="indefinite"/>
       </circle>`;
     }
+    // Victim pulses
+    DZ.forEach(z=>{
+      for(let i=0;i<8;i++){
+        const vx=z.x+(Math.random()-0.5)*z.rx*1.2;
+        const vy=z.y+(Math.random()-0.5)*z.ry*1.2;
+        const dur=1.2+Math.random()*0.8;
+        s+=`<circle cx="${vx}" cy="${vy}" r="2"
+          fill="#ff3a3a" opacity="0.50">
+          <animate attributeName="r"
+            values="2;4;2" dur="${dur}s"
+            repeatCount="indefinite"/>
+          <animate attributeName="opacity"
+            values="0.5;0.15;0.5" dur="${dur}s"
+            repeatCount="indefinite"/>
+        </circle>`;
+      }
+    });
+    return s;
   });
-
-  s += '</svg>';
-  svg.innerHTML = s;
-
-  // Zone rows
-  buildZoneRows();
-  buildResourceRows();
 }
 
-function buildZoneRows() {
-  const zones = [
-    {n:'Flood NW',    col:'#5080ff',risk:'MONITORING',aff:847,  open:false},
-    {n:'Fire East',   col:'#ff5020',risk:'MONITORING',aff:212,  open:false},
-    {n:'Collapse SE', col:'#ffaa00',risk:'MONITORING',aff:312,  open:false},
-    {n:'Safe North',  col:'#00ff88',risk:'OPEN',    aff:'180/400',open:true},
-    {n:'Safe South',  col:'#00ff88',risk:'OPEN',    aff:'340/500',open:true},
-    {n:'Safe East',   col:'#00ff88',risk:'OPEN',    aff:'95/300', open:true}
+function buildZoneRows(){
+  const zones=[
+    {n:'Flood NW',   c:'#5080ff',r:'CRITICAL',a:847},
+    {n:'Fire East',  c:'#ff5020',r:'HIGH',    a:212},
+    {n:'Collapse SE',c:'#ffaa00',r:'CRITICAL',a:312},
+    {n:'Safe North', c:'#00ff88',r:'OPEN',    a:'180/400'},
+    {n:'Safe South', c:'#00ff88',r:'OPEN',    a:'340/500'},
+    {n:'Safe East',  c:'#00ff88',r:'OPEN',    a:'95/300'}
   ];
-  const c = document.getElementById('zone-rows');
-  if (!c) return;
-  c.innerHTML = zones.map(z=>`
-    <div style="display:flex;align-items:center;gap:8px;
-      padding:7px 0;border-bottom:1px solid rgba(0,212,255,0.04);">
+  const c=document.getElementById('zone-rows');
+  if(!c) return;
+  c.innerHTML=zones.map(z=>`
+    <div style="display:flex;align-items:center;
+      gap:8px;padding:7px 0;
+      border-bottom:1px solid rgba(0,212,255,0.04);">
       <div style="width:7px;height:7px;border-radius:50%;
-        background:${z.col};flex-shrink:0;
-        ${z.risk==='CRITICAL'?'animation:pulse 1.2s infinite':''}">
+        background:${z.c};flex-shrink:0;
+        ${z.r==='CRITICAL'?
+          'animation:pulse 1.2s infinite':''}"></div>
+      <div style="font-size:10px;
+        color:rgba(255,255,255,0.72);flex:1;">${z.n}</div>
+      <div style="font-size:8px;padding:1px 6px;
+        border-radius:1px;color:${z.c};
+        background:${z.c}20;
+        letter-spacing:0.10em;">${z.r}</div>
+      <div style="font-size:10px;color:${z.c};
+        min-width:40px;text-align:right;">
+        ${typeof z.a==='number'?z.a.toLocaleString():z.a}
       </div>
-      <div style="font-size:10px;color:rgba(255,255,255,0.72);flex:1;">
-        ${z.n}
-      </div>
-      <div style="font-size:8px;padding:1px 6px;border-radius:1px;
-        color:${z.col};background:${z.col}20;
-        letter-spacing:0.10em;">${z.risk}</div>
-      <div style="font-size:10px;color:${z.col};
-        min-width:40px;text-align:right;">${
-        typeof z.aff==='number'?z.aff.toLocaleString():z.aff
-      }</div>
     </div>`).join('');
 }
 
-function buildResourceRows() {
+function buildResRows(){
   const res=[
-    {l:'System Nodes', pct:75, col:'var(--cyan)',  t:'18/24 deployed'},
-    {l:'Sensor Units', pct:60, col:'var(--green)', t:'12/20 active'},
-    {l:'Relief Camps', pct:38, col:'var(--amber)', t:'3/8 open'},
-    {l:'Mesh Nodes',   pct:100,col:'#7f77dd',      t:'8,420 active'}
+    {l:'Rescue Teams',pct:75,col:'var(--c)',t:'18/24'},
+    {l:'Medical Units',pct:60,col:'var(--g)',t:'12/20'},
+    {l:'Relief Camps', pct:38,col:'var(--a)',t:'3/8'},
+    {l:'Mesh Nodes',   pct:100,col:'#7f77dd',t:'8,420'}
   ];
-  const c = document.getElementById('resource-rows');
-  if (!c) return;
-  c.innerHTML = res.map(r=>`
+  const c=document.getElementById('res-rows');
+  if(!c) return;
+  c.innerHTML=res.map(r=>`
     <div style="display:flex;align-items:center;
       gap:8px;padding:5px 0;">
-      <div style="font-size:10px;color:rgba(255,255,255,0.52);
-        width:88px;flex-shrink:0;">${r.l}</div>
+      <div style="font-size:10px;
+        color:rgba(255,255,255,0.50);
+        width:86px;flex-shrink:0;">${r.l}</div>
       <div style="flex:1;height:3px;border-radius:2px;
         background:rgba(255,255,255,0.08);">
         <div style="width:${r.pct}%;height:100%;
           border-radius:2px;background:${r.col};"></div>
       </div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.50);
-        min-width:80px;text-align:right;">${r.t}</div>
+      <div style="font-size:9px;
+        color:rgba(255,255,255,0.48);
+        min-width:40px;text-align:right;">${r.t}</div>
     </div>`).join('');
 }
 
-// ==================== COMMAND TERMINAL ====================
-
-function addCmdLine(text, color) {
-  const t = document.getElementById('cmd-terminal');
-  if (!t) return;
-  const d = document.createElement('div');
-  d.style.cssText = `color:${color};padding:1px 0;`;
-  d.textContent = text;
+// ===== TERMINAL =====
+function addLine(text,color){
+  const t=document.getElementById('cmd-term');
+  if(!t) return;
+  const d=document.createElement('div');
+  d.style.cssText=`color:${color};padding:1px 0;`;
+  d.textContent=text;
   t.appendChild(d);
-  t.scrollTop = t.scrollHeight;
+  t.scrollTop=t.scrollHeight;
 }
-
-function typeLines(lines, i=0) {
-  if (i>=lines.length) return;
-  addCmdLine(lines[i].t, lines[i].c);
-  setTimeout(()=>typeLines(lines,i+1), 310);
+function typeLines(lines,i=0){
+  if(i>=lines.length) return;
+  addLine(lines[i].t,lines[i].c);
+  setTimeout(()=>typeLines(lines,i+1),310);
 }
-
-function execCmd(raw) {
-  if (!raw.trim()) return;
-  const c = raw.trim().toUpperCase();
-  addCmdLine('> '+raw, 'rgba(255,255,255,0.32)');
-  if (c==='STATUS')
+function bootTerminal(){
+  const t = document.getElementById('cmd-term');
+  if(t) t.innerHTML = '';
+  typeLines([
+    {t:'[BOOT] AURA Command v2.0 — online',c:'var(--c)'},
+    {t:'[BOOT] Sensor mesh: 8,420 nodes',c:'var(--c)'},
+    {t:'[BOOT] AI engine: ONLINE',c:'var(--g)'},
+    {t:'[OK]   Press F1 for STATUS',
+      c:'rgba(255,255,255,0.38)'}
+  ]);
+}
+function execCmd(raw){
+  if(!raw.trim()) return;
+  const c=raw.trim().toUpperCase();
+  addLine('> '+raw,'rgba(255,255,255,0.30)');
+  if(c==='STATUS')
     typeLines([
-      {t:'[SCAN]  Analyzing 3 deployment zones...',c:'var(--cyan)'},
-      {t:'[DATA]  Signals: 1,371 | Active: 892 | Critical: 23',c:'rgba(255,255,255,0.68)'},
-      {t:'[AI]    Flood NW expanding 0.3km/hr — surge in 47 min',c:'var(--cyan)'},
-      {t:'[COT]   Confidence: 91.4% | Model: AURA_PRED_V2.1',c:'rgba(255,255,255,0.38)'},
-      {t:'[OK]    All teams nominal. Mesh stable.',c:'var(--green)'}
+      {t:'[SCAN] Analyzing 3 disaster zones...',c:'var(--c)'},
+      {t:'[DATA] Affected:1,371 | Rescued:892 | Critical:23',
+        c:'rgba(255,255,255,0.68)'},
+      {t:'[AI]   Flood NW +0.3km/hr — surge 47min',c:'var(--c)'},
+      {t:'[COT]  Confidence:91.4% | AURA_PRED_V2.1',
+        c:'rgba(255,255,255,0.38)'},
+      {t:'[OK]   All teams nominal.',c:'var(--g)'}
     ]);
-  else if (c.includes('SIMULATE'))
-    runSimulation();
-  else if (c.includes('EMERGENCY'))
-    triggerEmergency();
-  else if (c.includes('REUNION'))
+  else if(c.includes('SIM')) runSim();
+  else if(c.includes('EMER')) trigEmergency();
+  else if(c.includes('REUN'))
     typeLines([
-      {t:'[REUNION] Scanning 1,247 survivor records...',c:'var(--cyan)'},
-      {t:'[MATCH]   847 family connections established',c:'var(--green)'},
-      {t:'[ACTION]  Notifications sent via mesh',c:'var(--green)'}
+      {t:'[REUNION] Scanning 1,247 records...',c:'var(--c)'},
+      {t:'[MATCH]   847 families connected',c:'var(--g)'},
+      {t:'[OK]      Notifications via mesh',c:'var(--g)'}
     ]);
-  else if (c.includes('VITAL')||c.includes('CARDIAC'))
+  else if(c==='NETWORK' || c==='NET')
     typeLines([
-      {t:'[VITAL-SHIELD] Scanning 2,847 biometric nodes...',c:'#ff9040'},
-      {t:'[DATA]  Avg HR: '+Math.round(SENSOR.hr)+' BPM | O2: '+SENSOR.o2.toFixed(1)+'%',c:'rgba(255,255,255,0.68)'},
-      {t:'[OK]    No cardiac events detected.',c:'var(--green)'}
+      {t:'[NET]  Interface: P2P MESH / SAT-LINK',c:'var(--c)'},
+      {t:'[NET]  Status: OPTIMAL',c:'var(--g)'},
+      {t:'[NET]  Active Webhooks: field_comms, feedback',c:'rgba(255,255,255,0.4)'},
+      {t:'[NET]  Encryption: AES-GCM 256-bit',c:'rgba(255,255,255,0.3)'}
+    ]);
+  else if(c.includes('VITAL')||c.includes('CARD'))
+    typeLines([
+      {t:'[VS] Scanning 2,847 biometric nodes...',
+        c:'#ff9040'},
+      {t:'[DATA] HR:'+Math.round(S.hr)+
+        'BPM O2:'+S.o2.toFixed(1)+'%',
+        c:'rgba(255,255,255,0.68)'},
+      {t:'[OK]  No cardiac events.',c:'var(--g)'}
     ]);
   else
     typeLines([
-      {t:'[AURA]  Processing: "'+raw+'"',c:'var(--cyan)'},
-      {t:'[COT]   Cross-referencing live zone data...',c:'rgba(255,255,255,0.38)'},
-      {t:'[OK]    No critical action required.',c:'var(--green)'}
+      {t:'[AURA] Processing: "'+raw+'"',c:'var(--c)'},
+      {t:'[COT]  Cross-referencing zone data...',
+        c:'rgba(255,255,255,0.36)'},
+      {t:'[OK]   No critical action required.',c:'var(--g)'}
     ]);
 }
-
-function execCmdBtn() {
-  const i=document.getElementById('cmd-input');
+function execCmdBtn(){
+  const i=document.getElementById('cmd-inp');
   if(i&&i.value.trim()){execCmd(i.value);i.value='';}
 }
-
-function addIncidentLog(msg) {
-  const l=document.getElementById('incident-log');
+function incLog(msg){
+  const l=document.getElementById('inc-log');
   if(!l) return;
   const d=document.createElement('div');
   d.style.padding='1px 0';
   const t=new Date().toTimeString().slice(0,8);
-  d.innerHTML=`<span style="color:rgba(0,212,255,0.36);">[${t}]</span>
+  d.innerHTML=`<span style="color:rgba(0,212,255,0.36);">
+    [${t}]</span>
     <span style="color:rgba(255,255,255,0.50);"> ${msg}</span>`;
   l.appendChild(d);
   l.scrollTop=l.scrollHeight;
 }
 
-// ==================== EMERGENCY ====================
-
-function triggerEmergency() {
-  if (emergencyActive) return;
-  emergencyActive = true;
+// ===== EMERGENCY =====
+function trigEmergency(){
+  if(emgActive) return; emgActive=true;
   document.body.style.animation='critBlink 1.2s ease-in-out infinite';
-  const ov=document.getElementById('emg-overlay');
-  if(ov){ov.style.display='flex';}
-  document.getElementById('ai-status').textContent='⚠ EMERGENCY PROTOCOL ACTIVE';
-  document.getElementById('ai-status').style.color='var(--red)';
-  document.getElementById('cot-obs').textContent='[OBSERVE] Full emergency — all zones critical';
-  document.getElementById('cot-rea').textContent='[REASON]  Mass casualty probability: HIGH';
-  document.getElementById('cot-dec').textContent='[DECIDE]  All 24 teams deployed + mutual aid';
-  setTimeout(()=>typeLines([
-    {t:'[ALERT] ⚠ FULL EMERGENCY DECLARED',c:'var(--red)'},
-    {t:'[EXEC]  All 24 response teams mobilized',c:'var(--amber)'},
-    {t:'[EXEC]  All 8 gates → SYSTEM OVERRIDE',c:'var(--amber)'},
-    {t:'[EXEC]  Mesh broadcast: 8,420 nodes',c:'var(--cyan)'},
-    {t:'[OK]    Secure corridors activated.',c:'var(--green)'}
-  ]),800);
-  addIncidentLog('⚠ EMERGENCY PROTOCOL TRIGGERED');
-  const hdr=document.getElementById('cmd-header');
+  const ov=document.getElementById('emg-ov');
+  if(ov) ov.style.display='flex';
+  const hdr=document.getElementById('cmd-hdr');
   if(hdr) hdr.style.borderBottomColor='rgba(255,58,58,0.38)';
+  
+  const aist = document.getElementById('ai-st');
+  if(aist) {
+    aist.textContent = '⚠ EMERGENCY PROTOCOL ACTIVE';
+    aist.style.color = 'var(--r)';
+  }
+  const coto = document.getElementById('cot-o');
+  if(coto) coto.textContent = '[OBSERVE] Full emergency — all zones critical';
+  const cotr = document.getElementById('cot-r');
+  if(cotr) cotr.textContent = '[REASON]  Mass casualty: HIGH';
+  const cotd = document.getElementById('cot-d');
+  if(cotd) cotd.textContent = '[DECIDE]  All 24 teams deployed + mutual aid';
 
-  // Add reset button
-  if(!document.getElementById('reset-btn')) {
+  setTimeout(()=>typeLines([
+    {t:'[ALERT] ⚠ FULL EMERGENCY DECLARED',c:'var(--r)'},
+    {t:'[EXEC]  All 24 teams mobilized',c:'var(--a)'},
+    {t:'[EXEC]  All 8 gates EMERGENCY OPEN',c:'var(--a)'},
+    {t:'[OK]    Life corridors activated',c:'var(--g)'}
+  ]),800);
+  incLog('⚠ EMERGENCY TRIGGERED — all gates opened');
+  if(!document.getElementById('rst-btn')){
     const rb=document.createElement('button');
-    rb.id='reset-btn';rb.className='btn';
-    rb.style.cssText='font-size:10px;padding:5px 12px;';
-    rb.textContent='◎ RESET EMERGENCY';
-    rb.onclick=resetEmergency;
-    hdr.appendChild(rb);
+    rb.id='rst-btn'; rb.className='btn';
+    rb.style.cssText='font-size:10px;padding:5px 12px;margin-left:8px;';
+    rb.textContent='◎ RESET';
+    rb.onclick=resetEmg;
+    document.getElementById('cmd-hdr').appendChild(rb);
   }
 }
-
-function resetEmergency() {
-  emergencyActive=false;
+function resetEmg(){
+  emgActive=false;
   document.body.style.animation='';
-  const ov=document.getElementById('emg-overlay');
+  const ov=document.getElementById('emg-ov');
   if(ov) ov.style.display='none';
-  const rb=document.getElementById('reset-btn');
+  const rb=document.getElementById('rst-btn');
   if(rb) rb.remove();
-  document.getElementById('ai-status').textContent = 'SYSTEM MONITORING ACTIVE';
-  document.getElementById('ai-status').style.color = 'var(--cyan)';
-  document.getElementById('cot-obs').textContent = '[OBSERVE] 3 deployment zones — 1,247 signals';
-  document.getElementById('cot-rea').textContent = '[REASON]  System load expanding nominal';
-  document.getElementById('cot-dec').textContent = '[DECIDE]  Rerouting nodes A,B + verifying Gate 4';
-  const hdr=document.getElementById('cmd-header');
+  const hdr=document.getElementById('cmd-hdr');
   if(hdr) hdr.style.borderBottomColor='rgba(0,212,255,0.10)';
-  addIncidentLog('System restored — normal ops resumed');
-  typeLines([{t:'[OK]    Emergency reset. Normal ops restored.',c:'var(--green)'}]);
-}
+  
+  const aist = document.getElementById('ai-st');
+  if(aist) {
+    aist.textContent = 'COORDINATING RESCUE OPS';
+    aist.style.color = 'var(--c)';
+  }
+  const coto = document.getElementById('cot-o');
+  if(coto) coto.textContent = '[OBSERVE] 3 zones — 1,247 signals active';
+  const cotr = document.getElementById('cot-r');
+  if(cotr) cotr.textContent = '[REASON]  NW flood +0.3km/hr';
+  const cotd = document.getElementById('cot-d');
+  if(cotd) cotd.textContent = '[DECIDE]  Rerouting teams A,B → Gate 4';
 
-function runSimulation() {
-  if(simTimer) return;
-  addIncidentLog('SIMULATION: Disaster escalation started');
-  typeLines([{t:'[SIM]   Escalation sim running (30s)...',c:'var(--amber)'}]);
+  typeLines([{t:'[OK] Emergency reset. Normal ops.',c:'var(--g)'}]);
+  incLog('System restored — normal ops');
+}
+function runSim(){
+  if(simT) return;
+  incLog('SIMULATION: Escalation started');
+  typeLines([{t:'[SIM] Running 30s escalation...',c:'var(--a)'}]);
   let tick=0;
-  simTimer=setInterval(()=>{
-    tick++;
-    SENSOR.lives+=Math.floor(Math.random()*4);
+  simT=setInterval(()=>{
+    tick++; S.lives+=Math.floor(Math.random()*4);
     updateDisplays();
     if(tick>=30){
-      clearInterval(simTimer);simTimer=null;
-      addIncidentLog('SIMULATION: Complete');
-      typeLines([{t:'[SIM]   Simulation ended.',c:'var(--green)'}]);
+      clearInterval(simT);simT=null;
+      incLog('SIMULATION: Complete');
+      typeLines([{t:'[SIM] Done.',c:'var(--g)'}]);
     }
   },1000);
 }
+function toggleDrone(){
+  const w=document.getElementById('cmd-map-wrap');
+  const b=document.getElementById('drone-btn');
+  if(!w) return;
+  if(w.dataset.d==='1'){
+    w.style.transform='';w.dataset.d='0';
+    if(b) b.style.color='';
+    addLine('[DRONE] Aerial view off','rgba(255,255,255,0.35)');
+  } else {
+    w.style.transform=
+      'perspective(900px) rotateX(22deg) scale(0.88)';
+    w.style.transformOrigin='50% 50%';
+    w.dataset.d='1';
+    if(b) b.style.color='#ffaa00';
+    addLine('[DRONE] Aerial perspective engaged','#ffaa00');
+  }
+}
+function updatePred(v){
+  const el=document.getElementById('pred-lbl');
+  if(el) el.textContent=v==0?'+0 MIN (LIVE)':
+    '+'+v+' MIN (PREDICTED)';
+  if(v>0){
+    addLine('[PRED] +'+v+'min: Flood NW → '+
+      (Math.round(S.den+v*0.8))+'% density','#ffaa00');
+  }
+}
 
-// ==================== VITAL-SHIELD ====================
-
-function buildOrb() {
+// ===== VITAL-SHIELD =====
+function buildOrb(){
   const svg=document.getElementById('survival-orb');
   if(!svg) return;
-  const S=220,cx=110,cy=110,r=92;
-  const segs=36, filled=Math.round(0.96*segs);
+  const S2=220,cx=110,cy=110,r=92;
+  const segs=36,filled=Math.round(0.96*segs);
   let c='';
-
-  // Background circle
   c+=`<circle cx="${cx}" cy="${cy}" r="${r}"
     fill="none" stroke="rgba(255,140,0,0.08)"
     stroke-width="1.5"/>`;
-
-  // Segmented arc gauge
   for(let i=0;i<segs;i++){
     const sa=((i*10)-90)*Math.PI/180;
     const ea=((i*10+8)-90)*Math.PI/180;
-    const x1=cx+r*Math.cos(sa), y1=cy+r*Math.sin(sa);
-    const x2=cx+r*Math.cos(ea), y2=cy+r*Math.sin(ea);
-    const x3=cx+(r-10)*Math.cos(ea), y3=cy+(r-10)*Math.sin(ea);
-    const x4=cx+(r-10)*Math.cos(sa), y4=cy+(r-10)*Math.sin(sa);
-    const active=i<filled;
-    const col=i<filled*0.35?'#ff3a3a':i<filled*0.70?'#ffaa00':'#00ff88';
-    const op=active?0.82:0.07;
-    c+=`<path d="M${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2}
-      L${x3},${y3} A${r-10},${r-10} 0 0,0 ${x4},${y4} Z"
+    const x1=cx+r*Math.cos(sa),y1=cy+r*Math.sin(sa);
+    const x2=cx+r*Math.cos(ea),y2=cy+r*Math.sin(ea);
+    const x3=cx+(r-10)*Math.cos(ea),y3=cy+(r-10)*Math.sin(ea);
+    const x4=cx+(r-10)*Math.cos(sa),y4=cy+(r-10)*Math.sin(sa);
+    const act=i<filled;
+    const col=i<filled*0.35?'#ff3a3a':
+      i<filled*0.70?'#ffaa00':'#00ff88';
+    const op=act?0.82:0.07;
+    c+=`<path d="M${x1},${y1} A${r},${r} 0 0,1
+      ${x2},${y2} L${x3},${y3}
+      A${r-10},${r-10} 0 0,0 ${x4},${y4} Z"
       fill="${col}" opacity="${op}">
-      ${active?`<animate attributeName="opacity"
+      ${act?`<animate attributeName="opacity"
         values="${op};${op*0.65};${op}"
-        dur="${1.8+i*0.04}s" repeatCount="indefinite"/>`:''}</path>`;
+        dur="${1.8+i*0.04}s"
+        repeatCount="indefinite"/>`:''}
+    </path>`;
   }
-
-  // Inner fill
   c+=`<circle cx="${cx}" cy="${cy}" r="${r-12}"
     fill="rgba(4,8,12,0.97)"/>`;
-
-  // ECG line
   const ep=`M${cx-54},${cy} L${cx-40},${cy}
     L${cx-34},${cy} L${cx-30},${cy-26}
     L${cx-26},${cy+26} L${cx-20},${cy-13}
@@ -1931,307 +2445,558 @@ function buildOrb() {
     L${cx+8},${cy} L${cx+12},${cy-20}
     L${cx+16},${cy+20} L${cx+20},${cy-10}
     L${cx+24},${cy} L${cx+54},${cy}`;
-  c+=`<path d="${ep}" fill="none" stroke="var(--cyan)"
-    stroke-width="1.8" stroke-linecap="round"
-    stroke-dasharray="280">
+  c+=`<path d="${ep}" fill="none"
+    stroke="var(--c)" stroke-width="1.8"
+    stroke-linecap="round" stroke-dasharray="280">
     <animate attributeName="stroke-dashoffset"
-      from="280" to="0" dur="1.4s" repeatCount="indefinite"/>
+      from="280" to="0" dur="1.4s"
+      repeatCount="indefinite"/>
   </path>`;
-
-  // Labels
-  c+=`<text x="${cx}" y="${cy-18}" text-anchor="middle"
+  c+=`<text x="${cx}" y="${cy-18}"
+    text-anchor="middle"
     fill="rgba(255,255,255,0.28)"
     font-size="7" font-family="monospace"
     letter-spacing="3">SURVIVAL PROBABILITY</text>`;
-  c+=`<text x="${cx}" y="${cy+10}" text-anchor="middle"
-    fill="var(--green)" font-size="26"
-    font-family="monospace" font-weight="bold">96%</text>`;
-  c+=`<text x="${cx}" y="${cy+26}" text-anchor="middle"
+  c+=`<text x="${cx}" y="${cy+10}"
+    text-anchor="middle"
+    fill="var(--g)" font-size="26"
+    font-family="monospace"
+    font-weight="bold">96%</text>`;
+  c+=`<text x="${cx}" y="${cy+26}"
+    text-anchor="middle"
     fill="rgba(0,255,136,0.52)"
     font-size="8" font-family="monospace"
     letter-spacing="2">NOMINAL</text>`;
-
-  svg.innerHTML = c;
+  svg.innerHTML=c;
 }
 
-function buildWorkerRows() {
-  const wdef=[
-    {loc:'Zone A'},{loc:'Flood NW'},{loc:'Fire East'},
-    {loc:'Safe South'},{loc:'Collapse SE'},{loc:'Command'}
-  ];
+function buildWorkerRows(){
+  const locs=['Zone A','Flood NW','Fire East',
+    'Safe South','Collapse SE','Command'];
   const c=document.getElementById('worker-rows');
   if(!c) return;
-  c.innerHTML=SENSOR.workers.map((w,i)=>{
-    const def=wdef[i];
+  c.innerHTML=S.workers.map((w,i)=>{
     const st=w.hr>110||w.o2<19.0?'HIGH RISK':
-              w.hr>95||w.o2<19.8?'ELEVATED':'NOMINAL';
-    const stc=st==='HIGH RISK'?'var(--red)':st==='ELEVATED'?'var(--amber)':'var(--green)';
-    const stbg=st==='HIGH RISK'?'rgba(255,58,58,0.10)':
-               st==='ELEVATED'?'rgba(255,170,0,0.10)':'rgba(0,255,136,0.08)';
-    return `<div class="panel" style="display:flex;align-items:center;
+      w.hr>95||w.o2<19.8?'ELEVATED':'NOMINAL';
+    const sc=st==='HIGH RISK'?'var(--r)':
+      st==='ELEVATED'?'var(--a)':'var(--g)';
+    const sb=st==='HIGH RISK'?'rgba(255,58,58,0.10)':
+      st==='ELEVATED'?'rgba(255,170,0,0.10)':
+      'rgba(0,255,136,0.08)';
+    return `<div class="panel"
+      style="display:flex;align-items:center;
       gap:8px;padding:7px 10px;
-      border-color:rgba(255,140,0,0.08);">
-      <div id="wdot-${w.id}" style="width:7px;height:7px;border-radius:50%;
-        background:${stc};flex-shrink:0;
-        ${st==='HIGH RISK'?'animation:pulse 1s infinite':''}"></div>
-      <div style="font-size:9px;color:rgba(0,212,255,0.62);
+      border-color:rgba(255,140,0,0.08);margin-bottom:4px;">
+      <div id="wd-${w.id}"
+        style="width:7px;height:7px;border-radius:50%;
+        background:${sc};flex-shrink:0;
+        ${st==='HIGH RISK'?
+          'animation:pulse 1s infinite':''}"></div>
+      <div style="font-size:9px;
+        color:rgba(0,212,255,0.62);
         min-width:42px;">${w.id}</div>
-      <div style="font-size:10px;color:rgba(255,255,255,0.68);flex:1;">
-        ${w.name}
+      <div style="font-size:10px;
+        color:rgba(255,255,255,0.68);flex:1;">
+        ${w.nm}
         <div style="font-size:8px;
-          color:rgba(255,255,255,0.32);">${def.loc}</div>
+          color:rgba(255,255,255,0.30);">${locs[i]}</div>
       </div>
-      <div id="whr-${w.id}" style="font-size:10px;color:var(--green);
-        min-width:50px;text-align:right;">${w.hr} BPM</div>
-      <div id="wo2-${w.id}" style="font-size:10px;color:var(--cyan);
-        min-width:38px;text-align:right;">${w.o2.toFixed(1)}%</div>
-      <div id="wst-${w.id}" style="font-size:8px;padding:1px 5px;
-        border-radius:1px;color:${stc};background:${stbg};
-        min-width:56px;text-align:center;">${st}</div>
+      <div id="wh-${w.id}"
+        style="font-size:10px;color:var(--g);
+        min-width:50px;text-align:right;">
+        ${w.hr} BPM</div>
+      <div id="wo-${w.id}"
+        style="font-size:10px;color:var(--c);
+        min-width:38px;text-align:right;">
+        ${w.o2.toFixed(1)}%</div>
+      <div id="ws-${w.id}"
+        style="font-size:8px;padding:1px 5px;
+        border-radius:1px;color:${sc};
+        background:${sb};min-width:56px;
+        text-align:center;">${st}</div>
     </div>`;
   }).join('');
 }
 
-function updateWorkers() {
-  SENSOR.workers.forEach(w=>{
+function updWorkers(){
+  S.workers.forEach(w=>{
     const st=w.hr>110||w.o2<19.0?'HIGH RISK':
-              w.hr>95||w.o2<19.8?'ELEVATED':'NOMINAL';
-    const stc=st==='HIGH RISK'?'var(--red)':
-               st==='ELEVATED'?'var(--amber)':'var(--green)';
-    const stbg=st==='HIGH RISK'?'rgba(255,58,58,0.10)':
-                st==='ELEVATED'?'rgba(255,170,0,0.10)':'rgba(0,255,136,0.08)';
-    const hrEl=document.getElementById('whr-'+w.id);
-    const o2El=document.getElementById('wo2-'+w.id);
-    const stEl=document.getElementById('wst-'+w.id);
-    const dtEl=document.getElementById('wdot-'+w.id);
-    if(hrEl){
-      hrEl.textContent=w.hr+' BPM';
-      hrEl.style.color=w.hr>110?'var(--red)':w.hr>95?'var(--amber)':'var(--green)';
+      w.hr>95||w.o2<19.8?'ELEVATED':'NOMINAL';
+    const sc=st==='HIGH RISK'?'var(--r)':
+      st==='ELEVATED'?'var(--a)':'var(--g)';
+    const sb=st==='HIGH RISK'?'rgba(255,58,58,0.10)':
+      st==='ELEVATED'?'rgba(255,170,0,0.10)':
+      'rgba(0,255,136,0.08)';
+    
+    const hrel = document.getElementById('wh-'+w.id);
+    if(hrel) {
+      hrel.textContent = w.hr + ' BPM';
+      hrel.style.color = w.hr>110?'var(--r)':w.hr>95?'var(--a)':'var(--g)';
     }
-    if(o2El){
-      o2El.textContent=w.o2.toFixed(1)+'%';
-      o2El.style.color=w.o2<19.5?'var(--red)':w.o2<20.0?'var(--amber)':'var(--cyan)';
+    const o2el = document.getElementById('wo-'+w.id);
+    if(o2el) {
+      o2el.textContent = w.o2.toFixed(1)+'%';
+      o2el.style.color = w.o2<19.5?'var(--r)':w.o2<20.0?'var(--a)':'var(--c)';
     }
-    if(stEl){stEl.textContent=st;stEl.style.color=stc;stEl.style.background=stbg;}
-    if(dtEl) dtEl.style.background=stc;
+    const stel = document.getElementById('ws-'+w.id);
+    if(stel) {
+      stel.textContent = st;
+      stel.style.color = sc;
+      stel.style.background = sb;
+    }
+    const dot=document.getElementById('wd-'+w.id);
+    if(dot) dot.style.background=sc;
   });
 }
 
-function addVitalLog(text,type) {
-  const cols={ai:'rgba(0,212,255,0.80)',central:'rgba(255,140,0,0.80)',
-    shield:'rgba(0,255,136,0.80)',alert:'rgba(255,58,58,0.90)'};
+function vLog(text,type){
+  const cols={ai:'rgba(0,212,255,0.80)',
+    quorum:'rgba(255,140,0,0.80)',
+    shield:'rgba(0,255,136,0.80)',
+    alert:'rgba(255,58,58,0.90)'};
   const el=document.getElementById('vital-log');
   if(!el) return;
   const d=document.createElement('div');
   d.style.cssText=`color:${cols[type]||cols.ai};padding:1px 0;`;
   d.textContent=text;
-  el.appendChild(d);
-  el.scrollTop=el.scrollHeight;
+  el.appendChild(d); el.scrollTop=el.scrollHeight;
 }
 
-function cardiacEmergency() {
-  addVitalLog('[ALERT]: CARDIAC EVENT DETECTED — local units notified','alert');
-  addVitalLog('[CENTRAL]: Optimized path established for medical response','central');
-  addVitalLog('[VITAL-SHIELD]: AED locations broadcast to 2,847 mesh nodes','shield');
+function cardiacEmg(){
+  vLog('[ALERT]: CARDIAC EMERGENCY — units scrambled!','alert');
+  vLog('[QUORUM]: Clearing path to medical facility','quorum');
+  vLog('[VITAL-SHIELD]: AED broadcast to 2,847 nodes','shield');
 }
 
-// ==================== SENSOR SIMULATION ====================
+// ===== FIELD MODE =====
+function buildFieldMap(){
+  makeMapSVG('field-map-wrap','field-map-svg',(s,W,H)=>{
+    // Same city grid + disaster zones
+    const DZ=[
+      {x:W*0.3, y:H*0.4,rx:W*0.18,ry:H*0.14,
+        col:'0,100,255'},
+      {x:W*0.65,y:H*0.35,rx:W*0.12,ry:H*0.11,
+        col:'255,60,0'},
+      {x:W*0.65,y:H*0.65,rx:W*0.11,ry:H*0.10,
+        col:'255,140,0'}
+    ];
+    s+=`<defs>
+      <filter id="gff">
+        <feGaussianBlur stdDeviation="20"/>
+      </filter>
+    </defs>`;
+    DZ.forEach(z=>{
+      s+=`<ellipse cx="${z.x}" cy="${z.y}"
+        rx="${z.rx}" ry="${z.ry}"
+        fill="rgba(${z.col},0.20)"
+        filter="url(#gff)">
+        <animate attributeName="opacity"
+          values="0.7;0.3;0.7" dur="3s"
+          repeatCount="indefinite"/>
+      </ellipse>`;
+    });
+    // Field responder position
+    s+=`<circle cx="${W*0.45}" cy="${H*0.55}"
+      r="8" fill="#00ff88" opacity="0.8">
+      <animate attributeName="r"
+        values="8;14;8" dur="1.5s"
+        repeatCount="indefinite"/>
+      <animate attributeName="opacity"
+        values="0.8;0.3;0.8" dur="1.5s"
+        repeatCount="indefinite"/>
+    </circle>`;
+    s+=`<text x="${W*0.45}" y="${H*0.55-20}"
+      text-anchor="middle"
+      fill="#00ff88" font-size="10"
+      font-family="monospace">YOU</text>`;
+    // Victim markers
+    for(let i=0;i<12;i++){
+      const vx=W*(0.25+Math.random()*0.55);
+      const vy=H*(0.25+Math.random()*0.55);
+      s+=`<circle cx="${vx}" cy="${vy}"
+        r="5" fill="#ff3a3a" opacity="0.70">
+        <animate attributeName="r"
+          values="5;8;5" dur="${1.5+Math.random()}s"
+          repeatCount="indefinite"/>
+      </circle>`;
+      s+=`<text x="${vx}" y="${vy+18}"
+        text-anchor="middle"
+        fill="rgba(255,100,100,0.70)"
+        font-size="8" font-family="monospace">
+        V-${(i+1).toString().padStart(2,'0')}</text>`;
+    }
+    return s;
+  });
+}
 
-function updateSensors() {
-  SENSOR.o2+=( Math.random()-0.48)*0.18;
-  SENSOR.o2=Math.max(19.0,Math.min(21.2,SENSOR.o2));
-  SENSOR.hr+=(Math.random()-0.48)*4;
-  SENSOR.hr=Math.max(72,Math.min(120,Math.round(SENSOR.hr)));
-  SENSOR.co+=(Math.random()-0.49)*0.8;
-  SENSOR.co=Math.max(2,Math.min(15,SENSOR.co));
-  SENSOR.density+=(Math.random()-0.47)*1.5;
-  SENSOR.density=Math.max(70,Math.min(99,Math.round(SENSOR.density)));
-  if(Math.random()<0.28) SENSOR.lives+=Math.floor(Math.random()*3);
-  SENSOR.workers.forEach(w=>{
+let victimId=1;
+function addVictim(){
+  const sev=document.getElementById('victim-severity').value;
+  const sym=document.getElementById('victim-symptom').value.trim();
+  if(!sym){
+    document.getElementById('victim-symptom')
+      .style.borderColor='rgba(255,58,58,0.50)';
+    return;
+  }
+  document.getElementById('victim-symptom').value='';
+  document.getElementById('victim-symptom')
+    .style.borderColor='rgba(0,255,136,0.22)';
+  const id=`V-${victimId.toString().padStart(3,'0')}`;
+  victimId++;
+  const sevLabels=['','CRITICAL','HIGH','MODERATE','LOW'];
+  const sevCols=['','var(--r)','var(--a)','#ffcc00','var(--g)'];
+  victimQ.push({id,sev:parseInt(sev),sym});
+  const vl=document.getElementById('victim-list');
+  if(vl){
+    const d=document.createElement('div');
+    d.style.cssText=`padding:8px 10px;margin-bottom:6px;
+      background:rgba(0,255,136,0.04);
+      border:1px solid rgba(0,255,136,0.12);
+      border-left:3px solid ${sevCols[sev]};
+      border-radius:2px;font-size:10px;`;
+    d.innerHTML=`<div style="display:flex;
+      justify-content:space-between;margin-bottom:3px;">
+      <span style="color:var(--g);">${id}</span>
+      <span style="color:${sevCols[sev]};font-size:9px;
+        letter-spacing:0.10em;">${sevLabels[sev]}</span>
+    </div>
+    <div style="color:rgba(255,255,255,0.55);">${sym}</div>`;
+    vl.appendChild(d);
+    vl.scrollTop=vl.scrollHeight;
+  }
+  const vc=document.getElementById('victim-count');
+  if(vc) vc.textContent=`QUEUE: ${victimQ.length} VICTIMS`;
+  fieldLog(`[TRIAGE] ${id} added — ${sevLabels[sev]}: ${sym}`,'ok');
+}
+
+function fieldLog(msg,type){
+  const l=document.getElementById('field-log');
+  if(!l) return;
+  const d=document.createElement('div');
+  const col=type==='ok'?'var(--g)':
+    type==='warn'?'var(--a)':
+    type==='err'?'var(--r)':'rgba(255,255,255,0.50)';
+  d.style.cssText=`color:${col};padding:1px 0;`;
+  d.textContent=msg;
+  l.appendChild(d); l.scrollTop=l.scrollHeight;
+}
+
+function sendFieldMsg(){
+  const i=document.getElementById('field-msg');
+  if(!i||!i.value.trim()) return;
+  const msg = i.value;
+  fieldLog('[YOU→CMD] '+msg,'sys');
+  mockAPI('field_comms', { message: msg, responder: 'R-ALPHA' });
+  i.value='';
+  setTimeout(()=>fieldLog(
+    '[CMD→YOU] Acknowledged. Assistance en route.','ok'),800);
+}
+
+function fieldSOS(){
+  fieldLog('[SOS] EMERGENCY BROADCAST SENT','err');
+  fieldLog('[CMD] All units alerted to your position','ok');
+  addLine('[FIELD] SOS received — Team at '+
+    document.getElementById('field-loc').textContent,
+    'var(--r)');
+  incLog('FIELD SOS from responder position');
+}
+
+function fieldAction(type){
+  const msgs={
+    ZONE_CLEAR:'Zone reported clear — updating map',
+    NEED_BACKUP:'Backup requested — 2 units dispatched',
+    HAZARD:'Hazard reported — area flagged on command map'
+  };
+  fieldLog('[ACTION] '+msgs[type],'ok');
+  setTimeout(()=>fieldLog('[CMD] Confirmed: '+msgs[type],'sys'),600);
+}
+
+// ===== DEMO MODE =====
+const DEMO_STEPS=[
+  {
+    title:'AURA — Adaptive Urban Rescue & Aid',
+    body:'A real-time AI life-safety OS that coordinates disaster rescue, prevents crowd crushes, and monitors cardiac health — all offline-resilient via mesh networking.',
+    cot:null,
+    metric:[
+      {v:'1,247',l:'Lives Assisted'},
+      {v:'3',l:'Active Disasters'},
+      {v:'8,420',l:'Mesh Nodes'}
+    ]
+  },
+  {
+    title:'Problem: When Disasters Strike',
+    body:'Internet goes down. Rescuers can\'t find victims. Medical triage is slow. 50,000 died in Turkey earthquake. 159 in Seoul crowd crush. AURA solves all three failure points simultaneously.',
+    cot:null,metric:null
+  },
+  {
+    title:'AI Chain-of-Thought — Visible Reasoning',
+    body:'Every AI decision is explainable. Judges can see exactly how AURA thinks. This is prompt engineering at its core.',
+    cot:'[OBSERVE] Flood NW expanding 0.3km/hr — 847 signals\n[REASON]  O2 dropping in Sector D — compression risk\n[DECIDE]  Rerouting teams A,B + pre-opening Gate 4\n[COT]     Confidence: 91.4% | AURA_PRED_V2.1',
+    metric:null
+  },
+  {
+    title:'Field Mode — Responder on the Ground',
+    body:'A rescue worker in the field gets real-time victim triage queue, direct comms to command center, and a one-tap SOS button. Works without internet via mesh.',
+    cot:null,
+    metric:[
+      {v:'12',l:'Victims in Queue'},
+      {v:'6',l:'Rescue Units'},
+      {v:'ACTIVE',l:'Mesh Status'}
+    ]
+  },
+  {
+    title:'VITAL-SHIELD — Cardiac Monitoring',
+    body:'Continuous heart rate and O2 monitoring for every worker. Survival probability orb. Automatic alerts on abnormal readings. Ghost Privacy — no data stored.',
+    cot:'[AI]: Biometric scan — 2,847 nodes online\n[VITAL-SHIELD]: Worker W3 HR 115 BPM — elevated\n[QUORUM]: Medical team rerouted via Exit D\n[AI]: Predictive model — no arrests forecast 30min',
+    metric:null
+  },
+  {
+    title:'Offline Mesh Network — No Internet Needed',
+    body:'8,420 P2P nodes form a Bluetooth/WiFi mesh. When towers fall (always first in disasters), AURA keeps working. Navigation, triage, comms — all functional.',
+    cot:null,
+    metric:[
+      {v:'8,420',l:'Mesh Nodes'},
+      {v:'99.8%',l:'Coverage'},
+      {v:'0ms',l:'Failover'}
+    ]
+  },
+  {
+    title:'SDG Impact — Saving Lives Globally',
+    body:'AURA addresses SDG 3 (Health), SDG 11 (Safe Cities), SDG 13 (Climate/Disasters). Every feature has a direct path to real-world deployment. This is not a demo — it\'s a survival system.',
+    cot:null,
+    metric:[
+      {v:'SDG 3',l:'Good Health'},
+      {v:'SDG 11',l:'Safe Cities'},
+      {v:'SDG 13',l:'Climate Action'}
+    ]
+  }
+];
+
+function startDemo(){
+  demoIdx=0; renderDemoStep();
+}
+function stopDemo(){
+  if(demoTimer){clearInterval(demoTimer);demoTimer=null;}
+}
+function demoStep(dir){
+  demoIdx=Math.max(0,Math.min(DEMO_STEPS.length-1,demoIdx+dir));
+  renderDemoStep();
+}
+function renderDemoStep(){
+  const step=DEMO_STEPS[demoIdx];
+  if(!step) return;
+  const el=id=>document.getElementById(id);
+  el('demo-step-label').textContent=
+    `STEP ${demoIdx+1} OF ${DEMO_STEPS.length}`;
+  el('demo-progress').textContent=
+    `Step ${demoIdx+1} of ${DEMO_STEPS.length}`;
+  el('demo-title').textContent=step.title;
+  el('demo-body').textContent=step.body;
+  // CoT
+  const cotEl=el('demo-cot');
+  if(step.cot){
+    cotEl.style.display='block';
+    cotEl.innerHTML='';
+    step.cot.split('\n').forEach((line,i)=>{
+      const d=document.createElement('div');
+      d.style.cssText=`padding:1px 0;color:${
+        line.startsWith('[OBSERVE]')?'rgba(0,212,255,0.80)':
+        line.startsWith('[REASON]')?'rgba(255,255,255,0.55)':
+        line.startsWith('[DECIDE]')?'rgba(0,255,136,0.80)':
+        line.startsWith('[COT]')||line.startsWith('[AI]')?
+          'rgba(255,255,255,0.40)':
+        'rgba(255,140,0,0.80)'};`;
+      d.textContent=line;
+      setTimeout(()=>cotEl.appendChild(d),i*200);
+    });
+  } else {
+    cotEl.style.display='none';
+  }
+  // Metrics
+  const mEl=el('demo-metrics');
+  if(step.metric){
+    mEl.style.display='flex';
+    mEl.innerHTML=step.metric.map(m=>`
+      <div style="text-align:center;padding:0 20px;">
+        <div style="font-size:28px;font-weight:500;
+          color:var(--c);">${m.v}</div>
+        <div style="font-size:9px;letter-spacing:0.14em;
+          color:rgba(255,255,255,0.30);margin-top:3px;">
+          ${m.l}</div>
+      </div>`).join(
+        '<div style="width:1px;background:rgba(255,255,255,0.07);"></div>'
+      );
+  } else {
+    mEl.style.display='none';
+  }
+  // Prev button
+  el('demo-prev').style.opacity=demoIdx===0?'0.3':'1';
+  const nextBtn = el('demo-next');
+  nextBtn.textContent = demoIdx===DEMO_STEPS.length-1?'FINISH →':'NEXT →';
+  
+  if(demoIdx===DEMO_STEPS.length-1){
+    nextBtn.onclick=()=>{
+      stopDemo();goTo('screen-command');
+    };
+  } else {
+    nextBtn.onclick=()=>demoStep(1);
+  }
+  // Dots
+  const dots=el('demo-dots');
+  if(dots){
+    dots.innerHTML=DEMO_STEPS.map((_,i)=>`
+      <div style="width:${i===demoIdx?16:6}px;
+        height:6px;border-radius:3px;
+        background:${i===demoIdx?
+          'var(--a)':'rgba(255,255,255,0.20)'};
+        transition:all 300ms;"></div>`).join('');
+  }
+}
+
+// ===== SENSORS =====
+function updateSensors(){
+  S.o2+=(Math.random()-0.48)*0.18;
+  S.o2=Math.max(19.0,Math.min(21.2,S.o2));
+  S.hr+=(Math.random()-0.48)*4;
+  S.hr=Math.max(72,Math.min(120,Math.round(S.hr)));
+  S.co+=(Math.random()-0.49)*0.8;
+  S.co=Math.max(2,Math.min(15,S.co));
+  S.den+=(Math.random()-0.47)*1.5;
+  S.den=Math.max(70,Math.min(99,Math.round(S.den)));
+  if(Math.random()<0.28)
+    S.lives+=Math.floor(Math.random()*3);
+  S.workers.forEach(w=>{
     w.hr+=(Math.random()-0.49)*3;
     w.hr=Math.max(65,Math.min(130,Math.round(w.hr)));
     w.o2+=(Math.random()-0.49)*0.12;
     w.o2=Math.max(17.5,Math.min(21.5,w.o2));
   });
-  sparkH.o2.push(SENSOR.o2); if(sparkH.o2.length>18) sparkH.o2.shift();
-  sparkH.hr.push(SENSOR.hr); if(sparkH.hr.length>18) sparkH.hr.shift();
+  S.safety=Math.round(100-(S.den*0.25)-
+    ((21-S.o2)*6));
+  S.safety=Math.max(40,Math.min(100,S.safety));
+  S.threat=Math.round(100-S.safety);
+  spH.o2.push(S.o2); if(spH.o2.length>18) spH.o2.shift();
+  spH.hr.push(S.hr); if(spH.hr.length>18) spH.hr.shift();
   updateDisplays();
 }
 
-function showReunion() {
-  const rp = document.getElementById('reunion-panel');
-  if(rp) rp.style.display = rp.style.display==='none'?'block':'none';
-}
+function updateDisplays(){
+  const set=(id,v)=>{
+    const e=document.getElementById(id);if(e)e.textContent=v;};
+  const col=(id,c)=>{
+    const e=document.getElementById(id);if(e)e.style.color=c;};
 
-function runReunion() {
-  const name = document.getElementById('r-name').value.trim()||'Unknown';
-  const rr = document.getElementById('reunion-result');
-  if(!rr) return;
-  rr.style.display='block';
-  rr.innerHTML='<span style="color:#00d4ff">[REUNION AI] Scanning 1,247 records...</span>';
-  setTimeout(()=>{
-    rr.innerHTML=`
-      <div style="border-left:3px solid #ffaa00;padding:6px 8px;
-        background:rgba(255,170,0,0.05);margin-bottom:6px;">
-        <div style="color:#ffaa00;font-size:11px;font-weight:500;">
-          POSSIBLE MATCH — 78% confidence</div>
-        <div style="color:rgba(255,255,255,0.50);margin-top:3px;">
-          ${name} · Safe South collection point<br>
-          Physical description: partial match
-        </div>
-      </div>
-      <div style="border-left:3px solid rgba(255,255,255,0.15);
-        padding:6px 8px;background:rgba(255,255,255,0.02);">
-        <div style="color:rgba(255,255,255,0.40);font-size:10px;">
-          LOW MATCH — 29% confidence · Fire East medical point
-        </div>
-      </div>`;
-    triageMsg('aura','[REUNION AI] Search complete. 2 potential matches found for '+name+'.');
-  }, 1800);
-}
+  const o2c=S.o2<19.0?'var(--r)':S.o2<19.8?'var(--a)':'var(--c)';
+  set('tel-o2',S.o2.toFixed(1)+'%'); col('tel-o2',o2c);
+  set('tel-o2s',S.o2<19.0?'[CRITICAL]':
+    S.o2<19.8?'[WATCH]':'[STABLE]');
+  col('tel-o2s',S.o2<19.0?'var(--r)':
+    S.o2<19.8?'var(--a)':'var(--g)');
 
-function updatePrediction(val) {
-  const el = document.getElementById('pred-label');
-  if(el) el.textContent = val==0 ? '+0 MIN (LIVE)' : '+'+val+' MIN (PREDICTED)';
-  if(val>0) {
-    addCmdLine('[PRED]  +'+val+'min: Flood NW → '+(Math.round(SENSOR.density+val*0.8))+'% density', '#ffaa00');
-    addCmdLine('[PRED]  Gate 4 will reach 95% in '+(30-val)+' min', 'rgba(255,255,255,0.45)');
-  }
-}
+  const hrc=S.hr>110?'var(--r)':S.hr>95?'var(--a)':'#ff9040';
+  set('tel-hr',Math.round(S.hr)+' BPM'); col('tel-hr',hrc);
+  set('tel-hrs',S.hr>110?'[ELEVATED]':
+    S.hr>95?'[HIGH]':'[NOMINAL]');
+  col('tel-hrs',S.hr>110?'var(--r)':
+    S.hr>95?'var(--a)':'var(--g)');
+  set('hrb',Math.round(S.hr)+' BPM');
+  set('f-hr',Math.round(S.hr));
 
-function toggleDrone() {
-  const wrap = document.getElementById('cmd-map-wrap');
-  const btn = document.getElementById('drone-btn');
-  if(!wrap) return;
-  if(wrap.dataset.drone==='1') {
-    wrap.style.transform = '';
-    wrap.style.transition = '';
-    wrap.dataset.drone = '0';
-    if(btn) btn.style.color = '';
-  } else {
-    wrap.style.transform = 'perspective(900px) rotateX(22deg) scale(0.88)';
-    wrap.style.transition = 'transform 900ms ease';
-    wrap.style.transformOrigin = '50% 50%';
-    wrap.dataset.drone = '1';
-    if(btn) btn.style.color = '#ffaa00';
-    addCmdLine('[DRONE] Aerial perspective activated — 3D view engaged', '#ffaa00');
-  }
-}
+  const coc=S.co>10?'var(--r)':S.co>6?'var(--a)':'var(--g)';
+  set('tel-co',Math.round(S.co)+' PPM'); col('tel-co',coc);
+  set('tel-cos',S.co>10?'[DANGER]':S.co>6?'[WATCH]':'[LOW]');
 
-function updateDisplays() {
-  const set=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val;};
-  const setC=(id,col)=>{const e=document.getElementById(id);if(e)e.style.color=col;};
+  const dc=S.den>90?'var(--r)':S.den>75?'var(--a)':'var(--g)';
+  set('tel-den',Math.round(S.den)+'%'); col('tel-den',dc);
+  set('tel-dens',S.den>90?'[CRITICAL]':
+    S.den>75?'[HIGH]':'[OK]');
 
-  const ss = Math.round(100 - (SENSOR.density*0.25) - ((21-SENSOR.o2)*6));
-  const se = document.getElementById('m-safety');
-  if(se) {
-    se.textContent = Math.max(40,Math.min(100,ss));
-    se.style.color = ss < 60 ? '#ff3a3a' : ss < 75 ? '#ffaa00' : '#00ff88';
-  }
+  set('f-o2',S.o2.toFixed(1));
 
-  // O2
-  const o2s=SENSOR.o2<19.0?'[CRITICAL]':SENSOR.o2<19.8?'[WATCH]':'[STABLE]';
-  const o2c=SENSOR.o2<19.0?'var(--red)':SENSOR.o2<19.8?'var(--amber)':'var(--cyan)';
-  set('tel-o2',SENSOR.o2.toFixed(1)+'%'); setC('tel-o2',o2c);
-  set('tel-o2-s',o2s); setC('tel-o2-s',
-    SENSOR.o2<19.0?'var(--red)':SENSOR.o2<19.8?'var(--amber)':'var(--green)');
-
-  // HR
-  const hrs=SENSOR.hr>110?'[ELEVATED]':SENSOR.hr>95?'[HIGH]':'[NOMINAL]';
-  const hrc=SENSOR.hr>110?'var(--red)':SENSOR.hr>95?'var(--amber)':'#ff9040';
-  set('tel-hr',Math.round(SENSOR.hr)+' BPM'); setC('tel-hr',hrc);
-  set('tel-hr-s',hrs); setC('tel-hr-s',
-    SENSOR.hr>110?'var(--red)':SENSOR.hr>95?'var(--amber)':'var(--green)');
-  set('heart-rate-big',Math.round(SENSOR.hr)+' BPM');
-
-  // CO
-  const coc=SENSOR.co>10?'var(--red)':SENSOR.co>6?'var(--amber)':'var(--green)';
-  set('tel-co',Math.round(SENSOR.co)+' PPM'); setC('tel-co',coc);
-  set('tel-co-s',SENSOR.co>10?'[DANGER]':SENSOR.co>6?'[WATCH]':'[LOW]');
-
-  // Density
-  const dc=SENSOR.density>90?'var(--red)':SENSOR.density>75?'var(--amber)':'var(--green)';
-  set('tel-den',Math.round(SENSOR.density)+'%'); setC('tel-den',dc);
-  set('tel-den-s',SENSOR.density>90?'[CRITICAL]':SENSOR.density>75?'[HIGH]':'[OK]');
-
-  // Lives
-  if(!document.getElementById('stat-lives').dataset.cu)
-    set('stat-lives',SENSOR.lives.toLocaleString());
+  if(!document.getElementById('s-lives')?.dataset?.cu)
+    set('s-lives',S.lives.toLocaleString());
   if(!document.getElementById('m-lives')?.dataset?.cu)
-    set('m-lives',SENSOR.lives.toLocaleString());
+    set('m-lives',S.lives.toLocaleString());
 
-  // Sparklines
-  drawSpark('spark-o2',sparkH.o2,19.0,21.2,'var(--cyan)');
-  drawSpark('spark-hr',sparkH.hr,60,130,'#ff9040');
+  const ss=document.getElementById('m-safety');
+  if(ss){
+    ss.textContent=S.safety;
+    ss.style.color=S.safety<60?'var(--r)':
+      S.safety<75?'var(--a)':'var(--g)';
+  }
 
-  // Workers
-  updateWorkers();
-
-  // Threat needle
   const tn=document.getElementById('threat-needle');
-  if(tn) tn.style.left=SENSOR.threatLevel+'%';
+  if(tn) tn.style.left=S.threat+'%';
+  const tl=document.getElementById('threat-label');
+  if(tl){
+    tl.textContent=S.threat>75?'CRITICAL':
+      S.threat>55?'ELEVATED':'NOMINAL';
+    tl.style.color=S.threat>75?'var(--r)':
+      S.threat>55?'var(--a)':'var(--g)';
+  }
 
-  // Auto vital alerts
-  if(SENSOR.o2<19.2&&Math.random()<0.08)
-    addVitalLog('[ALERT]: O2 '+SENSOR.o2.toFixed(1)+'% — ventilation alert','alert');
-  if(SENSOR.hr>112&&Math.random()<0.06)
-    addVitalLog('[AI]: Elevated HR '+Math.round(SENSOR.hr)+'BPM — monitoring','ai');
+  drawSpark('sp-o2',spH.o2,19.0,21.2,'var(--c)');
+  drawSpark('sp-hr',spH.hr,60,130,'#ff9040');
+  updWorkers();
+
+  if(S.o2<19.2&&Math.random()<0.08)
+    vLog('[ALERT]: O2 '+S.o2.toFixed(1)+'% — ventilation alert','alert');
+  if(S.hr>112&&Math.random()<0.06)
+    vLog('[AI]: HR '+Math.round(S.hr)+' BPM — monitoring','ai');
 }
 
-function drawSpark(id,hist,minV,maxV,col) {
+function drawSpark(id,hist,mn,mx,col){
   const el=document.getElementById(id);
   if(!el||hist.length<2) return;
-  const W=60,H=18;
+  const W=60,H=16;
   const pts=hist.map((v,i)=>{
     const x=(i/(hist.length-1))*W;
-    const y=H-((v-minV)/(maxV-minV))*H;
-    return `${x},${Math.max(1,Math.min(H-1,y))}`;
+    const y=H-((v-mn)/(mx-mn))*H;
+    return x+','+Math.max(1,Math.min(H-1,y));
   }).join(' ');
   el.innerHTML=`<polyline points="${pts}" fill="none"
-    stroke="${col}" stroke-width="1.4" stroke-linecap="round"/>`;
+    stroke="${col}" stroke-width="1.4"
+    stroke-linecap="round"/>`;
 }
 
-// ==================== AI DIRECTIVE CYCLING ====================
-
-function cycleDirective() {
+// ===== AI DIRECTIVE CYCLE =====
+function cycleDirective(){
   const D=[
-    {s:'SYSTEM MONITORING ACTIVE',
-     o:'[OBSERVE] 3 deployment zones — 1,247 signals active',
-     r:'[REASON]  Data flow consistent across mesh',
-     d:'[DECIDE]  Verifying nodes A,B + health check Gate 4'},
+    {s:'COORDINATING RESCUE OPS',
+     o:'[OBSERVE] 3 zones — 1,247 signals active',
+     r:'[REASON]  NW flood +0.3km/hr',
+     d:'[DECIDE]  Rerouting A,B + opening Gate 4'},
     {s:'OPTIMIZING RESOURCE FLOW',
-     o:'[OBSERVE] Signal degradation in East Sector mesh',
-     r:'[REASON]  Bottleneck at Central Bridge',
-     d:'[DECIDE]  Air-lift for critical patients in Sector E'},
-    {s:'SIGNAL TRIAGE ACTIVE',
-     o:'[OBSERVE] 23 alerts: 3 cardiac, 11 trauma, 9 resp',
-     r:'[REASON]  Fire East O2 monitor deviation',
-     d:'[DECIDE]  Analyzing O2 units + prioritizing Fire East'}
+     o:'[OBSERVE] Mesh degradation East sector',
+     r:'[REASON]  Bridge bottleneck stalling units',
+     d:'[DECIDE]  Air-lift for Sector E critical'},
+    {s:'MEDICAL TRIAGE ACTIVE',
+     o:'[OBSERVE] 23 critical: 3 cardiac, 11 trauma',
+     r:'[REASON]  Fire East O2 below threshold',
+     d:'[DECIDE]  O2 units + med team to Fire East'}
   ];
   let i=0;
   setInterval(()=>{
-    if(emergencyActive) return;
+    if(emgActive) return;
     const d=D[i%D.length];
-    const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
-    set('ai-status',d.s);
-    set('cot-obs',d.o);
-    set('cot-rea',d.r);
-    set('cot-dec',d.d);
+    ['ai-st','cot-o','cot-r','cot-d'].forEach((id,j)=>{
+      const el=document.getElementById(id);
+      if(el) el.textContent=[d.s,d.o,d.r,d.d][j];
+    });
     i++;
   },8000);
 }
 
-// ==================== TICKER ====================
-
-function startTicker() {
+// ===== TICKER =====
+function startTicker(){
   const msgs=[
-    "AI MONITORING 1,247 SIGNALS ACROSS 3 DEPLOYMENT ZONES",
-    "VITAL-SHIELD: CARDIAC SENTINEL — SYSTEM READY",
-    "MESH NETWORK: 8,420 NODES — FULLY OFFLINE RESILIENT",
-    "REUNION AI: 847 SIGNALS PROCESSED THIS CYCLE"
+    'AI PROTECTING 1,247 LIVES — 3 ACTIVE DISASTER ZONES',
+    'VITAL-SHIELD: CARDIAC SENTINEL — 0 ARRESTS TODAY',
+    'MESH NETWORK: 8,420 NODES — OFFLINE RESILIENT',
+    'REUNION AI: 847 FAMILIES RECONNECTED THIS MONTH'
   ];
   let i=0;
-  const el=document.getElementById('landing-ticker');
+  const el=document.getElementById('ticker');
   if(!el) return;
   el.style.transition='opacity 300ms';
   el.textContent=msgs[0];
@@ -2245,143 +3010,128 @@ function startTicker() {
   },4000);
 }
 
-// ==================== FEEDBACK ====================
-
-function openFeedback(){
-  const m=document.getElementById('feedback-modal');
+// ===== FEEDBACK =====
+function openFB(){
+  const m=document.getElementById('fb-modal');
   if(m) m.style.display='flex';
 }
-function closeFeedback(){
-  const m=document.getElementById('feedback-modal');
+function closeFB(){
+  const m=document.getElementById('fb-modal');
   if(m) m.style.display='none';
-  selectedStars=0;
+  fbStars=0;
   for(let i=1;i<=5;i++){
-    const s=document.getElementById('star-'+i);
+    const s=document.getElementById('st'+i);
     if(s) s.style.color='rgba(255,255,255,0.20)';
   }
 }
-function selectStar(n){
-  selectedStars=n;
+function setStar(n){
+  fbStars=n;
   for(let i=1;i<=5;i++){
-    const s=document.getElementById('star-'+i);
-    if(s) s.style.color=i<=n?'var(--amber)':'rgba(255,255,255,0.20)';
+    const s=document.getElementById('st'+i);
+    if(s) s.style.color=i<=n?'var(--a)':
+      'rgba(255,255,255,0.20)';
   }
 }
-function submitFeedback(){
-  const txt=document.getElementById('fb-text').value.trim();
+function submitFB(){
+  const txt=document.getElementById('fb-txt').value.trim();
   try{
     const a=JSON.parse(localStorage.getItem('aura_fb')||'[]');
-    a.push({stars:selectedStars,text:txt,time:new Date().toISOString()});
+    const entry = {stars:fbStars,text:txt, time:new Date().toISOString()};
+    a.push(entry);
     localStorage.setItem('aura_fb',JSON.stringify(a));
+    mockAPI('feedback', entry);
   }catch(e){}
-  const inner=document.querySelector('#feedback-modal .panel');
+  const inner=document.querySelector('#fb-modal .panel');
   if(inner) inner.innerHTML=`
-    <div style="text-align:center;padding:20px;">
-      <div style="font-size:28px;color:var(--green);margin-bottom:12px;">✓</div>
-      <div style="font-size:13px;color:var(--cyan);letter-spacing:0.2em;
-        margin-bottom:6px;">RECEIVED</div>
-      <div style="font-size:10px;color:rgba(255,255,255,0.38);line-height:1.7;">
-        Thank you. Your feedback helps<br>AURA protect more lives.
+    <div style="text-align:center;padding:24px;">
+      <div style="font-size:28px;color:var(--g);
+        margin-bottom:12px;">✓</div>
+      <div style="font-size:13px;color:var(--c);
+        letter-spacing:0.2em;margin-bottom:6px;">
+        RECEIVED</div>
+      <div style="font-size:10px;
+        color:rgba(255,255,255,0.38);line-height:1.7;">
+        Thank you. Your feedback helps<br>AURA save more lives.
       </div>
       <button class="btn" style="margin-top:16px;"
-        onclick="closeFeedback()">CLOSE</button>
+        onclick="closeFB()">CLOSE</button>
     </div>`;
-  setTimeout(closeFeedback,2600);
-  addIncidentLog('USER FEEDBACK: '+selectedStars+'★');
+  setTimeout(closeFB,2600);
+  incLog('FEEDBACK: '+fbStars+'★');
 }
 
-// ==================== KEYBOARD SHORTCUTS ====================
-
-document.addEventListener('keydown',e=>{
-  const cmd=document.getElementById('screen-command');
-  if(cmd&&cmd.classList.contains('active')){
-    if(e.key==='F1'){e.preventDefault();execCmd('STATUS');}
-    if(e.key==='F2'){e.preventDefault();runSimulation();}
-    if(e.key==='F3'){e.preventDefault();triggerEmergency();}
-    if(e.key==='Escape') resetEmergency();
-  }
-});
-
-// ==================== CLOCKS ====================
-
-function tickClocks() {
+// ===== CLOCKS =====
+function tickClocks(){
   const t=new Date().toTimeString().slice(0,8);
-  ['landing-clock','citizen-clock','cmd-clock','vitals-clock'].forEach(id=>{
-    const e=document.getElementById(id);
-    if(e) e.textContent=t;
-  });
-  // Uptime
-  if(window._appStart){
-    const el=document.getElementById('cmd-status-l');
-    const elapsed=Math.floor((Date.now()-window._appStart)/1000);
+  ['clock-l','clock-c','clock-cmd','clock-v','clock-f']
+    .forEach(id=>{
+      const e=document.getElementById(id);
+      if(e) e.textContent=t;
+    });
+  if(window._st){
+    const el=document.getElementById('cmd-st-l');
+    const elapsed=Math.floor((Date.now()-window._st)/1000);
     const h=String(Math.floor(elapsed/3600)).padStart(2,'0');
     const m=String(Math.floor((elapsed%3600)/60)).padStart(2,'0');
     const s=String(elapsed%60).padStart(2,'0');
-    if(el) el.textContent=`NEURAL_LOAD: 34% | ENCRYPTION: AES-256 | UPTIME: ${h}:${m}:${s}`;
+    if(el) el.textContent=
+      `NEURAL_LOAD: 34% | ENC: AES-256 | UPTIME: ${h}:${m}:${s}`;
   }
 }
 
-// ==================== INIT ====================
+// ===== KEYBOARD =====
+document.addEventListener('keydown',e=>{
+  const cmd=document.getElementById('screen-command');
+  if(cmd && cmd.classList.contains('active')){
+    if(e.key==='F1'){e.preventDefault();execCmd('STATUS');}
+    if(e.key==='F2'){e.preventDefault();runSim();}
+    if(e.key==='F3'){e.preventDefault();trigEmergency();}
+    if(e.key==='Escape') resetEmg();
+  }
+});
 
+// ===== INIT =====
 window.addEventListener('DOMContentLoaded',()=>{
-  window._appStart=Date.now();
-
-  // Build landing visuals
-  buildLandingGrid();
-
-  // Count-up stats
+  window._st=Date.now();
+  buildLanding();
+  // Count-up
   setTimeout(()=>{
-    countUp('stat-lives',1247,1400);
-    countUp('stat-disasters',3,600);
-    countUp('stat-nodes',8420,1400);
+    countUp('s-lives',1247,1400);
+    countUp('s-zones',3,600);
+    countUp('s-nodes',8420,1400);
   },1800);
-
-  // Ticker
+  // Start systems
   startTicker();
-
-  // Clocks
   setInterval(tickClocks,1000);
-
-  // Sensors
   updateSensors();
   setInterval(updateSensors,2000);
-
-  // AI directive cycling
   cycleDirective();
-
-  // Pre-populate incident log
-  const logs=[
-    'FLOOD: NW sector expanding — teams A,B rerouted',
-    'MEDICAL: 3 critical near Fire East — dispatched',
-    'MESH: SE internet down — mesh network active',
-    'REUNION: 847 family matches confirmed by AI',
-    'RESCUE: Team C at collapse site — 12 extracted'
-  ];
-  logs.forEach((l,i)=>setTimeout(()=>addIncidentLog(l),i*180));
-
-  // Vital-shield AI log boot sequence
-  const vl=[
-    {t:'[AI]: Biometric scan — 2,847 nodes online',ty:'ai',d:800},
-    {t:'[AI]: All cardiac readings normal',ty:'ai',d:2000},
-    {t:'[QUORUM]: Sector B4 density 88% — watch active',ty:'quorum',d:3500},
-    {t:'[AI]: HR spike — Node 445 — trend analysis',ty:'ai',d:5500},
-    {t:'[QUORUM]: Medical team rerouted via Exit D',ty:'quorum',d:7000},
-    {t:'[VITAL-SHIELD]: Worker W3 CO: 5 PPM — monitor',ty:'shield',d:8800},
-    {t:'[AI]: No cardiac events forecast 30 min (94%)',ty:'ai',d:10500}
-  ];
-  vl.forEach(v=>setTimeout(()=>addVitalLog(v.t,v.ty),v.d));
-
+  // Incident log boot
+  ['FLOOD: NW expanding — teams A,B rerouted',
+   'MEDICAL: 3 critical Fire East — dispatched',
+   'MESH: SE internet down — mesh active',
+   'REUNION: 847 families matched by AI',
+   'RESCUE: Team C at collapse — 12 extracted']
+    .forEach((l,i)=>setTimeout(()=>incLog(l),i*180));
+  // Vital log
+  [{t:'[AI]: Scan — 2,847 nodes online',ty:'ai',d:800},
+   {t:'[AI]: All cardiac readings normal',ty:'ai',d:2000},
+   {t:'[QUORUM]: Sector B4 density 88%',ty:'quorum',d:3500},
+   {t:'[AI]: HR spike Node-445 — analysing',ty:'ai',d:5500},
+   {t:'[QUORUM]: Med team rerouted Exit D',ty:'quorum',d:7000},
+   {t:'[VITAL-SHIELD]: Worker W3 CO 5PPM',ty:'shield',d:8800}]
+    .forEach(v=>setTimeout(()=>vLog(v.t,v.ty),v.d));
   // Triage welcome
   setTimeout(()=>triageMsg('aura',
-    '[AURA] Ready. Enter your location to begin navigation or describe your situation.'),
-  600);
+    '[AURA] Ready. Select your zone to begin navigation.'),600);
+});
 
-  // Make landing visible
-  const ls=document.getElementById('screen-landing');
-  if(ls) {
-    ls.classList.add('active');
-    requestAnimationFrame(()=>requestAnimationFrame(()=>ls.classList.add('visible')));
-  }
+// Resize listener for maps
+window.addEventListener('resize', () => {
+  buildLanding();
+  if (window._cm) buildCitizenMap();
+  if (window._cmd) buildCommandMap();
+  if (window._fd) buildFieldMap();
 });
 
 </script>

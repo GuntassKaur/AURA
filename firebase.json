@@ -1,0 +1,19 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      ".env",
+      "patch.js",
+      "patch_v2.js"
+    ],
+    "rewrites": [
+      {
+        "source": "/",
+        "destination": "/aura.html"
+      }
+    ]
+  }
+}
