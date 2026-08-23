@@ -1,0 +1,6 @@
+# Services
+# Business logic lives here — completely separate from HTTP concerns.
+# A router receives the HTTP request, validates it, then delegates to a service function.
+# This means the same logic can be called by different routers, background tasks, or tests
+# without duplicating code.
+# Example: services/ocr_service.py will run PaddleOCR and call Gemini for structuring.

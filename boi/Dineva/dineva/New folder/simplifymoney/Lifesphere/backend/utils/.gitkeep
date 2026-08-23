@@ -1,0 +1,6 @@
+# Utils
+# Small, stateless helper functions that have no business logic of their own.
+# They are pure utility — things like reading an env var, formatting a date string,
+# computing a file hash, or generating a UUID. Nothing here should touch the database
+# or call external APIs directly.
+# Example: utils/file_helpers.py for validating file extensions before upload.

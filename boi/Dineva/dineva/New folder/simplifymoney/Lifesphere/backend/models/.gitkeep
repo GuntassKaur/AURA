@@ -1,0 +1,5 @@
+# Models
+# SQLAlchemy ORM table definitions live here.
+# Each file maps to one database table (or a tightly related cluster of tables).
+# Example: models/document.py will define the `documents` table columns.
+# These are never exposed directly to the API — schemas/ handles that.

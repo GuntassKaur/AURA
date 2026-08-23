@@ -1,0 +1,7 @@
+# Schemas
+# Pydantic models that define the shape of data crossing the API boundary.
+# They are the contract between the frontend and backend — what the request body
+# must look like, and what the response will always look like.
+# Keeping these separate from models/ means you can change your DB internals
+# without breaking the API contract (and vice versa).
+# Example: schemas/document.py will define DocumentCreateRequest and DocumentResponse.

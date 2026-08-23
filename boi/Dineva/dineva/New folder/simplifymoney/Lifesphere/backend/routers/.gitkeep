@@ -1,0 +1,4 @@
+# Routers
+# Each module (documents, photos, lifestyle, vault) gets its own router file here.
+# A router groups all HTTP endpoints for one feature, keeping main.py clean.
+# Example: routers/documents.py will hold POST /documents/upload, GET /documents/{id}, etc.

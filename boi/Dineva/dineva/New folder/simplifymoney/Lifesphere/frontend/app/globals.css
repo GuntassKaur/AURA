@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@theme {
+  /* Core Background System */
+  --color-bg-base: #06070A;
+  --color-bg-secondary: #0D1117;
+  --color-bg-surface: #12161D;
+  --color-bg-elevated: #171C25;
+
+  /* Core Text System */
+  --color-text-primary: #F2F2F5;
+  --color-text-secondary: #8A8A9A;
+  --color-text-tertiary: #4A4A5A;
+
+  /* Core Accent System */
+  --color-accent-primary: #6C6FFF;
+  --color-accent-warm: #F59E0B;
+  --color-accent-success: #10B981;
+  --color-accent-rose: #F43F5E;
+
+  /* LifeSphere Design System Compatibility Tokens */
+  --color-ls-bg: #06070A;
+  --color-ls-surface: #0D1117;
+  --color-ls-elevated: #12161D;
+  --color-ls-text: #F2F2F5;
+  --color-ls-secondary: #8A8A9A;
+  --color-ls-accent: #6C6FFF;
+  --color-ls-warm: #F59E0B;
+  --color-ls-success: #10B981;
+  --color-ls-critical: #F43F5E;
+
+  /* Typography Scales */
+  --font-inter: var(--font-inter-var), "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-inter-var), "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-space-mono-var), "Space Mono", monospace;
+}
+
+:root {
+  --background: #06070A;
+  --foreground: #F2F2F5;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: #06070A;
+  color: #F2F2F5;
+  font-family: var(--font-inter-var), "Inter", system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Technical Metadata Font Class - ONLY for timestamps, IDs, hashes, EXIF */
+.font-mono-meta {
+  font-family: var(--font-space-mono-var), "Space Mono", monospace;
+}
+
+/* Ambient Noise Texture Overlay */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0.012;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Organic Constellation Connection Animation */
+@keyframes pulseLine {
+  0%, 100% { opacity: 0.25; stroke-dashoffset: 0; }
+  50% { opacity: 0.65; stroke-dashoffset: 12; }
+}
+
+.animate-pulse-line {
+  stroke-dasharray: 4 6;
+  animation: pulseLine 4s ease-in-out infinite;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
