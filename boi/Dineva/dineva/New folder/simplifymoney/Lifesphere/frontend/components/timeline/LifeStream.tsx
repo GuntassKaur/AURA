@@ -1,321 +1,372 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Calendar, X, Sparkles, ArrowRight } from 'lucide-react';
-import { useTimelineStore, MemoryCapsuleData, TimelineFilter, TimelineZoomLevel } from '@/store/useTimelineStore';
+import {
+  Search, MapPin, X, Sparkles, ArrowRight, FileText,
+  Image as ImageIcon, CreditCard, ChevronRight, Compass,
+} from 'lucide-react';
+import { useLifeDataStore } from '@/store/useLifeDataStore';
+import { useDocumentStore } from '@/store/useDocumentStore';
+import { usePhotoStore } from '@/store/usePhotoStore';
+import { useOrbitStore } from '@/store/useOrbitStore';
+import { useRouter } from 'next/navigation';
+import { ConnectedMemory } from '@/lib/data';
 
-const mockMemoryCapsules: (MemoryCapsuleData & { image?: string })[] = [
-  { 
-    id: '1', 
-    title: 'Goa Coastal Journey', 
-    type: 'trip', 
-    category: 'travel', 
-    date: 'April 10, 2026', 
-    location: 'Goa, India', 
-    confidenceScore: 98, 
-    summary: 'Auto-clustered flight IndiGo 6E-2018, Taj Resort stay, and 24 beach photographs into a cohesive travel dossier.', 
-    relatedDocsCount: 4, 
-    photoCount: 24, 
-    totalExpense: '₹58,400',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80'
-  },
-  { 
-    id: '2', 
-    title: 'Samsung Split AC Purchase', 
-    type: 'warranty', 
-    category: 'documents', 
-    date: 'December 15, 2025', 
-    location: 'Home Residence', 
-    confidenceScore: 94, 
-    summary: '5-year compressor warranty registered with purchase invoice from Croma.', 
-    relatedDocsCount: 2, 
-    totalExpense: '₹54,000',
-    image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80'
-  },
-  { 
-    id: '3', 
-    title: 'Annual Health Lab Panel', 
-    type: 'medical', 
-    category: 'medical', 
-    date: 'January 20, 2026', 
-    location: 'Max Labs Delhi', 
-    confidenceScore: 96, 
-    summary: 'Metabolic panel blood test report showing healthy cholesterol & glucose profiles.', 
-    relatedDocsCount: 1, 
-    totalExpense: '₹2,500'
-  },
-  { 
-    id: '4', 
-    title: 'Passport Renewal Submission', 
-    type: 'passport', 
-    category: 'personal', 
-    date: 'February 05, 2026', 
-    location: 'Passport Seva Kendra', 
-    confidenceScore: 90, 
-    summary: 'Official government passport submission logs and appointment schedule.', 
-    relatedDocsCount: 1, 
-    totalExpense: '₹1,500'
-  },
-  { 
-    id: '5', 
-    title: 'Birthday Evening at Cafe', 
-    type: 'photos', 
-    category: 'photos', 
-    date: 'May 18, 2026', 
-    location: 'Cafe Delhi Heights', 
-    confidenceScore: 95, 
-    summary: 'Gathering with friends. 42 photographs captured and tagged.', 
-    relatedDocsCount: 0, 
-    photoCount: 42,
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80'
-  },
-];
+const S = {
+  label: { fontSize: 9, fontWeight: 700 as const, letterSpacing: '0.12em', textTransform: 'uppercase' as const, fontFamily: 'Inter, sans-serif' },
+  pill: (color: string, bg: string) => ({ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 999, fontSize: 9, fontWeight: 700 as const, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color, background: bg, fontFamily: 'Inter, sans-serif' }),
+  mono: { fontFamily: 'JetBrains Mono, monospace', fontSize: 10 },
+};
 
 export default function LifeStream() {
-  const { 
-    zoomLevel, setZoomLevel,
-    activeFilter, setActiveFilter, 
-    selectedCapsule, setSelectedCapsule,
-    searchQuery, setSearchQuery
-  } = useTimelineStore();
+  const router = useRouter();
+  const { memories, getPhotosForMemory, getDocsForMemory } = useLifeDataStore();
+  const { setOpenedDoc } = useDocumentStore();
+  const { setSearchQuery: setPhotoSearch } = usePhotoStore();
+  const { setIsOpen: setOrbitOpen, sendMessage } = useOrbitStore();
 
-  const featured = mockMemoryCapsules[0];
+  const [selectedMemory, setSelectedMemory] = useState<ConnectedMemory | null>(null);
+  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
 
-  const filteredCapsules = mockMemoryCapsules.slice(1).filter(c => {
-    const matchesFilter = activeFilter === 'all' || c.category === activeFilter;
-    const matchesSearch = searchQuery
-      ? c.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        c.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.summary.toLowerCase().includes(searchQuery.toLowerCase())
+  const filtered = memories.filter(m => {
+    const matchFilter = activeFilter === 'all' || m.category === activeFilter;
+    const matchSearch = search
+      ? m.title.toLowerCase().includes(search.toLowerCase()) ||
+        m.location.toLowerCase().includes(search.toLowerCase())
       : true;
-    return matchesFilter && matchesSearch;
+    return matchFilter && matchSearch;
   });
 
-  const getZoomSpacing = () => {
-    switch (zoomLevel) {
-      case 'year': return 'space-y-6';
-      case 'week': return 'space-y-16';
-      case 'day': return 'space-y-24';
-      case 'month':
-      default: return 'space-y-10';
-    }
+  const handleOpenDoc = (docId: string) => {
+    const doc = useLifeDataStore.getState().documents.find(d => d.id === docId);
+    if (doc) { setOpenedDoc(doc as any); router.push('/documents'); }
   };
 
   return (
-    <div className="w-full space-y-12 pt-4 sm:pt-8 pb-24 font-sans text-left">
-      
-      {/* 1. Header & Controls */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/[0.06] pb-6">
-        <div className="space-y-1">
-          <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Chronology</span>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-text-primary">Timeline</h1>
-        </div>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 32, paddingBottom: 48, fontFamily: 'Inter, sans-serif' }}>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-          {/* Zoom Control Buttons */}
-          <div className="flex items-center bg-bg-surface border border-white/[0.08] rounded-full p-1 self-start">
-            {(['year', 'month', 'week', 'day'] as TimelineZoomLevel[]).map((level) => {
-              const active = zoomLevel === level;
-              return (
-                <button
-                  key={level}
-                  onClick={() => setZoomLevel(level)}
-                  className={`px-3.5 py-1 text-xs font-medium rounded-full transition-all capitalize cursor-pointer ${
-                    active
-                      ? 'bg-text-primary text-bg-base font-semibold shadow'
-                      : 'text-text-secondary hover:text-text-primary'
-                  }`}
-                >
-                  {level}
-                </button>
-              );
-            })}
+      {/* ── Header ──────────────────────────────────────────── */}
+      <div style={{ borderBottom: '1px solid #E2E0D8', paddingBottom: 24 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap' as const, justifyContent: 'space-between', alignItems: 'flex-end', gap: 16 }}>
+          <div>
+            <span style={{ ...S.label, color: '#5B5CE2', display: 'block', marginBottom: 8 }}>Chronological Life Chapters</span>
+            <h1 style={{ fontFamily: 'DM Serif Display, serif', fontSize: 'clamp(1.7rem, 4vw, 2.6rem)', color: '#1A1B1F', lineHeight: 1.08, letterSpacing: '-0.02em', marginBottom: 8 }}>
+              Memories & Timeline
+            </h1>
+            <p style={{ fontSize: 12, color: '#5C5E66', lineHeight: 1.7, maxWidth: 480 }}>
+              Your life as connected stories — journeys, milestones, and moments linked across time, places, and people.
+            </p>
           </div>
 
-          {/* Search memories */}
-          <div className="bg-bg-surface border border-white/[0.08] rounded-full px-4 py-2 flex items-center space-x-2.5 w-full sm:w-64 shadow-lg">
-            <Search size={14} className="text-text-secondary" />
+          {/* Search */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #E2E0D8', borderRadius: 999, padding: '7px 14px', width: 220 }}>
+            <Search size={13} style={{ color: '#9B9DA4', flexShrink: 0 }} />
             <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search memories…"
-              className="w-full bg-transparent border-none text-xs text-text-primary placeholder-text-tertiary focus:outline-none"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search chapters…"
+              style={{ flex: 1, border: 'none', background: 'transparent', fontSize: 12, color: '#1A1B1F', outline: 'none', fontFamily: 'Inter, sans-serif' }}
             />
           </div>
         </div>
+
+        {/* Filter chips */}
+        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6, marginTop: 16 }}>
+          {[
+            { id: 'all', label: 'All Chapters' },
+            { id: 'travel', label: 'Travel & Trips' },
+            { id: 'personal', label: 'Career & Milestones' },
+            { id: 'photos', label: 'Celebrations' },
+          ].map(f => {
+            const active = activeFilter === f.id;
+            return (
+              <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{
+                padding: '6px 14px', borderRadius: 999, fontSize: 11, fontWeight: active ? 600 : 500,
+                background: active ? '#1A1B1F' : '#fff', color: active ? '#fff' : '#5C5E66',
+                border: `1px solid ${active ? '#1A1B1F' : '#E2E0D8'}`,
+                cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.12s',
+              }}>
+                {f.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap gap-2 text-xs">
-        {[
-          { id: 'all', label: 'All Memories' },
-          { id: 'travel', label: 'Travel' },
-          { id: 'medical', label: 'Health' },
-          { id: 'documents', label: 'Documents' },
-          { id: 'photos', label: 'Photos' },
-          { id: 'personal', label: 'Personal' }
-        ].map(f => {
-          const active = activeFilter === f.id;
-          return (
-            <button
-              key={f.id}
-              onClick={() => setActiveFilter(f.id as TimelineFilter)}
-              className={`px-4 py-1.5 rounded-full font-medium transition-all cursor-pointer ${
-                active 
-                  ? 'bg-accent-primary text-white font-semibold' 
-                  : 'bg-white/[0.04] text-text-secondary hover:text-text-primary border border-white/[0.06]'
-              }`}
-            >
-              {f.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* 2. ONE LARGE FEATURED MEMORY HERO */}
-      <motion.div 
-        whileHover={{ y: -3 }}
-        transition={{ type: 'spring', stiffness: 200, damping: 26 }}
-        onClick={() => setSelectedCapsule(featured)}
-        className="w-full h-80 sm:h-[440px] rounded-3xl bg-bg-surface border border-white/[0.08] p-8 sm:p-10 flex flex-col justify-end relative overflow-hidden group cursor-pointer shadow-2xl"
-      >
-        <img 
-          src={featured.image} 
-          alt={featured.title} 
-          className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-85 group-hover:scale-[1.015] transition-all duration-700 ease-out" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-bg-base via-bg-base/30 to-transparent" />
-
-        <div className="relative z-10 space-y-3 max-w-xl text-left">
-          <div className="flex items-center space-x-4 text-xs font-mono-meta text-text-primary/90">
-            <span className="flex items-center space-x-1.5">
-              <Calendar size={13} className="text-accent-primary" />
-              <span>{featured.date}</span>
-            </span>
-            <span className="flex items-center space-x-1.5">
-              <MapPin size={13} className="text-accent-primary" />
-              <span>{featured.location}</span>
-            </span>
-          </div>
-
-          <h2 className="text-2xl sm:text-4xl font-bold text-text-primary tracking-tight">{featured.title}</h2>
-          <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">{featured.summary}</p>
-          
-          <div className="pt-2 flex items-center space-x-2 text-xs font-medium text-text-primary group-hover:text-accent-primary transition-colors">
-            <span>Inspect memory capsule</span>
-            <ArrowRight size={13} />
+      {/* ── Timeline ─────────────────────────────────────────── */}
+      <div style={{ position: 'relative' }}>
+        {/* Year badge */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#1A1B1F', color: '#fff', padding: '6px 16px', borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', fontFamily: 'Inter, sans-serif' }}>
+            <Compass size={11} style={{ color: '#D4D4FF' }} /> 2026 LIFE ARCHIVE
           </div>
         </div>
-      </motion.div>
 
-      {/* 3. ORGANIC CONNECTING TIMELINE THREAD */}
-      <div className="space-y-4 pt-4">
-        <div className="flex items-center space-x-2 text-xs font-semibold text-text-secondary uppercase tracking-wide">
-          <Sparkles size={13} className="text-accent-primary" />
-          <span>Timeline Stream</span>
-        </div>
+        {/* Spine */}
+        <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', top: 60, bottom: 0, width: 1, background: 'linear-gradient(to bottom, #5B5CE2 0%, #E2E0D8 60%, rgba(226,224,216,0.3) 100%)' }} className="hidden sm:block" />
 
-        <div className={`relative pl-6 border-l border-white/[0.08] ${getZoomSpacing()} transition-all duration-500`}>
-          {filteredCapsules.map((c) => (
-            <motion.div 
-              key={c.id}
-              whileHover={{ x: 4 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 26 }}
-              onClick={() => setSelectedCapsule(c)}
-              className="relative group cursor-pointer"
-            >
-              {/* Connecting node dot */}
-              <div className="absolute -left-[31px] top-1.5 w-2.5 h-2.5 rounded-full bg-white/20 border-2 border-bg-base group-hover:bg-accent-primary group-hover:scale-125 transition-all" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+          {filtered.map((mem, idx) => {
+            const isEven = idx % 2 === 0;
+            const photos = getPhotosForMemory(mem.id);
+            const docs = getDocsForMemory(mem.id);
 
-              <div className="p-6 rounded-2xl bg-bg-surface border border-white/[0.08] group-hover:border-white/20 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between shadow-xl transition-all">
-                <div className="space-y-2 max-w-xl">
-                  <div className="flex items-center space-x-3 text-xs font-mono-meta text-text-secondary">
-                    <span>{c.date}</span>
-                    <span>·</span>
-                    <span className="capitalize text-accent-primary">{c.category}</span>
+            return (
+              <motion.div
+                key={mem.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: idx * 0.06 }}
+                style={{ position: 'relative', display: 'flex', justifyContent: isEven ? 'flex-start' : 'flex-end', alignItems: 'center' }}
+                className="sm:flex"
+              >
+                {/* Center node */}
+                <div style={{
+                  position: 'absolute', left: '50%', transform: 'translateX(-50%)',
+                  width: 14, height: 14, borderRadius: '50%', background: '#fff',
+                  border: '3px solid #5B5CE2', zIndex: 5,
+                }} className="hidden sm:block" />
+
+                {/* Card */}
+                <div
+                  onClick={() => setSelectedMemory(mem)}
+                  style={{
+                    width: '100%', maxWidth: 'calc(50% - 24px)',
+                    background: '#fff', border: '1px solid #E2E0D8',
+                    borderRadius: 18, overflow: 'hidden',
+                    cursor: 'pointer', transition: 'border-color 0.15s, box-shadow 0.15s',
+                  }}
+                  className="w-full sm:max-w-[calc(50%-24px)]"
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#D4D4FF'; el.style.boxShadow = '0 4px 20px rgba(91,92,226,0.1)'; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#E2E0D8'; el.style.boxShadow = 'none'; }}
+                >
+                  {mem.image && (
+                    <div style={{ height: 200, position: 'relative', overflow: 'hidden' }}>
+                      <img src={mem.image} alt={mem.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(26,27,31,0.7) 0%, transparent 55%)' }} />
+                      <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.92)', borderRadius: 999, padding: '3px 9px' }}>
+                        <MapPin size={9} style={{ color: '#5B5CE2' }} />
+                        <span style={{ fontSize: 9, fontWeight: 600, color: '#1A1B1F', fontFamily: 'Inter, sans-serif' }}>{mem.location}</span>
+                      </div>
+                      <div style={{ position: 'absolute', bottom: 12, left: 14, right: 14 }}>
+                        <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.75)', fontFamily: 'JetBrains Mono, monospace', display: 'block', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{mem.date}</span>
+                        <h3 style={{ fontFamily: 'DM Serif Display, serif', fontSize: 17, color: '#fff', lineHeight: 1.2 }}>{mem.title}</h3>
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ padding: '14px 16px' }}>
+                    <p style={{ fontSize: 11, color: '#5C5E66', lineHeight: 1.7, marginBottom: 10, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' }}>
+                      {mem.summary}
+                    </p>
+
+                    {mem.journeySteps && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 4, marginBottom: 12 }}>
+                        {mem.journeySteps.slice(0, 3).map((st, i) => (
+                          <span key={i} style={{ fontSize: 9, background: '#F8F7F4', border: '1px solid #E2E0D8', borderRadius: 5, padding: '2px 7px', color: '#5C5E66', fontFamily: 'Inter, sans-serif' }}>
+                            {st.title}
+                          </span>
+                        ))}
+                        {mem.journeySteps.length > 3 && <span style={{ fontSize: 9, color: '#9B9DA4', fontFamily: 'JetBrains Mono, monospace', alignSelf: 'center' }}>+{mem.journeySteps.length - 3}</span>}
+                      </div>
+                    )}
+
+                    <div style={{ borderTop: '1px solid #F0EFE9', paddingTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: 12, fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#9B9DA4' }}>
+                        {photos.length > 0 && <span>{photos.length} photos</span>}
+                        {mem.totalExpense && <span>{mem.totalExpense}</span>}
+                        {docs.length > 0 && <span>{docs.length} docs</span>}
+                      </div>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: '#5B5CE2', display: 'flex', alignItems: 'center', gap: 2, fontFamily: 'Inter, sans-serif' }}>
+                        Enter story <ChevronRight size={12} />
+                      </span>
+                    </div>
                   </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
 
-                  <h3 className="text-lg font-bold text-text-primary group-hover:text-accent-primary transition-colors">
-                    {c.title}
-                  </h3>
+      {/* ══ MEMORY STORY MODAL ══════════════════════════════════ */}
+      <AnimatePresence>
+        {selectedMemory && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+            className="sm:items-center sm:p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setSelectedMemory(null)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(26,27,31,0.6)', backdropFilter: 'blur(6px)' }} />
 
-                  <p className="text-xs text-text-secondary leading-relaxed line-clamp-2">
-                    {c.summary}
-                  </p>
+            <motion.div
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+              style={{
+                position: 'relative', zIndex: 10, width: '100%', maxWidth: 700,
+                maxHeight: '92vh', background: '#fff',
+                borderTopLeftRadius: 24, borderTopRightRadius: 24,
+                overflowY: 'auto', fontFamily: 'Inter, sans-serif',
+              }}
+              className="sm:rounded-3xl"
+            >
+              {/* Sticky top bar */}
+              <div style={{ position: 'sticky', top: 0, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(8px)', borderBottom: '1px solid #F0EFE9', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 20 }}>
+                <button onClick={() => setSelectedMemory(null)} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: '#5B5CE2', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                  <ArrowRight size={13} style={{ transform: 'rotate(180deg)' }} /> Back to Timeline
+                </button>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <button
+                    onClick={() => { setOrbitOpen(true); sendMessage(`Analyze: ${selectedMemory.title}`, () => {}); setSelectedMemory(null); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', background: '#EEEEFF', border: '1px solid #D4D4FF', borderRadius: 999, fontSize: 10, fontWeight: 600, color: '#5B5CE2', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                    <Sparkles size={11} /> Ask Orbit
+                  </button>
+                  <button onClick={() => setSelectedMemory(null)} style={{ width: 30, height: 30, borderRadius: '50%', background: '#F8F7F4', border: '1px solid #E2E0D8', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                    <X size={13} style={{ color: '#5C5E66' }} />
+                  </button>
+                </div>
+              </div>
 
-                  <div className="flex items-center space-x-2 text-[11px] text-text-secondary pt-1">
-                    <MapPin size={11} />
-                    <span>{c.location}</span>
-                    {c.totalExpense && (
-                      <>
-                        <span>·</span>
-                        <span className="text-text-primary font-medium">{c.totalExpense}</span>
-                      </>
+              {/* Body */}
+              <div style={{ padding: '24px 24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+                {/* Heading */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' as const, marginBottom: 8 }}>
+                    <span style={{ ...S.pill('#5B5CE2', '#EEEEFF') }}>{selectedMemory.category}</span>
+                    <span style={{ ...S.mono, color: '#9B9DA4' }}>·</span>
+                    <span style={{ ...S.mono, color: '#9B9DA4' }}>{selectedMemory.date}</span>
+                    <span style={{ ...S.mono, color: '#9B9DA4' }}>·</span>
+                    <span style={{ ...S.mono, color: '#9B9DA4' }}>{selectedMemory.location}</span>
+                  </div>
+                  <h2 style={{ fontFamily: 'DM Serif Display, serif', fontSize: 'clamp(1.5rem, 4vw, 2.2rem)', color: '#1A1B1F', lineHeight: 1.1, letterSpacing: '-0.015em', marginBottom: 10 }}>{selectedMemory.title}</h2>
+                  <p style={{ fontSize: 12, color: '#5C5E66', lineHeight: 1.75 }}>{selectedMemory.summary}</p>
+                </div>
+
+                {/* Hero photo */}
+                {selectedMemory.image && (
+                  <div style={{ borderRadius: 16, overflow: 'hidden', height: 240 }}>
+                    <img src={selectedMemory.image} alt={selectedMemory.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                )}
+
+                {/* Journey roadmap */}
+                {selectedMemory.journeySteps && selectedMemory.journeySteps.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9B9DA4', marginBottom: 12, borderBottom: '1px solid #F0EFE9', paddingBottom: 8 }}>Journey Roadmap</div>
+                    <div style={{ paddingLeft: 18, borderLeft: '2px solid rgba(91,92,226,0.3)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      {selectedMemory.journeySteps.map((step, i) => (
+                        <div key={i} style={{ position: 'relative' }}>
+                          <span style={{ position: 'absolute', left: -26, top: 4, width: 10, height: 10, borderRadius: '50%', background: '#5B5CE2', border: '2px solid #fff', boxShadow: '0 0 0 2px rgba(91,92,226,0.2)' }} />
+                          <p style={{ fontFamily: 'DM Serif Display, serif', fontSize: 13, color: '#1A1B1F', marginBottom: 2 }}>{step.title}</p>
+                          <p style={{ fontSize: 11, color: '#9B9DA4', lineHeight: 1.6 }}>{step.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Photos */}
+                {(() => {
+                  const ph = getPhotosForMemory(selectedMemory.id);
+                  if (!ph.length) return null;
+                  return (
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, borderBottom: '1px solid #F0EFE9', paddingBottom: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9B9DA4', fontFamily: 'Inter, sans-serif' }}>
+                          <ImageIcon size={11} style={{ color: '#5B5CE2' }} /> Connected Moments ({ph.length})
+                        </div>
+                        <button onClick={() => { setPhotoSearch(selectedMemory.title.split(' ')[0]); router.push('/photos'); }} style={{ fontSize: 10, fontWeight: 600, color: '#5B5CE2', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                          View all
+                        </button>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                        {ph.map(p => (
+                          <div key={p.id} style={{ height: 100, borderRadius: 10, overflow: 'hidden', position: 'relative', cursor: 'pointer' }} onClick={() => router.push('/photos')}>
+                            <img src={p.imageUrl} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Expenses */}
+                {selectedMemory.expenses && selectedMemory.expenses.length > 0 && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12, borderBottom: '1px solid #F0EFE9', paddingBottom: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9B9DA4', fontFamily: 'Inter, sans-serif' }}>
+                        <CreditCard size={11} style={{ color: '#2E8B72' }} /> Connected Expenditure
+                      </div>
+                      <span style={{ fontFamily: 'DM Serif Display, serif', fontSize: 15, color: '#1A1B1F' }}>Total: {selectedMemory.totalExpense}</span>
+                    </div>
+                    <div style={{ background: '#F8F7F4', border: '1px solid #E2E0D8', borderRadius: 12, overflow: 'hidden' }}>
+                      {selectedMemory.expenses.map((exp, i) => (
+                        <div key={exp.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 14px', borderTop: i > 0 ? '1px solid #E2E0D8' : 'none' }}>
+                          <div>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: '#1A1B1F', fontFamily: 'Inter, sans-serif', display: 'block' }}>{exp.title}</span>
+                            <span style={{ fontSize: 10, color: '#9B9DA4', fontFamily: 'JetBrains Mono, monospace' }}>{exp.category} · {exp.date}</span>
+                          </div>
+                          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600, color: '#1A1B1F' }}>{exp.formattedAmount}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Documents */}
+                {(() => {
+                  const docs = getDocsForMemory(selectedMemory.id);
+                  if (!docs.length) return null;
+                  return (
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9B9DA4', fontFamily: 'Inter, sans-serif', marginBottom: 12, borderBottom: '1px solid #F0EFE9', paddingBottom: 8 }}>
+                        <FileText size={11} style={{ color: '#D4922A' }} /> Records & Documents ({docs.length})
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        {docs.map(doc => (
+                          <div key={doc.id} onClick={() => handleOpenDoc(doc.id)} style={{ padding: '12px', background: '#fff', border: '1px solid #E2E0D8', borderRadius: 12, cursor: 'pointer', transition: 'border-color 0.12s' }}
+                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = '#D4D4FF'}
+                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = '#E2E0D8'}>
+                            <span style={{ fontSize: 11, fontWeight: 600, color: '#1A1B1F', display: 'block', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, fontFamily: 'Inter, sans-serif' }}>{doc.title}</span>
+                            <span style={{ fontSize: 9, color: '#9B9DA4', fontFamily: 'JetBrains Mono, monospace' }}>{doc.category} · {doc.amount || doc.date}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* People + Places */}
+                {(selectedMemory.people || selectedMemory.places) && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    {selectedMemory.people && (
+                      <div>
+                        <div style={{ ...S.label, color: '#9B9DA4', marginBottom: 8 }}>People Along</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 5 }}>
+                          {selectedMemory.people.map(p => (
+                            <span key={p} style={{ padding: '4px 10px', background: '#EEEEFF', color: '#5B5CE2', borderRadius: 999, fontSize: 10, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>{p}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {selectedMemory.places && (
+                      <div>
+                        <div style={{ ...S.label, color: '#9B9DA4', marginBottom: 8 }}>Locations</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 5 }}>
+                          {selectedMemory.places.map(pl => (
+                            <span key={pl} style={{ padding: '4px 10px', background: '#E3F4EF', color: '#2E8B72', borderRadius: 999, fontSize: 10, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>{pl}</span>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </div>
-                </div>
-
-                {c.image && (
-                  <img 
-                    src={c.image} 
-                    alt={c.title} 
-                    className="w-full md:w-36 h-28 rounded-xl object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
-                  />
                 )}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* 4. EXPANDED CAPSULE DETAIL MODAL */}
-      <AnimatePresence>
-        {selectedCapsule && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedCapsule(null)}
-              className="absolute inset-0 bg-bg-base/85 backdrop-blur-xl"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ type: 'spring', stiffness: 220, damping: 26 }}
-              className="relative w-full max-w-xl bg-bg-surface border border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-[0_30px_70px_rgba(0,0,0,0.9)] z-10 space-y-6 text-left"
-            >
-              <div className="flex justify-between items-start border-b border-white/[0.08] pb-4">
-                <div className="space-y-1">
-                  <span className="text-xs font-semibold text-accent-primary uppercase tracking-wide">{selectedCapsule.category}</span>
-                  <h3 className="text-xl font-bold text-text-primary">{selectedCapsule.title}</h3>
-                </div>
-                <button onClick={() => setSelectedCapsule(null)} className="text-text-secondary hover:text-text-primary transition-colors cursor-pointer">
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className="space-y-4 text-xs text-text-secondary leading-relaxed">
-                <p className="p-4 bg-white/[0.02] border border-white/[0.04] rounded-2xl text-text-primary">
-                  {selectedCapsule.summary}
-                </p>
-
-                <div className="grid grid-cols-2 gap-4 text-xs pt-2">
-                  <div>Date: <span className="text-text-primary font-medium font-mono-meta">{selectedCapsule.date}</span></div>
-                  <div>Location: <span className="text-text-primary font-medium">{selectedCapsule.location}</span></div>
-                  {selectedCapsule.totalExpense && <div>Expense: <span className="text-text-primary font-medium">{selectedCapsule.totalExpense}</span></div>}
-                  {selectedCapsule.photoCount && <div>Photos: <span className="text-text-primary font-medium">{selectedCapsule.photoCount} files</span></div>}
-                </div>
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

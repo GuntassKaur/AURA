@@ -1,0 +1,8 @@
+{
+  "/cases/page": "app/cases/page.js",
+  "/threats/page": "app/threats/page.js",
+  "/network/page": "app/network/page.js",
+  "/india-intelligence/page": "app/india-intelligence/page.js",
+  "/investigate/page": "app/investigate/page.js",
+  "/ai-lab/page": "app/ai-lab/page.js"
+}

@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Search, Sparkles, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Sparkles, ArrowRight, Send } from 'lucide-react';
 import AppShell from '@/components/layout/AppShell';
 import { useOrbitStore } from '@/store/useOrbitStore';
 
@@ -11,12 +11,18 @@ export default function OrbitPage() {
   const { messages, sendMessage } = useOrbitStore();
   const [input, setInput] = useState('');
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const threadRef = useRef<HTMLDivElement>(null);
+
+  // Non-welcome messages (actual conversation)
+  const conversationMessages = messages.filter(m => m.id !== 'welcome' || messages.length === 1);
+  const hasConversation = messages.filter(m => m.id !== 'welcome').length > 0;
 
   const suggestedPrompts = [
-    "Show my Goa memories",
-    "What did I spend on travel?",
-    "Find my medical documents",
-    "What connects these memories?"
+    "How much did I spend in Goa?",
+    "When does my passport expire?",
+    "Show my upcoming payments",
+    "Which subscriptions should I review?",
   ];
 
   const handleSend = (textToSend?: string) => {
@@ -26,92 +32,135 @@ export default function OrbitPage() {
     setInput('');
   };
 
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    if (threadRef.current) {
+      threadRef.current.scrollTop = threadRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   return (
     <AppShell activeTab="chat">
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-3xl mx-auto flex flex-col items-center justify-center min-h-[75vh] text-center space-y-10 font-sans py-8"
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-2xl mx-auto flex flex-col min-h-[calc(100vh-8rem)] font-sans pb-4"
       >
-        {/* Centered Heading */}
-        <div className="space-y-4 max-w-xl">
-          <div className="flex items-center justify-center space-x-2 text-xs font-semibold text-accent-primary uppercase tracking-wide">
-            <Sparkles size={14} />
-            <span>Orbit Core Intelligence</span>
-          </div>
-          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-text-primary">
-            Ask Orbit anything.
-          </h1>
-          <p className="text-sm sm:text-base text-text-secondary leading-relaxed font-normal">
-            Search your memories, documents, photos and moments.
-          </p>
-        </div>
+        {!hasConversation ? (
+          /* ── EMPTY STATE: centered hero ──────────────── */
+          <div className="flex flex-col items-center justify-center flex-1 text-center space-y-8 py-12">
+            <div className="space-y-3 max-w-md">
+              <div className="w-12 h-12 rounded-2xl bg-[#E8E7FF] flex items-center justify-center mx-auto">
+                <Sparkles className="w-6 h-6 text-[#5B5CE2]" />
+              </div>
+              <h1 className="text-2xl font-serif font-bold tracking-tight text-[#17181C]">
+                Ask Orbit anything.
+              </h1>
+              <p className="text-sm text-[#6B6D73] leading-relaxed">
+                Search across your memories, documents, photos, expenses and everyday milestones.
+              </p>
+            </div>
 
-        {/* Command Input Surface */}
-        <div className="w-full space-y-4">
-          <div className="w-full bg-bg-surface border border-white/[0.1] rounded-3xl p-5 flex items-center space-x-3 shadow-[0_20px_50px_rgba(0,0,0,0.7)] focus-within:border-accent-primary transition-all">
-            <Search size={20} className="text-text-secondary" />
+            {/* Suggested prompts */}
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-lg">
+              {suggestedPrompts.map((prompt) => (
+                <button
+                  key={prompt}
+                  onClick={() => handleSend(prompt)}
+                  className="p-3.5 rounded-xl bg-white border border-[#E5E3DC] text-left text-xs text-[#17181C] font-medium hover:border-[#5B5CE2]/40 hover:bg-[#F7F6F2] transition-all cursor-pointer group shadow-xs"
+                >
+                  <span className="group-hover:text-[#5B5CE2] transition-colors">{prompt}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          /* ── THREAD VIEW: messages ────────────────────── */
+          <div
+            ref={threadRef}
+            className="flex-1 overflow-y-auto space-y-4 py-4 pr-1 min-h-0"
+          >
+            <AnimatePresence initial={false}>
+              {conversationMessages.map((m) => (
+                <motion.div
+                  key={m.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`max-w-[85%] space-y-2 ${m.sender === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
+                    {m.sender === 'orbit' && (
+                      <div className="flex items-center gap-1.5 px-1">
+                        <Sparkles size={11} className="text-[#5B5CE2]" />
+                        <span className="text-[10px] font-bold text-[#5B5CE2] uppercase tracking-wider">Orbit</span>
+                      </div>
+                    )}
+                    <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                      m.sender === 'user'
+                        ? 'bg-[#5B5CE2] text-white rounded-tr-sm'
+                        : 'bg-white border border-[#E5E3DC] text-[#17181C] rounded-tl-sm shadow-xs'
+                    }`}>
+                      {m.text}
+                    </div>
+
+                    {/* Action card */}
+                    {m.actionCard && (
+                      <div className="w-full p-4 border border-[#E5E3DC] bg-[#F7F6F2] rounded-xl flex items-center justify-between gap-3">
+                        <div className="space-y-0.5 min-w-0">
+                          <div className="text-xs font-bold text-[#17181C] truncate">{m.actionCard.title}</div>
+                          <div className="text-[11px] text-[#6B6D73] truncate">{m.actionCard.description}</div>
+                        </div>
+                        <button
+                          onClick={() => router.push('/' + (m.actionCard?.payload?.tab || 'timeline'))}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#5B5CE2] text-white hover:bg-[#4A4BC9] text-[11px] font-semibold transition-all cursor-pointer shadow-xs shrink-0"
+                        >
+                          Open <ArrowRight size={11} />
+                        </button>
+                      </div>
+                    )}
+
+                    <span className="text-[10px] font-mono text-[#9A9C9F] px-1">{m.timestamp}</span>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {/* ── INPUT BAR (always shown) ─────────────────── */}
+        <div className={`${!hasConversation ? 'mt-4' : 'mt-2'} w-full`}>
+          <div className="flex items-center gap-2 bg-white border border-[#E5E3DC] rounded-2xl px-4 py-3 shadow-xs focus-within:border-[#5B5CE2]/50 transition-colors">
+            <Search size={14} className="text-[#9A9C9F] shrink-0" />
             <input
+              ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask about your life, documents, or memories…"
-              className="w-full bg-transparent border-none text-base text-text-primary placeholder-text-tertiary focus:outline-none"
+              onKeyDown={handleKey}
+              placeholder="Ask about your memories, documents, expenses…"
+              className="flex-1 bg-transparent text-sm text-[#17181C] placeholder-[#9A9C9F] focus:outline-none min-w-0"
             />
-            <button 
-              onClick={() => handleSend()} 
-              className="p-2 rounded-full bg-accent-primary/20 text-accent-primary hover:bg-accent-primary/30 transition-all cursor-pointer"
+            <button
+              onClick={() => handleSend()}
+              disabled={!input.trim()}
+              className="w-8 h-8 rounded-xl bg-[#5B5CE2] hover:bg-[#4A4BC9] disabled:bg-[#E5E3DC] disabled:cursor-not-allowed text-white flex items-center justify-center transition-all shrink-0 cursor-pointer"
             >
-              <ArrowRight size={18} />
+              <Send size={13} />
             </button>
           </div>
-
-          {/* Suggested Prompts */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-            {suggestedPrompts.map((prompt, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSend(prompt)}
-                className="px-4 py-2 rounded-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] text-xs text-text-secondary hover:text-text-primary transition-all text-left cursor-pointer"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
+          <p className="text-[10px] text-[#9A9C9F] text-center mt-2">
+            Orbit reads your connected memories, documents and expenses.
+          </p>
         </div>
-
-        {/* Narrative Intelligence Cards (Not Chat Bubbles) */}
-        {messages.length > 0 && (
-          <div className="w-full space-y-4 text-left pt-6">
-            {messages.slice(-3).map((m) => (
-              <div key={m.id} className="p-6 rounded-3xl bg-bg-surface border border-white/[0.08] space-y-3 shadow-xl">
-                <div className="text-xs font-semibold text-text-secondary">
-                  {m.sender === 'user' ? 'You' : 'Orbit Narrative'}
-                </div>
-                <div className="text-base text-text-primary leading-relaxed">
-                  {m.text}
-                </div>
-                {m.actionCard && (
-                  <div className="p-4 border border-white/10 bg-bg-elevated rounded-2xl flex items-center justify-between mt-2">
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-text-primary">{m.actionCard.title}</div>
-                      <div className="text-xs text-text-secondary">{m.actionCard.description}</div>
-                    </div>
-                    <button 
-                      onClick={() => router.push('/' + (m.actionCard?.payload?.tab || 'timeline'))}
-                      className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-accent-primary/20 text-accent-primary hover:bg-accent-primary/30 text-xs font-semibold transition-all cursor-pointer"
-                    >
-                      <span>View connected memories</span>
-                      <ArrowRight size={12} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
       </motion.div>
     </AppShell>
   );

@@ -25,14 +25,14 @@ export default function MemoryCapsule({ data, index }: MemoryCapsuleProps) {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'trip': return <Plane size={12} className="text-accent-primary" />;
-      case 'passport': return <FileText size={12} className="text-accent-warm" />;
-      case 'payment': return <CreditCard size={12} className="text-accent-warm" />;
-      case 'medical': return <Heart size={12} className="text-accent-rose" />;
-      case 'purchase': return <ShoppingBag size={12} className="text-accent-success" />;
-      case 'photos': return <ImageIcon size={12} className="text-accent-primary" />;
-      case 'warranty': return <ShieldCheck size={12} className="text-accent-success" />;
-      default: return <FileCheck size={12} className="text-text-secondary" />;
+      case 'trip': return <Plane size={12} className="text-[#5B5CE2]" />;
+      case 'passport': return <FileText size={12} className="text-[#E9A23B]" />;
+      case 'payment': return <CreditCard size={12} className="text-[#E9A23B]" />;
+      case 'medical': return <Heart size={12} className="text-[#E98291]" />;
+      case 'purchase': return <ShoppingBag size={12} className="text-[#3A9D78]" />;
+      case 'photos': return <ImageIcon size={12} className="text-[#5B5CE2]" />;
+      case 'warranty': return <ShieldCheck size={12} className="text-[#3A9D78]" />;
+      default: return <FileCheck size={12} className="text-[#6B6D73]" />;
     }
   };
 
@@ -56,30 +56,30 @@ export default function MemoryCapsule({ data, index }: MemoryCapsuleProps) {
             onClick={() => setSelectedCapsule(data)}
             className="text-center space-y-1.5 cursor-pointer"
           >
-            <span className="font-mono-meta text-[10px] text-text-secondary">{data.date}</span>
-            <h3 className={`text-xs font-semibold leading-tight transition-colors ${isSelected ? 'text-accent-primary' : 'text-text-primary hover:text-accent-primary'}`}>
+            <span className="font-mono text-[10px] text-[#6B6D73]">{data.date}</span>
+            <h3 className={`text-xs font-semibold leading-tight transition-colors ${isSelected ? 'text-[#5B5CE2]' : 'text-[#17181C] hover:text-[#5B5CE2]'}`}>
               {data.title}
             </h3>
-            <div className="flex items-center justify-center space-x-1.5 text-[11px] text-text-secondary">
+            <div className="flex items-center justify-center space-x-1.5 text-[11px] text-[#6B6D73]">
               {getIcon(data.type)}
               <span className="truncate max-w-[140px]">{data.location}</span>
             </div>
           </motion.div>
-          <div className="w-[1px] h-12 bg-gradient-to-t from-accent-primary/40 to-transparent mt-4" />
+          <div className="w-[1px] h-12 bg-gradient-to-t from-[#5B5CE2]/30 to-transparent mt-4" />
         </div>
       ) : (
         <div className="flex flex-col items-center justify-start h-48 pt-6">
-          <div className="w-[1px] h-12 bg-gradient-to-b from-accent-primary/40 to-transparent mb-4" />
+          <div className="w-[1px] h-12 bg-gradient-to-b from-[#5B5CE2]/30 to-transparent mb-4" />
           <motion.div
             whileHover={{ y: 2 }}
             onClick={() => setSelectedCapsule(data)}
             className="text-center space-y-1.5 cursor-pointer"
           >
-            <span className="font-mono-meta text-[10px] text-text-secondary">{data.date}</span>
-            <h3 className={`text-xs font-semibold leading-tight transition-colors ${isSelected ? 'text-accent-primary' : 'text-text-primary hover:text-accent-primary'}`}>
+            <span className="font-mono text-[10px] text-[#6B6D73]">{data.date}</span>
+            <h3 className={`text-xs font-semibold leading-tight transition-colors ${isSelected ? 'text-[#5B5CE2]' : 'text-[#17181C] hover:text-[#5B5CE2]'}`}>
               {data.title}
             </h3>
-            <div className="flex items-center justify-center space-x-1.5 text-[11px] text-text-secondary">
+            <div className="flex items-center justify-center space-x-1.5 text-[11px] text-[#6B6D73]">
               {getIcon(data.type)}
               <span className="truncate max-w-[140px]">{data.location}</span>
             </div>
@@ -93,8 +93,8 @@ export default function MemoryCapsule({ data, index }: MemoryCapsuleProps) {
           animate={{
             scale: isSelected ? 1.4 : 1,
           }}
-          className={`w-2.5 h-2.5 rounded-full border border-accent-primary/40 bg-bg-base transition-all duration-300 ${
-            isSelected ? 'bg-accent-primary shadow-[0_0_10px_rgba(108,111,255,0.6)]' : 'hover:border-white'
+          className={`w-2.5 h-2.5 rounded-full border border-[#5B5CE2]/30 bg-[#F7F6F2] transition-all duration-300 ${
+            isSelected ? 'bg-[#5B5CE2] shadow-[0_0_10px_rgba(91,92,226,0.4)]' : 'hover:border-[#5B5CE2]'
           }`}
         />
       </div>

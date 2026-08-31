@@ -13,8 +13,8 @@ export default function NotificationCenter() {
     warning: <AlertTriangle size={16} className="text-amber-400" />,
     error: <AlertCircle size={16} className="text-rose-400" />,
     reminder: <Bell size={16} className="text-indigo-400" />,
-    thinking: <RefreshCw size={16} className="text-white/60 animate-spin" />,
-    progress: <RefreshCw size={16} className="text-white/60 animate-spin" />,
+    thinking: <RefreshCw size={16} className="text-[#5B5CE2] animate-spin" />,
+    progress: <RefreshCw size={16} className="text-[#5B5CE2] animate-spin" />,
   };
 
   return (
@@ -26,18 +26,18 @@ export default function NotificationCenter() {
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            className="backdrop-blur-xl bg-bg-surface/90 border border-white/[0.1] rounded-2xl p-4 flex items-start space-x-3 pointer-events-auto shadow-2xl relative overflow-hidden"
+            className="bg-[#FFFFFF] border border-[#E5E3DC] rounded-2xl p-4 flex items-start space-x-3 pointer-events-auto shadow-lg relative overflow-hidden"
           >
             <div className="mt-0.5">{icons[n.type]}</div>
             
             <div className="flex-1">
-              <div className="text-xs font-semibold text-text-primary">{n.title}</div>
-              <div className="text-xs text-text-secondary mt-0.5 leading-relaxed">{n.message}</div>
+              <div className="text-xs font-semibold text-[#17181C]">{n.title}</div>
+              <div className="text-xs text-[#6B6D73] mt-0.5 leading-relaxed">{n.message}</div>
               
               {n.type === 'progress' && n.progress !== undefined && (
-                <div className="mt-2.5 w-full bg-white/[0.06] h-1 rounded-full overflow-hidden relative">
+                <div className="mt-2.5 w-full bg-[#F0EFEA] h-1 rounded-full overflow-hidden relative">
                   <motion.div
-                    className="absolute top-0 left-0 bg-white h-full"
+                    className="absolute top-0 left-0 bg-[#5B5CE2] h-full"
                     initial={{ width: 0 }}
                     animate={{ width: `${n.progress}%` }}
                   />
@@ -47,7 +47,7 @@ export default function NotificationCenter() {
 
             <button
               onClick={() => removeNotification(n.id)}
-              className="text-white/30 hover:text-white transition-colors p-1"
+              className="text-[#9A9C9F] hover:text-[#17181C] transition-colors p-1"
             >
               <X size={14} />
             </button>

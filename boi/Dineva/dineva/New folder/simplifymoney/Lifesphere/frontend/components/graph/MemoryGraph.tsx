@@ -124,7 +124,7 @@ function FlowCanvas() {
       {/* Floating Controls Overlay */}
       <div className="absolute top-4 left-4 right-4 z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pointer-events-none">
         {/* View toggles */}
-        <div className="bg-bg-surface/90 backdrop-blur-2xl border border-white/[0.08] rounded-full p-1.5 flex flex-wrap gap-1 pointer-events-auto shadow-2xl">
+        <div className="bg-[#FFFFFF]/90 backdrop-blur-md border border-[#E5E3DC] rounded-full p-1.5 flex flex-wrap gap-1 pointer-events-auto shadow-xs">
           {[
             { id: 'relations', label: 'Constellation' },
             { id: 'timeline', label: 'Timeline' },
@@ -137,8 +137,8 @@ function FlowCanvas() {
                 onClick={() => setViewMode(mode.id as GraphViewMode)}
                 className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
                   active 
-                    ? 'bg-accent-primary text-white font-semibold' 
-                    : 'text-text-secondary hover:text-text-primary bg-transparent'
+                    ? 'bg-[#5B5CE2] text-white font-semibold shadow-xs' 
+                    : 'text-[#6B6D73] hover:text-[#17181C] bg-transparent'
                 }`}
               >
                 {mode.label}
@@ -148,17 +148,18 @@ function FlowCanvas() {
         </div>
 
         {/* Search */}
-        <div className="bg-bg-surface/90 backdrop-blur-2xl border border-white/[0.08] rounded-full px-4 py-2 flex items-center space-x-2.5 w-full sm:w-64 pointer-events-auto shadow-2xl">
-          <Search size={14} className="text-text-secondary" />
+        <div className="bg-[#FFFFFF]/90 backdrop-blur-md border border-[#E5E3DC] rounded-full px-4 py-2 flex items-center space-x-2.5 w-full sm:w-64 pointer-events-auto shadow-xs">
+          <Search size={14} className="text-[#6B6D73]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search constellation…"
-            className="w-full bg-transparent border-none text-xs text-text-primary placeholder-text-tertiary focus:outline-none"
+            placeholder="Search life map…"
+            className="w-full bg-transparent border-none text-xs text-[#17181C] placeholder-[#9A9C9F] focus:outline-none"
           />
         </div>
       </div>
+
 
       <MemoryInsightPanel />
     </div>

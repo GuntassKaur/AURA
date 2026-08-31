@@ -16,6 +16,8 @@ export interface MemoryCapsuleData {
   photoCount?: number;
   expenseCount?: number;
   totalExpense?: string;
+  image?: string;
+  storyDetails?: any;
   metadata?: Record<string, unknown>;
 }
 

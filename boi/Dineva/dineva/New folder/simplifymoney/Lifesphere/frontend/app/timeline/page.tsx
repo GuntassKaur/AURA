@@ -8,12 +8,12 @@ import { LoadingIndicator } from '@/components/ui/HudElements';
 
 const LifeStream = dynamic(() => import('@/components/timeline/LifeStream'), {
   ssr: false,
-  loading: () => <LoadingIndicator label="CACHING_CHRONOLOGICAL_STREAM..." />
+  loading: () => <div className="p-12 text-center text-sm font-medium text-[#6B6D73]">Loading timeline stories…</div>
 });
 
 export default function TimelinePage() {
   return (
-    <AppShell activeTab="timeline" setActiveTab={() => {}}>
+    <AppShell activeTab="timeline">
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -25,3 +25,4 @@ export default function TimelinePage() {
     </AppShell>
   );
 }
+

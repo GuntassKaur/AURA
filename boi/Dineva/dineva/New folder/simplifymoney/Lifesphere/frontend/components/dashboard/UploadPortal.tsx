@@ -115,7 +115,7 @@ export default function UploadPortal({ onNavigate }: UploadPortalProps) {
 
   return (
     <div className="w-full relative font-sans text-left">
-      <div className="flex items-center space-x-2 text-xs font-semibold text-text-secondary tracking-wide uppercase mb-3">
+      <div className="flex items-center space-x-2 text-xs font-semibold text-[#6B6D73] tracking-wide uppercase mb-3">
         <Upload size={14} className={uploading ? 'animate-bounce' : ''} />
         <span>Add Memory or Document</span>
       </div>
@@ -132,7 +132,7 @@ export default function UploadPortal({ onNavigate }: UploadPortalProps) {
             onDragOver={handleDrag}
             onDrop={handleDrop}
             className={`border border-dashed rounded-2xl p-6 text-center transition-all ${
-              dragActive ? 'border-accent-primary/40 bg-accent-primary/[0.04]' : 'border-white/[0.08] hover:border-white/20 bg-bg-surface'
+              dragActive ? 'border-[#5B5CE2]/50 bg-[#E8E7FF]/30' : 'border-[#E5E3DC] hover:border-[#5B5CE2]/40 bg-[#FFFFFF]'
             }`}
           >
             <input
@@ -146,12 +146,12 @@ export default function UploadPortal({ onNavigate }: UploadPortalProps) {
               htmlFor="file-upload-input"
               className="flex flex-col items-center space-y-2.5 cursor-pointer"
             >
-              <div className="p-3 bg-white/[0.04] rounded-full text-text-secondary border border-white/10">
+              <div className="p-3 bg-[#E8E7FF] rounded-full text-[#5B5CE2] border border-[#5B5CE2]/20">
                 <FileText size={18} />
               </div>
               <div className="space-y-1">
-                <div className="text-xs font-medium text-text-primary">Drag & drop files here, or <span className="text-accent-primary underline">Browse</span></div>
-                <div className="text-[11px] text-text-secondary">PDF, JPG, PNG up to 10MB</div>
+                <div className="text-xs font-medium text-[#17181C]">Drag & drop files here, or <span className="text-[#5B5CE2] underline">Browse</span></div>
+                <div className="text-[11px] text-[#6B6D73]">PDF, JPG, PNG up to 10MB</div>
               </div>
             </label>
           </motion.div>
@@ -161,16 +161,16 @@ export default function UploadPortal({ onNavigate }: UploadPortalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="p-6 border border-white/[0.08] rounded-2xl bg-bg-surface flex flex-col items-center space-y-3"
+            className="p-6 border border-[#E5E3DC] rounded-2xl bg-[#FFFFFF] flex flex-col items-center space-y-3"
           >
-            <RefreshCw size={20} className="text-accent-primary animate-spin" />
+            <RefreshCw size={20} className="text-[#5B5CE2] animate-spin" />
             <div className="space-y-2 text-center w-full">
-              <div className="text-xs font-medium text-text-primary">
+              <div className="text-xs font-medium text-[#17181C]">
                 {currentStep}
               </div>
-              <div className="w-full bg-white/[0.06] h-1 rounded-full overflow-hidden relative">
+              <div className="w-full bg-[#F0EFEA] h-1 rounded-full overflow-hidden relative">
                 <motion.div
-                  className="absolute top-0 left-0 bg-accent-primary h-full"
+                  className="absolute top-0 left-0 bg-[#5B5CE2] h-full"
                   style={{ width: `${progress}%` }}
                 />
               </div>

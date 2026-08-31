@@ -1,55 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
-@theme {
-  /* Core Background System */
-  --color-bg-base: #06070A;
-  --color-bg-secondary: #0D1117;
-  --color-bg-surface: #12161D;
-  --color-bg-elevated: #171C25;
-
-  /* Core Text System */
-  --color-text-primary: #F2F2F5;
-  --color-text-secondary: #8A8A9A;
-  --color-text-tertiary: #4A4A5A;
-
-  /* Core Accent System */
-  --color-accent-primary: #6C6FFF;
-  --color-accent-warm: #F59E0B;
-  --color-accent-success: #10B981;
-  --color-accent-rose: #F43F5E;
-
-  /* LifeSphere Design System Compatibility Tokens */
-  --color-ls-bg: #06070A;
-  --color-ls-surface: #0D1117;
-  --color-ls-elevated: #12161D;
-  --color-ls-text: #F2F2F5;
-  --color-ls-secondary: #8A8A9A;
-  --color-ls-accent: #6C6FFF;
-  --color-ls-warm: #F59E0B;
-  --color-ls-success: #10B981;
-  --color-ls-critical: #F43F5E;
-
-  /* Typography Scales */
-  --font-inter: var(--font-inter-var), "Inter", system-ui, -apple-system, sans-serif;
-  --font-sans: var(--font-inter-var), "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-space-mono-var), "Space Mono", monospace;
-}
-
-:root {
-  --background: #06070A;
-  --foreground: #F2F2F5;
-}
-
-* {
+/* ─── BASE RESET ─────────────────────────────────────────────── */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+:root {
+  --bg: #F8F7F4;
+  --bg-subtle: #F2F0E9;
+  --surface: #FFFFFF;
+  --border: #E5E3DC;
+  --border-subtle: #EBE9E2;
+
+  --text-primary: #17181C;
+  --text-secondary: #5C5E66;
+  --text-tertiary: #9A9C9F;
+
+  --accent-indigo: #5B5CE2;
+  --accent-indigo-subtle: #EEEEFF;
+  --accent-indigo-border: #D4D4FF;
+
+  --accent-rose: #E8808F;
+  --accent-rose-subtle: #FCEEF0;
+
+  --accent-amber: #D4922A;
+  --accent-amber-subtle: #FDF3E3;
+
+  --accent-teal: #2E8B72;
+  --accent-teal-subtle: #E3F4EF;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: 'DM Serif Display', Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
 html, body {
-  background-color: #06070A;
-  color: #F2F2F5;
-  font-family: var(--font-inter-var), "Inter", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
   min-height: 100vh;
   max-width: 100vw;
   overflow-x: hidden;
@@ -57,50 +48,126 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Technical Metadata Font Class - ONLY for timestamps, IDs, hashes, EXIF */
-.font-mono-meta {
-  font-family: var(--font-space-mono-var), "Space Mono", monospace;
+/* ─── BULLETPROOF LAYOUT SYSTEM (Desktop vs Mobile) ─────────── */
+.ls-shell-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  background: var(--bg);
+  position: relative;
+  overflow-x: hidden;
 }
 
-/* Ambient Noise Texture Overlay */
-.noise-overlay {
+/* Desktop Sidebar: 240px wide on desktop, 100% hidden on mobile */
+.ls-sidebar {
+  width: 240px;
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  opacity: 0.012;
-  pointer-events: none;
-  z-index: 9999;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  bottom: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
 }
 
-/* Organic Constellation Connection Animation */
-@keyframes pulseLine {
-  0%, 100% { opacity: 0.25; stroke-dashoffset: 0; }
-  50% { opacity: 0.65; stroke-dashoffset: 12; }
+@media (max-width: 768px) {
+  .ls-sidebar {
+    display: none !important;
+  }
 }
 
-.animate-pulse-line {
-  stroke-dasharray: 4 6;
-  animation: pulseLine 4s ease-in-out infinite;
+/* Main content wrapper: properly offset by 240px on desktop */
+.ls-main-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-left: 240px;
+  padding-top: 56px;
+  padding-bottom: 48px;
 }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+@media (max-width: 768px) {
+  .ls-main-viewport {
+    margin-left: 0 !important;
+    padding-bottom: 84px !important;
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+/* Top utility bar */
+.ls-topbar {
+  position: fixed;
+  top: 0;
+  left: 240px;
+  right: 0;
+  height: 56px;
+  background: rgba(248, 247, 244, 0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 9999px;
+@media (max-width: 768px) {
+  .ls-topbar {
+    left: 0 !important;
+    padding: 0 16px !important;
+  }
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.16);
+/* Mobile bottom dock: STRICTLY HIDDEN on desktop */
+.ls-mobile-dock {
+  display: none !important;
 }
+
+@media (max-width: 768px) {
+  .ls-mobile-dock {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    z-index: 50;
+    padding: 8px 16px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    align-items: center;
+    justify-content: space-around;
+  }
+}
+
+/* ─── TYPOGRAPHY HIERARCHY ───────────────────────────────────── */
+.ls-serif-title {
+  font-family: var(--font-serif);
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.ls-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.ls-mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+/* ─── SCROLLBAR ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(23, 24, 28, 0.12); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(23, 24, 28, 0.24); }

@@ -1,217 +1,201 @@
 'use client';
 
-import React from 'react';
-import { AnimatePresence } from 'framer-motion';
-import { Search, Calendar, MapPin, Camera, Sparkles } from 'lucide-react';
-import { PhotoData, usePhotoStore } from '@/store/usePhotoStore';
-import PhotoCard from './PhotoCard';
-import PhotoViewer from './PhotoViewer';
+import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Search, MapPin, Camera, X, ExternalLink } from 'lucide-react';
+import { useLifeDataStore } from '@/store/useLifeDataStore';
+import { usePhotoStore } from '@/store/usePhotoStore';
 
-const mockPhotos: PhotoData[] = [
-  {
-    id: 'photo-1',
-    title: 'Goa Sandy Beach Sunset',
-    category: 'trip',
-    date: 'April 11, 2026',
-    location: 'Anjuna Beach, Goa',
-    confidenceScore: 98,
-    summary: 'Warm sunset scene with palm tree silhouettes and ocean horizon.',
-    gradient: 'from-[#ff9e00]/30 to-[#8b5cf6]/30',
-    imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
-    exif: {
-      camera: 'Sony Alpha 7R V',
-      aperture: 'f/4.0',
-      exposure: '1/250s',
-      iso: '100'
-    },
-    detectedObjects: ['Sunset', 'Ocean', 'Palm Trees', 'Beach Scenery']
-  },
-  {
-    id: 'photo-2',
-    title: 'Samsung Split AC Receipt Snap',
-    category: 'receipts',
-    date: 'December 16, 2025',
-    location: 'Home Residence',
-    confidenceScore: 94,
-    summary: 'Document capture of purchase receipt for Samsung Split AC.',
-    gradient: 'from-[#00e1d9]/30 to-[#08111F]/50',
-    imageUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=80',
-    exif: {
-      camera: 'iPhone 15 Pro Max',
-      aperture: 'f/1.8',
-      exposure: '1/60s',
-      iso: '200'
-    },
-    detectedObjects: ['Document Paper', 'Invoice Text', 'AC Model']
-  },
-  {
-    id: 'photo-3',
-    title: 'Evening at Delhi Cafe',
-    category: 'people',
-    date: 'May 18, 2026',
-    location: 'Cafe Delhi Heights',
-    confidenceScore: 96,
-    summary: 'Gathering with friends at Cafe Delhi Heights.',
-    gradient: 'from-[#ff1e56]/30 to-[#8b5cf6]/30',
-    imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
-    exif: {
-      camera: 'iPhone 15 Pro Max',
-      aperture: 'f/2.2',
-      exposure: '1/30s',
-      iso: '400'
-    },
-    detectedObjects: ['People', 'Selfie', 'Cafe Interior']
-  },
-  {
-    id: 'photo-4',
-    title: 'Vagator Beach Coastal Cliffs',
-    category: 'places',
-    date: 'April 13, 2026',
-    location: 'Vagator, Goa',
-    confidenceScore: 95,
-    summary: 'Rocky coastline vista with blue sea and green cliff edges.',
-    gradient: 'from-[#10b981]/30 to-[#00e1d9]/30',
-    imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1200&q=80',
-    exif: {
-      camera: 'Sony Alpha 7R V',
-      aperture: 'f/8.0',
-      exposure: '1/500s',
-      iso: '100'
-    },
-    detectedObjects: ['Coastal Rocks', 'Sea Waves', 'Blue Sky']
-  }
+const CATS = [
+  { id: 'all', label: 'All Moments' },
+  { id: 'trip', label: 'Trips & Journeys' },
+  { id: 'people', label: 'People & Gatherings' },
+  { id: 'places', label: 'Landscapes & Places' },
+  { id: 'receipts', label: 'Receipts & Captures' },
 ];
 
 export default function PhotosVault() {
-  const { 
-    activeCategory, setActiveCategory, 
-    selectedPhoto,
-    searchQuery, setSearchQuery 
-  } = usePhotoStore();
+  const { photos } = useLifeDataStore();
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewPhoto, setViewPhoto] = useState<any>(null);
 
-  const filteredPhotos = mockPhotos.filter(photo => {
-    const matchesCat = activeCategory === 'all' || photo.category === activeCategory;
-    const matchesSearch = searchQuery
-      ? photo.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filtered = photos.filter(photo => {
+    const matchCat = activeCategory === 'all' || photo.category === activeCategory;
+    const matchSearch = searchQuery
+      ? photo.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         photo.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        photo.detectedObjects.some(o => o.toLowerCase().includes(searchQuery.toLowerCase()))
+        photo.detectedObjects?.some((o: string) => o.toLowerCase().includes(searchQuery.toLowerCase()))
       : true;
-    return matchesCat && matchesSearch;
+    return matchCat && matchSearch;
   });
 
   return (
-    <div className="w-full space-y-8 pt-4 sm:pt-8 pb-24 font-sans text-left">
-      
-      {/* 1. Header & Search */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/[0.06] pb-6">
-        <div className="space-y-1">
-          <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Photo Gallery</span>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-text-primary">Photos</h1>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 48, fontFamily: 'Inter, sans-serif' }}>
+
+      {/* Header */}
+      <div style={{ borderBottom: '1px solid #E2E0D8', paddingBottom: 24 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap' as const, justifyContent: 'space-between', alignItems: 'flex-end', gap: 16 }}>
+          <div>
+            <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: '#5B5CE2', display: 'block', marginBottom: 8, fontFamily: 'Inter, sans-serif' }}>Visual Memory Archive</span>
+            <h1 style={{ fontFamily: 'DM Serif Display, serif', fontSize: 'clamp(1.7rem, 4vw, 2.6rem)', color: '#1A1B1F', lineHeight: 1.08, letterSpacing: '-0.02em', marginBottom: 8 }}>
+              Moments & Captures
+            </h1>
+            <p style={{ fontSize: 12, color: '#5C5E66', lineHeight: 1.7, maxWidth: 440 }}>
+              Every photograph is connected to a life chapter, companion, place, and booking record.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #E2E0D8', borderRadius: 999, padding: '7px 14px', width: 220 }}>
+            <Search size={13} style={{ color: '#9B9DA4', flexShrink: 0 }} />
+            <input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search moments, places…"
+              style={{ flex: 1, border: 'none', background: 'transparent', fontSize: 12, color: '#1A1B1F', outline: 'none', fontFamily: 'Inter, sans-serif' }}
+            />
+          </div>
         </div>
 
-        <div className="bg-bg-surface border border-white/[0.08] rounded-full px-4 py-2 flex items-center space-x-2.5 w-full sm:w-72 shadow-lg">
-          <Search size={14} className="text-text-secondary" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search photo memories…"
-            className="w-full bg-transparent border-none text-xs text-text-primary placeholder-text-tertiary focus:outline-none"
-          />
-        </div>
-      </div>
-
-      {/* Category Tabs */}
-      <div className="flex flex-wrap gap-6 text-sm">
-        {[
-          { id: 'all', label: 'All Captures' },
-          { id: 'trip', label: 'Trips' },
-          { id: 'people', label: 'People' },
-          { id: 'places', label: 'Places' },
-          { id: 'receipts', label: 'Receipts' }
-        ].map(cat => {
-          const active = activeCategory === cat.id;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`transition-all font-medium cursor-pointer ${
-                active 
-                  ? 'text-text-primary border-b-2 border-accent-primary pb-1 font-semibold' 
-                  : 'text-text-secondary hover:text-text-primary pb-1'
-              }`}
-            >
-              {cat.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* 2. Masonry Gallery & Details Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        {/* REAL MASONRY GRID */}
-        <div className="lg:col-span-8 columns-1 sm:columns-2 gap-6 space-y-6">
-          <AnimatePresence>
-            {filteredPhotos.map((photo, idx) => (
-              <PhotoCard key={photo.id} photo={photo} index={idx} />
-            ))}
-          </AnimatePresence>
-        </div>
-
-        {/* Selected Photo Inspector */}
-        <div className="lg:col-span-4 p-6 rounded-3xl bg-bg-surface border border-white/[0.08] space-y-6 sticky top-24 shadow-2xl">
-          {selectedPhoto ? (
-            <div className="space-y-5">
-              <div className="flex items-center space-x-2 text-xs font-semibold text-accent-primary">
-                <Sparkles size={14} />
-                <span>Photo Insight</span>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-bold text-text-primary">{selectedPhoto.title}</h3>
-                <div className="text-xs font-mono-meta text-text-secondary mt-0.5">{selectedPhoto.location} · {selectedPhoto.date}</div>
-              </div>
-
-              <div className="space-y-1.5 text-xs">
-                <div className="text-xs font-semibold text-text-secondary">Memory Summary</div>
-                <p className="text-xs text-text-primary leading-relaxed p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04]">
-                  {selectedPhoto.summary}
-                </p>
-              </div>
-
-              <div className="space-y-2 text-xs font-mono-meta text-text-secondary pt-2 border-t border-white/[0.06]">
-                <div className="flex items-center space-x-2">
-                  <Camera size={13} className="text-accent-primary" />
-                  <span className="text-text-primary">{selectedPhoto.exif.camera}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Calendar size={13} />
-                  <span>{selectedPhoto.date}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <MapPin size={13} />
-                  <span>{selectedPhoto.location}</span>
-                </div>
-              </div>
-
-              <button 
-                onClick={() => usePhotoStore.getState().setOpenedPhoto(selectedPhoto)}
-                className="w-full py-3 bg-accent-primary hover:bg-accent-primary/90 text-white font-medium text-xs rounded-full shadow-lg shadow-accent-primary/20 transition-all cursor-pointer"
-              >
-                Open Immersive Viewer
+        {/* Category chips */}
+        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6, marginTop: 16 }}>
+          {CATS.map(cat => {
+            const active = activeCategory === cat.id;
+            return (
+              <button key={cat.id} onClick={() => setActiveCategory(cat.id)} style={{
+                padding: '6px 14px', borderRadius: 999, fontSize: 11, fontWeight: active ? 600 : 500,
+                background: active ? '#1A1B1F' : '#fff', color: active ? '#fff' : '#5C5E66',
+                border: `1px solid ${active ? '#1A1B1F' : '#E2E0D8'}`,
+                cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.12s',
+              }}>
+                {cat.label}
               </button>
-            </div>
-          ) : (
-            <div className="py-16 text-center text-xs text-text-secondary font-sans">
-              Select a photo to inspect metadata
-            </div>
-          )}
+            );
+          })}
         </div>
-
       </div>
 
-      <PhotoViewer />
+      {/* Masonry Grid */}
+      <div style={{ columns: '280px', columnGap: 14 }}>
+        <AnimatePresence>
+          {filtered.map((photo, idx) => (
+            <motion.div
+              key={photo.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: idx * 0.04 }}
+              onClick={() => setViewPhoto(photo)}
+              style={{
+                breakInside: 'avoid',
+                marginBottom: 14,
+                borderRadius: 14,
+                overflow: 'hidden',
+                position: 'relative',
+                cursor: 'pointer',
+                background: '#fff',
+                border: '1px solid #E2E0D8',
+                transition: 'transform 0.15s, box-shadow 0.15s',
+              }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)'; }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = 'translateY(0)'; el.style.boxShadow = 'none'; }}
+            >
+              <img
+                src={photo.imageUrl}
+                alt={photo.title}
+                style={{ width: '100%', display: 'block', objectFit: 'cover' }}
+              />
+              {/* Hover overlay */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(to top, rgba(26,27,31,0.72) 0%, transparent 55%)',
+                display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+                padding: '14px',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                  <MapPin size={9} style={{ color: 'rgba(255,255,255,0.7)' }} />
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.7)', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>{photo.location}</span>
+                </div>
+                <p style={{ fontSize: 12, fontWeight: 600, color: '#fff', fontFamily: 'DM Serif Display, serif', lineHeight: 1.2 }}>{photo.title}</p>
+                {photo.connectedMemoryId && (
+                  <span style={{ fontSize: 9, color: 'rgba(212,212,255,0.9)', fontFamily: 'Inter, sans-serif', marginTop: 4 }}>
+                    Linked to memory
+                  </span>
+                )}
+              </div>
+
+              {/* Date badge */}
+              <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(255,255,255,0.9)', borderRadius: 6, padding: '2px 7px', fontSize: 9, fontFamily: 'JetBrains Mono, monospace', color: '#5C5E66' }}>
+                {photo.date}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {filtered.length === 0 && (
+          <div style={{ background: '#fff', border: '1px solid #E2E0D8', borderRadius: 16, padding: '48px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <Camera size={28} style={{ color: '#9B9DA4' }} />
+            <p style={{ fontFamily: 'DM Serif Display, serif', fontSize: 16, color: '#1A1B1F' }}>No moments found</p>
+            <p style={{ fontSize: 11, color: '#9B9DA4' }}>No photo captures match your search.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Photo Lightbox */}
+      <AnimatePresence>
+        {viewPhoto && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setViewPhoto(null)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(26,27,31,0.85)', backdropFilter: 'blur(10px)' }} />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 24 }}
+              style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 700, background: '#fff', borderRadius: 20, overflow: 'hidden' }}
+            >
+              <img src={viewPhoto.imageUrl} alt={viewPhoto.title} style={{ width: '100%', maxHeight: '65vh', objectFit: 'cover' }} />
+              <button onClick={() => setViewPhoto(null)} style={{ position: 'absolute', top: 14, right: 14, width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <X size={14} style={{ color: '#1A1B1F' }} />
+              </button>
+
+              <div style={{ padding: '20px 24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap' as const, gap: 12 }}>
+                  <div>
+                    <p style={{ fontFamily: 'DM Serif Display, serif', fontSize: 18, color: '#1A1B1F', marginBottom: 4 }}>{viewPhoto.title}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 10, color: '#9B9DA4', fontFamily: 'JetBrains Mono, monospace' }}>
+                      <span>{viewPhoto.date}</span>
+                      <span>·</span>
+                      <MapPin size={9} />
+                      <span>{viewPhoto.location}</span>
+                    </div>
+                  </div>
+                  {viewPhoto.exif && (
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const }}>
+                      {Object.entries(viewPhoto.exif).map(([k, v]) => (
+                        <span key={k} style={{ fontSize: 9, background: '#F8F7F4', border: '1px solid #E2E0D8', borderRadius: 6, padding: '2px 7px', color: '#5C5E66', fontFamily: 'JetBrains Mono, monospace' }}>
+                          {k}: {v as string}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {viewPhoto.people && viewPhoto.people.length > 0 && (
+                  <div style={{ marginTop: 12 }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#9B9DA4', marginBottom: 6, fontFamily: 'Inter, sans-serif' }}>People</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 5 }}>
+                      {viewPhoto.people.map((p: string) => (
+                        <span key={p} style={{ padding: '3px 9px', background: '#EEEEFF', color: '#5B5CE2', borderRadius: 999, fontSize: 10, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>{p}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

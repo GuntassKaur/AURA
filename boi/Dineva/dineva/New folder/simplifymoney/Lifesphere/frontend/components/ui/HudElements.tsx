@@ -10,63 +10,57 @@ interface ElementProps {
 
 export function GlassSurface({ children, className = '' }: ElementProps) {
   return (
-    <div className={`backdrop-blur-xl bg-bg-surface/80 border border-white/[0.08] rounded-2xl shadow-xl ${className}`}>
+    <div className={`bg-[#FFFFFF] border border-[#E5E3DC] rounded-2xl shadow-xs ${className}`}>
       {children}
     </div>
   );
 }
 
-export function GradientBorder({ children, className = '', color = 'indigo' }: ElementProps & { color?: 'indigo' | 'amber' | 'emerald' | 'rose' }) {
-  const gradients = {
-    indigo: 'from-accent-primary/30 via-transparent to-accent-primary/10',
-    amber: 'from-accent-warm/30 via-transparent to-accent-warm/10',
-    emerald: 'from-accent-success/30 via-transparent to-accent-success/10',
-    rose: 'from-accent-rose/30 via-transparent to-accent-rose/10',
+export function GradientBorder({
+  children,
+  className = '',
+  color = 'indigo'
+}: ElementProps & { color?: 'indigo' | 'amber' | 'emerald' | 'rose' }) {
+  const borderColors = {
+    indigo: 'border-[#5B5CE2]/30',
+    amber: 'border-[#E9A23B]/30',
+    emerald: 'border-[#3A9D78]/30',
+    rose: 'border-[#E98291]/30',
   };
 
   return (
-    <div className={`relative p-[1px] rounded-2xl overflow-hidden group ${className}`}>
-      <div className={`absolute inset-0 bg-gradient-to-br ${gradients[color]} opacity-40 group-hover:opacity-100 transition-opacity duration-500`} />
-      <div className="relative rounded-[15px] bg-bg-secondary overflow-hidden w-full h-full">
-        {children}
-      </div>
+    <div className={`relative rounded-2xl border ${borderColors[color]} bg-[#FFFFFF] overflow-hidden w-full h-full shadow-xs ${className}`}>
+      {children}
     </div>
   );
 }
 
-export function LoadingIndicator({ label = 'Connecting your memories...' }: { label?: string }) {
+/** Clean loading indicator — no sci-fi copy */
+export function LoadingIndicator({ label = 'Loading...' }: { label?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center space-y-4 text-xs font-medium tracking-wide text-text-secondary">
-      <div className="relative w-10 h-10">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-          className="absolute inset-0 border-2 border-accent-primary/20 border-t-accent-primary rounded-full"
-        />
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{ duration: 2.0, repeat: Infinity, ease: 'linear' }}
-          className="absolute inset-2 border border-accent-warm/20 border-b-accent-warm rounded-full"
-        />
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative w-9 h-9">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
+            className="absolute inset-0 border-2 border-[#5B5CE2]/15 border-t-[#5B5CE2] rounded-full"
+          />
+        </div>
+        <span className="text-xs font-medium text-[#6B6D73]">{label}</span>
       </div>
-      <div className="animate-pulse text-text-secondary">{label}</div>
     </div>
   );
 }
 
+/** Skeleton shimmer for content placeholders */
 export function HudSkeleton({ className = 'h-16 w-full' }: { className?: string }) {
   return (
-    <div className={`relative overflow-hidden rounded-xl bg-white/[0.03] border border-white/[0.05] ${className}`}>
+    <div className={`relative overflow-hidden rounded-xl bg-[#F0EFEA] border border-[#E5E3DC] ${className}`}>
       <motion.div
-        animate={{
-          x: ['-100%', '100%']
-        }}
-        transition={{
-          repeat: Infinity,
-          duration: 1.5,
-          ease: 'easeInOut'
-        }}
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.05] to-transparent w-full h-full"
+        animate={{ x: ['-100%', '100%'] }}
+        transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FFFFFF]/55 to-transparent w-full h-full"
       />
     </div>
   );

@@ -1,246 +1,246 @@
 'use client';
 
-import React from 'react';
-import { AnimatePresence } from 'framer-motion';
-import { Search, Calendar, MapPin, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
-import { DocumentData, useDocumentStore, SmartCollectionType } from '@/store/useDocumentStore';
-import DocumentCard from './DocumentCard';
-import DocumentViewer from './DocumentViewer';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Shield, Receipt, Sparkles, Check, Bell, X, FileText } from 'lucide-react';
+import { useLifeDataStore } from '@/store/useLifeDataStore';
+import { useDocumentStore } from '@/store/useDocumentStore';
+import { useNotificationStore } from '@/store/useNotificationStore';
 
-const mockDocuments: DocumentData[] = [
-  {
-    id: 'doc-1',
-    title: 'Taj Exotica Hotel Invoice',
-    fileType: 'pdf',
-    category: 'financial',
-    date: 'April 12, 2026',
-    location: 'Goa, India',
-    confidenceScore: 98,
-    summary: 'Hotel bill for 3 nights suite booking. Total amount ₹42,500 inclusive of taxes. Mapped to Goa Trip.',
-    ocrText: 'TAJ EXOTICA RESORT & SPA GOA\nInvoice No: TX-90210\nDate: 12-04-2026\nDescription: Luxury Suite Booking\nNet Amount: INR 36,016.95\nGST 18%: INR 6,483.05\nTotal Paid: INR 42,500.00',
-    extractedMetadata: {
-      vendor: 'Taj Exotica Goa',
-      amount: '₹42,500',
-      documentNo: 'TX-90210',
-      entities: ['Taj Resort', 'Luxury Suite', 'Goa Tourism']
-    },
-    tags: ['Goa Trip', 'Invoice', 'Accommodation']
-  },
-  {
-    id: 'doc-2',
-    title: 'Samsung AC 5Yr Warranty Card',
-    fileType: 'image',
-    category: 'warranty',
-    date: 'December 16, 2025',
-    location: 'Living Room',
-    confidenceScore: 96,
-    summary: 'Warranty registration card for Split AC model AR18CY3AQWK. Covers compressor repairs for 5 years until December 2030.',
-    ocrText: 'SAMSUNG ELECTRONICS INDIA\nCertificate of Warranty\nProduct: Split Air Conditioner\nModel Code: AR18CY3AQWK\nSerial No: AC-98127391-B\nPurchase Date: 16-12-2025',
-    extractedMetadata: {
-      vendor: 'Samsung India',
-      expiryDate: '2030-12-16',
-      documentNo: 'AC-98127391-B',
-      entities: ['Compressor', 'Split AC', 'Warranty']
-    },
-    tags: ['Warranty', 'Home Appliance', 'Samsung']
-  },
-  {
-    id: 'doc-3',
-    title: 'Max Blood Lab Report',
-    fileType: 'pdf',
-    category: 'medical',
-    date: 'January 21, 2026',
-    location: 'Max Labs Delhi',
-    confidenceScore: 94,
-    summary: 'Annual metabolic panel blood test. Highlights show normal glucose and kidney profiles.',
-    ocrText: 'MAX SUPER SPECIALITY HOSPITAL\nDepartment of Pathology\nTest: Lipid Profile & CBC\nCholesterol Total: 215 mg/dL\nGlucose Fasting: 92 mg/dL',
-    extractedMetadata: {
-      vendor: 'Max Labs',
-      documentNo: 'LAB-782910',
-      entities: ['Lipid Profile', 'Cholesterol', 'Glucose']
-    },
-    tags: ['Health', 'Medical Report', 'Max Labs']
-  },
-  {
-    id: 'doc-4',
-    title: 'Indigo Flight Boarding Pass',
-    fileType: 'pdf',
-    category: 'travel',
-    date: 'April 10, 2026',
-    location: 'DEL Airport',
-    confidenceScore: 97,
-    summary: 'Boarding pass for flight 6E-2018 from New Delhi to Goa. Seat 12D, boarding time 05:15.',
-    ocrText: 'INDIGO AIRLINES\nBoarding Pass\nFlight: 6E-2018\nDate: 10 Apr 2026\nFrom: DEL\nTo: GOI\nSeat: 12D',
-    extractedMetadata: {
-      vendor: 'Indigo Airlines',
-      documentNo: '6E-2018',
-      entities: ['Boarding Pass', 'New Delhi', 'Goa Flight']
-    },
-    tags: ['Travel', 'Goa Trip', 'Indigo']
-  },
-  {
-    id: 'doc-5',
-    title: 'Passport Identity Credential',
-    fileType: 'image',
-    category: 'government',
-    date: 'May 18, 2024',
-    location: 'Secure Vault',
-    confidenceScore: 99,
-    summary: 'Verified government passport photo identity credential. Active for international travel.',
-    ocrText: 'REPUBLIC OF INDIA\nPassport\nType: P\nCountry Code: IND\nPassport No: Z9012345\nExpiry: 18 Dec 2026',
-    extractedMetadata: {
-      vendor: 'Government of India',
-      expiryDate: 'December 2026',
-      documentNo: 'Z9012345',
-      entities: ['Passport', 'Govt Identity', 'National ID']
-    },
-    tags: ['Passport', 'ID Card', 'Government']
-  }
+const S = {
+  label: { fontSize: 9, fontWeight: 700 as const, letterSpacing: '0.12em', textTransform: 'uppercase' as const, fontFamily: 'Inter, sans-serif' },
+};
+
+const CATEGORIES = [
+  { id: 'all', label: 'All Artifacts' },
+  { id: 'government', label: 'Government & ID' },
+  { id: 'financial', label: 'Financial & Invoices' },
+  { id: 'travel', label: 'Travel Vouchers' },
+  { id: 'warranty', label: 'Warranties' },
+  { id: 'medical', label: 'Medical Records' },
 ];
 
-export default function DocumentsVault() {
-  const { 
-    activeCollection, setActiveCollection, 
-    selectedDoc,
-    searchQuery, setSearchQuery 
-  } = useDocumentStore();
+const CAT_COLORS: Record<string, { color: string; bg: string }> = {
+  government: { color: '#D4922A', bg: '#FDF3E3' },
+  financial: { color: '#E8808F', bg: '#FCEEF0' },
+  travel: { color: '#5B5CE2', bg: '#EEEEFF' },
+  warranty: { color: '#2E8B72', bg: '#E3F4EF' },
+  medical: { color: '#9B9DA4', bg: '#F8F7F4' },
+};
 
-  const filteredDocs = mockDocuments.filter(doc => {
-    const matchesCol = activeCollection === 'all' || doc.category === activeCollection;
-    const matchesSearch = searchQuery
-      ? doc.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        doc.ocrText.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doc.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+export default function DocumentsVault() {
+  const { documents, addUpcomingItem } = useLifeDataStore();
+  const { setOpenedDoc, setSelectedDoc } = useDocumentStore();
+  const { addNotification } = useNotificationStore();
+  const [activeCollection, setActiveCollection] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filtered = documents.filter(doc => {
+    const matchCat = activeCollection === 'all' || doc.category === activeCollection;
+    const matchSearch = searchQuery
+      ? doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.ocrText?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.tags?.some((t: string) => t.toLowerCase().includes(searchQuery.toLowerCase()))
       : true;
-    return matchesCol && matchesSearch;
+    return matchCat && matchSearch;
   });
 
+  const passportDoc = documents.find(d => d.id === 'doc-passport');
+  const elecDoc = documents.find(d => d.id === 'doc-electricity');
+
+  const handleReminder = (doc: any) => {
+    addUpcomingItem({
+      groupKey: 'SCHEDULED', groupLabel: doc.expiryDate || 'Upcoming',
+      title: `${doc.title} deadline`, category: doc.category === 'financial' ? 'Bills' : 'Documents',
+      amount: doc.amount, description: `Scheduled action for ${doc.title}.`,
+      actionLabel: 'Handle record', dotColor: '#5B5CE2',
+      dueDate: doc.expiryDate || 'Next week', urgency: 'info', relatedEntityId: doc.id,
+    });
+    addNotification({ type: 'success', title: 'Reminder Set', message: `Alert scheduled for "${doc.title}".`, duration: 3500 });
+  };
+
+  const handleView = (doc: any) => {
+    setSelectedDoc(doc);
+    setOpenedDoc(doc);
+  };
+
   return (
-    <div className="w-full space-y-8 pt-4 sm:pt-8 pb-24 font-sans text-left">
-      
-      {/* 1. Header & Search */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/[0.06] pb-6">
-        <div className="space-y-1">
-          <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Document Archive</span>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-text-primary">Documents</h1>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 48, fontFamily: 'Inter, sans-serif' }}>
+
+      {/* Header */}
+      <div style={{ borderBottom: '1px solid #E2E0D8', paddingBottom: 24 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap' as const, justifyContent: 'space-between', alignItems: 'flex-end', gap: 16 }}>
+          <div>
+            <span style={{ ...S.label, color: '#5B5CE2', display: 'block', marginBottom: 8 }}>Personal Life Records & Artifacts</span>
+            <h1 style={{ fontFamily: 'DM Serif Display, serif', fontSize: 'clamp(1.7rem, 4vw, 2.6rem)', color: '#1A1B1F', lineHeight: 1.08, letterSpacing: '-0.02em', marginBottom: 8 }}>
+              Documents Vault
+            </h1>
+            <p style={{ fontSize: 12, color: '#5C5E66', lineHeight: 1.7, maxWidth: 460 }}>
+              Passports, utility bills, warranties, and travel vouchers stored as intelligent artifacts with automated OCR and expiry scheduling.
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #E2E0D8', borderRadius: 999, padding: '7px 14px', width: 220 }}>
+            <Search size={13} style={{ color: '#9B9DA4', flexShrink: 0 }} />
+            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search document archive…"
+              style={{ flex: 1, border: 'none', background: 'transparent', fontSize: 12, color: '#1A1B1F', outline: 'none', fontFamily: 'Inter, sans-serif' }} />
+          </div>
         </div>
 
-        <div className="bg-bg-surface border border-white/[0.08] rounded-full px-4 py-2 flex items-center space-x-2.5 w-full sm:w-72 shadow-lg">
-          <Search size={14} className="text-text-secondary" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search document archive…"
-            className="w-full bg-transparent border-none text-xs text-text-primary placeholder-text-tertiary focus:outline-none"
-          />
+        {/* Category chips */}
+        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6, marginTop: 16 }}>
+          {CATEGORIES.map(cat => {
+            const active = activeCollection === cat.id;
+            return (
+              <button key={cat.id} onClick={() => setActiveCollection(cat.id)} style={{
+                padding: '6px 14px', borderRadius: 999, fontSize: 11, fontWeight: active ? 600 : 500,
+                background: active ? '#1A1B1F' : '#fff', color: active ? '#fff' : '#5C5E66',
+                border: `1px solid ${active ? '#1A1B1F' : '#E2E0D8'}`,
+                cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.12s',
+              }}>
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex flex-wrap gap-6 text-sm">
-        {[
-          { id: 'all', label: 'All Artifacts' },
-          { id: 'travel', label: 'Travel' },
-          { id: 'medical', label: 'Health' },
-          { id: 'financial', label: 'Finance' },
-          { id: 'government', label: 'Government' },
-          { id: 'warranty', label: 'Subscriptions & Warranty' }
-        ].map(col => {
-          const active = activeCollection === col.id;
-          return (
-            <button
-              key={col.id}
-              onClick={() => setActiveCollection(col.id as SmartCollectionType)}
-              className={`transition-all font-medium cursor-pointer ${
-                active 
-                  ? 'text-text-primary border-b-2 border-accent-primary pb-1 font-semibold' 
-                  : 'text-text-secondary hover:text-text-primary pb-1'
-              }`}
-            >
-              {col.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* 2. Workspace Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        {/* Document Cards Feed */}
-        <div className="lg:col-span-7 space-y-4">
-          <AnimatePresence>
-            {filteredDocs.map(doc => (
-              <DocumentCard key={doc.id} doc={doc} />
-            ))}
-          </AnimatePresence>
+      {/* Proactive Intelligence Cards */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+          <Sparkles size={12} style={{ color: '#5B5CE2' }} />
+          <span style={{ ...S.label, color: '#5B5CE2' }}>Proactive Document Intelligence</span>
         </div>
 
-        {/* Selected Document Details Inspector */}
-        <div className="lg:col-span-5 p-6 sm:p-8 rounded-3xl bg-bg-surface border border-white/[0.08] space-y-6 sticky top-24 shadow-2xl">
-          {selectedDoc ? (
-            <div className="space-y-5">
-              <div className="flex items-center space-x-2 text-xs font-semibold text-accent-primary">
-                <Sparkles size={14} />
-                <span>Document Insight</span>
-              </div>
-
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
+          {/* Passport */}
+          {passportDoc && (
+            <div style={{ background: '#1C2430', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 180, position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(212,146,42,0.07)' }} />
               <div>
-                <h3 className="text-xl font-bold text-text-primary">{selectedDoc.title}</h3>
-                <div className="text-xs font-mono-meta text-text-secondary mt-1 capitalize">{selectedDoc.category} · {selectedDoc.date}</div>
-              </div>
-
-              <div className="space-y-1.5 text-xs">
-                <div className="text-xs font-semibold text-text-secondary">Summary</div>
-                <p className="text-xs text-text-primary leading-relaxed p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04]">
-                  {selectedDoc.summary}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: '#D4922A', background: 'rgba(212,146,42,0.15)', padding: '2px 8px', borderRadius: 999, letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontFamily: 'Inter, sans-serif' }}>Government ID</span>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>Expires {(passportDoc as any).expiryDate}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <Shield size={15} style={{ color: '#D4922A', flexShrink: 0 }} />
+                  <p style={{ fontFamily: 'DM Serif Display, serif', fontSize: 16, color: '#fff', lineHeight: 1.2 }}>Passport Renewal Approaching</p>
+                </div>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', lineHeight: 1.7 }}>
+                  Submit online before September 1st to prevent international travel delays.
                 </p>
               </div>
-
-              <div className="space-y-2 text-xs font-mono-meta text-text-secondary pt-2 border-t border-white/[0.06]">
-                <div className="flex items-center space-x-2">
-                  <Calendar size={13} className="text-text-secondary" />
-                  <span>Date: <span className="text-text-primary">{selectedDoc.date}</span></span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <MapPin size={13} className="text-text-secondary" />
-                  <span>Location: <span className="text-text-primary">{selectedDoc.location}</span></span>
-                </div>
-                {selectedDoc.extractedMetadata.expiryDate && (
-                  <div className="text-accent-warm font-semibold flex items-center space-x-1.5 pt-1">
-                    <ShieldCheck size={14} />
-                    <span>Expires: {selectedDoc.extractedMetadata.expiryDate}</span>
-                  </div>
-                )}
-              </div>
-
-              {selectedDoc.id === 'doc-5' && (
-                <button 
-                  onClick={() => alert("Passport renewal window opens in 30 days.")}
-                  className="w-full py-3 bg-accent-warm/15 hover:bg-accent-warm/25 text-accent-warm font-semibold text-xs rounded-full border border-accent-warm/30 transition-all flex items-center justify-center space-x-2 cursor-pointer shadow-lg"
-                >
-                  <span>Renew Passport →</span>
+              <div style={{ display: 'flex', gap: 8, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 14 }}>
+                <button onClick={() => handleView(passportDoc)} style={{ flex: 1, padding: '7px 12px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                  Inspect
                 </button>
-              )}
-
-              <button 
-                onClick={() => useDocumentStore.getState().setOpenedDoc(selectedDoc)}
-                className="w-full py-3 bg-accent-primary hover:bg-accent-primary/90 text-white font-medium text-xs rounded-full shadow-lg shadow-accent-primary/20 transition-all flex items-center justify-center space-x-2 cursor-pointer"
-              >
-                <span>Inspect Split View</span>
-                <ArrowRight size={13} />
-              </button>
+                <button onClick={() => handleReminder(passportDoc)} style={{ padding: '7px 14px', background: '#5B5CE2', border: 'none', borderRadius: 8, fontSize: 11, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                  Set Reminder
+                </button>
+              </div>
             </div>
-          ) : (
-            <div className="py-16 text-center text-xs text-text-secondary font-sans">
-              Select a document to inspect details
+          )}
+
+          {/* Electricity */}
+          {elecDoc && (
+            <div style={{ background: '#fff', border: '1px solid #E2E0D8', borderRadius: 18, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 180 }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: '#E8808F', background: '#FCEEF0', padding: '2px 8px', borderRadius: 999, letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontFamily: 'Inter, sans-serif' }}>Utility Invoice</span>
+                  <span style={{ fontFamily: 'DM Serif Display, serif', fontSize: 15, color: '#1A1B1F' }}>{(elecDoc as any).amount}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <Receipt size={15} style={{ color: '#E8808F', flexShrink: 0 }} />
+                  <p style={{ fontFamily: 'DM Serif Display, serif', fontSize: 16, color: '#1A1B1F', lineHeight: 1.2 }}>BSES Power Bill Due Tomorrow</p>
+                </div>
+                <p style={{ fontSize: 11, color: '#9B9DA4', lineHeight: 1.7 }}>
+                  Due on {(elecDoc as any).expiryDate}. Units: 482 kWh. Auto-pay not active.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 8, paddingTop: 14, borderTop: '1px solid #F0EFE9', marginTop: 14 }}>
+                <button onClick={() => handleView(elecDoc)} style={{ flex: 1, padding: '7px 12px', background: '#F8F7F4', border: '1px solid #E2E0D8', borderRadius: 8, fontSize: 11, fontWeight: 600, color: '#1A1B1F', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                  Inspect Invoice
+                </button>
+                <button onClick={() => handleReminder(elecDoc)} style={{ padding: '7px 14px', background: '#2E8B72', border: 'none', borderRadius: 8, fontSize: 11, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                  Schedule
+                </button>
+              </div>
             </div>
           )}
         </div>
-
       </div>
 
-      <DocumentViewer />
+      {/* Artifacts Grid */}
+      <div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+          <AnimatePresence>
+            {filtered.map((doc, idx) => {
+              const cc = CAT_COLORS[doc.category] || { color: '#9B9DA4', bg: '#F8F7F4' };
+              return (
+                <motion.div
+                  key={doc.id}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: idx * 0.03 }}
+                  onClick={() => handleView(doc)}
+                  style={{
+                    background: '#fff', border: '1px solid #E2E0D8', borderRadius: 14,
+                    padding: '16px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 10,
+                    transition: 'border-color 0.15s, box-shadow 0.15s',
+                  }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#D4D4FF'; el.style.boxShadow = '0 2px 12px rgba(91,92,226,0.08)'; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#E2E0D8'; el.style.boxShadow = 'none'; }}
+                >
+                  {/* Top row */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: cc.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FileText size={16} style={{ color: cc.color }} />
+                    </div>
+                    {(doc as any).amount && (
+                      <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700, color: '#1A1B1F' }}>{(doc as any).amount}</span>
+                    )}
+                  </div>
+
+                  {/* Title & tags */}
+                  <div>
+                    <p style={{ fontFamily: 'DM Serif Display, serif', fontSize: 14, color: '#1A1B1F', marginBottom: 4, lineHeight: 1.25 }}>{doc.title}</p>
+                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: cc.color, background: cc.bg, padding: '2px 7px', borderRadius: 5, fontFamily: 'Inter, sans-serif' }}>
+                      {doc.category}
+                    </span>
+                  </div>
+
+                  {/* Expiry */}
+                  {(doc as any).expiryDate && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: '#9B9DA4', fontFamily: 'JetBrains Mono, monospace' }}>
+                      Expires {(doc as any).expiryDate}
+                    </div>
+                  )}
+
+                  {/* Footer */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, borderTop: '1px solid #F0EFE9' }}>
+                    <span style={{ fontSize: 9, color: '#9B9DA4', fontFamily: 'JetBrains Mono, monospace' }}>{doc.date}</span>
+                    <button
+                      onClick={e => { e.stopPropagation(); handleReminder(doc); }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 600, color: '#5B5CE2', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                      <Bell size={10} /> Remind
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+
+          {filtered.length === 0 && (
+            <div style={{ gridColumn: '1 / -1', background: '#fff', border: '1px solid #E2E0D8', borderRadius: 16, padding: '48px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              <FileText size={28} style={{ color: '#9B9DA4' }} />
+              <p style={{ fontFamily: 'DM Serif Display, serif', fontSize: 16, color: '#1A1B1F' }}>No documents found</p>
+              <p style={{ fontSize: 11, color: '#9B9DA4' }}>No records match "{searchQuery || activeCollection}".</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

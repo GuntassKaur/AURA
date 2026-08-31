@@ -8,20 +8,21 @@ import { LoadingIndicator } from '@/components/ui/HudElements';
 
 const MemoryGraph = dynamic(() => import('@/components/graph/MemoryGraph'), {
   ssr: false,
-  loading: () => <LoadingIndicator label="COMPUTING_CONSTELLATION_VECTORS..." />
+  loading: () => <LoadingIndicator label="Loading Memory Map..." />
 });
 
 export default function GraphPage() {
   return (
-    <AppShell activeTab="graph" setActiveTab={() => {}}>
+    <AppShell activeTab="graph">
       <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: 'spring', stiffness: 180, damping: 24 }}
-        className="w-full h-full relative"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full min-w-0"
       >
         <MemoryGraph />
       </motion.div>
     </AppShell>
   );
 }
+

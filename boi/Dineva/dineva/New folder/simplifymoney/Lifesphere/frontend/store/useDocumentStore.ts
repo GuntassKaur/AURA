@@ -9,11 +9,15 @@ export interface DocumentData {
   fileType: 'pdf' | 'image' | 'doc';
   category: SmartCollectionType;
   date: string;
-  location: string;
-  confidenceScore: number; // 0-100
+  location?: string;
+  confidenceScore?: number; // 0-100
   summary: string;
   ocrText: string;
-  extractedMetadata: {
+  amount?: string;
+  vendor?: string;
+  expiryDate?: string;
+  documentNo?: string;
+  extractedMetadata?: {
     vendor?: string;
     amount?: string;
     expiryDate?: string;

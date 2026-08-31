@@ -16,8 +16,10 @@ export interface PhotoData {
   };
   detectedObjects: string[];
   people?: string[];
-  gradient: string; // Gorgeous background gradient fallback
+  gradient?: string; // Background gradient fallback
   imageUrl?: string;
+  connectedMemoryId?: string;
+  connectedDocIds?: string[];
 }
 
 interface PhotoStore {

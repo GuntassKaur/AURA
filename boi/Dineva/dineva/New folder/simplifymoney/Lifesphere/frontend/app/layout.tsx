@@ -29,12 +29,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceMono.variable} dark`}>
-      <body className="antialiased bg-bg-base text-text-primary min-h-screen selection:bg-accent-primary/30">
+    <html lang="en" className={`${inter.variable} ${spaceMono.variable}`}>
+      <body className="antialiased bg-[#F7F6F2] text-[#17181C] min-h-screen selection:bg-[#5B5CE2]/15 selection:text-[#5B5CE2]">
         <QueryProvider>
           <ThemeProvider>
             <MotionProvider>
-              {/* Premium ambient background */}
+              {/* Premium warm ambient background */}
               <AnimatedBackground />
               <CustomCursor />
               
@@ -49,3 +49,4 @@ export default function RootLayout({
     </html>
   );
 }
+

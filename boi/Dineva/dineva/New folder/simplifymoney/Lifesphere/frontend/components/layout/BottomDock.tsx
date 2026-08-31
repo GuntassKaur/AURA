@@ -1,17 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
-  Sparkles, 
-  Clock, 
-  Share2, 
-  FileText, 
-  Image as ImageIcon,
-  TrendingUp,
-  MessageSquare
+  Home, 
+  Image as ImageIcon, 
+  Plus, 
+  Search, 
+  User
 } from 'lucide-react';
+import AddActionSheet from '@/components/common/AddActionSheet';
+import { useSearchStore } from '@/store/useSearchStore';
 
 interface BottomDockProps {
   activeTab?: string;
@@ -20,60 +20,94 @@ interface BottomDockProps {
 export default function BottomDock({ activeTab: propActiveTab }: BottomDockProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { openSearch } = useSearchStore();
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
-  const tabs = [
-    { id: 'dashboard', href: '/dashboard', label: 'Memories', icon: Sparkles },
-    { id: 'timeline', href: '/timeline', label: 'Timeline', icon: Clock },
-    { id: 'documents', href: '/documents', label: 'Documents', icon: FileText },
-    { id: 'photos', href: '/photos', label: 'Photos', icon: ImageIcon },
-    { id: 'analytics', href: '/analytics', label: 'Insights', icon: TrendingUp },
-    { id: 'graph', href: '/graph', label: 'Constellation', icon: Share2 },
-    { id: 'chat', href: '/chat', label: 'Orbit AI', icon: MessageSquare },
+  const navItems = [
+    { id: 'dashboard', href: '/dashboard', label: 'Home', icon: Home },
+    { id: 'timeline', href: '/timeline', label: 'Memories', icon: ImageIcon },
   ];
 
-  const currentTab = propActiveTab || tabs.find(t => pathname === t.href)?.id || 'dashboard';
+  const rightNavItems = [
+    { id: 'search', action: openSearch, label: 'Search', icon: Search },
+    { id: 'profile', href: '/analytics', label: 'You', icon: User },
+  ];
+
+  const currentTab = propActiveTab || (pathname === '/dashboard' ? 'dashboard' : pathname.replace('/', ''));
 
   return (
-    <motion.div 
-      initial={{ y: 40, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, delay: 0.1 }}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 h-14 backdrop-blur-2xl bg-bg-surface/90 border border-white/[0.1] rounded-full flex items-center px-2 sm:px-3 space-x-1 shadow-[0_20px_50px_rgba(0,0,0,0.7)] font-sans max-w-[95vw]"
-    >
-      {tabs.map((tab) => {
-        const Icon = tab.icon;
-        const isActive = currentTab === tab.id;
+    <>
+      {/* ─── Mobile Bottom Navigation (Matching Reference) ─── */}
+      <nav aria-label="Mobile Navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[#E5E3DC] px-4 py-2 pb-safe shadow-[0_-4px_24px_rgba(23,24,28,0.06)] font-sans">
+        <div className="flex items-center justify-around max-w-md mx-auto relative">
+          
+          {/* Left Items (Home, Memories) */}
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentTab === item.id || (item.id === 'timeline' && pathname === '/timeline');
+            return (
+              <button
+                key={item.id}
+                onClick={() => router.push(item.href)}
+                className="flex flex-col items-center justify-center py-1 px-3 touch-target-44 cursor-pointer relative"
+              >
+                <Icon
+                  size={20}
+                  className={`transition-colors ${
+                    isActive ? 'text-[#5B5CE2]' : 'text-[#6B6D73]'
+                  }`}
+                />
+                <span className={`text-[10px] mt-1 font-medium ${
+                  isActive ? 'text-[#5B5CE2] font-semibold' : 'text-[#6B6D73]'
+                }`}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
 
-        return (
-          <button
-            key={tab.id}
-            onClick={() => router.push(tab.href)}
-            className="relative px-2.5 sm:px-3.5 py-2 rounded-full transition-all duration-200 group flex items-center space-x-2 cursor-pointer"
-            title={tab.label}
-          >
-            {isActive && (
-              <motion.div
-                layoutId="active-bottom-dock-tab"
-                className="absolute inset-0 rounded-full bg-accent-primary/15 border border-accent-primary/30"
-                transition={{ type: 'spring', stiffness: 220, damping: 26 }}
-              />
-            )}
+          {/* Center Elevated FAB (+) Button */}
+          <div className="relative -top-4 flex items-center justify-center">
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              onClick={() => setIsAddOpen(true)}
+              className="w-12 h-12 rounded-full bg-[#5B5CE2] text-white flex items-center justify-center shadow-[0_4px_16px_rgba(91,92,226,0.38)] cursor-pointer ring-4 ring-[#F7F6F2]"
+              aria-label="Add to LifeSphere"
+            >
+              <Plus size={22} strokeWidth={2.5} />
+            </motion.button>
+          </div>
 
-            <Icon 
-              size={19} 
-              className={`relative z-10 transition-colors duration-200 ${
-                isActive ? 'text-accent-primary' : 'text-text-secondary group-hover:text-text-primary'
-              }`}
-            />
+          {/* Right Items (Search, You) */}
+          {rightNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = item.id === 'profile' && pathname === '/analytics';
+            return (
+              <button
+                key={item.label}
+                onClick={() => (item.action ? item.action() : item.href ? router.push(item.href) : null)}
+                className="flex flex-col items-center justify-center py-1 px-3 touch-target-44 cursor-pointer"
+              >
+                <Icon
+                  size={20}
+                  className={`transition-colors ${
+                    isActive ? 'text-[#5B5CE2]' : 'text-[#6B6D73]'
+                  }`}
+                />
+                <span className={`text-[10px] mt-1 font-medium ${
+                  isActive ? 'text-[#5B5CE2] font-semibold' : 'text-[#6B6D73]'
+                }`}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
 
-            <span className={`hidden md:inline text-xs font-medium relative z-10 transition-colors duration-200 ${
-              isActive ? 'text-text-primary font-semibold' : 'text-text-secondary group-hover:text-text-primary'
-            }`}>
-              {tab.label}
-            </span>
-          </button>
-        );
-      })}
-    </motion.div>
+        </div>
+      </nav>
+
+      {/* Global Add Sheet */}
+      <AddActionSheet isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} />
+    </>
   );
 }
